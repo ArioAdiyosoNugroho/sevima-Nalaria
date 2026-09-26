@@ -313,4 +313,111 @@ class DiagnosticWorkflowTest extends TestCase
             'session_id' => $assessmentSession->id,
         ]);
     }
+
+    public function test_adaptive_difficulty_assigns_menantang_for_high_performing_user_history(): void
+    {
+        // Buat riwayat sesi sebelumnya dengan skor tinggi
+        AssessmentSession::create([
+            'session_code' => 'NAL-PAST85',
+            'user_id' => $this->user->id,
+            'student_name' => $this->user->name,
+            'score' => 90,
+            'status' => 'completed',
+        ]);
+
+        $newSession = AssessmentSession::create([
+            'session_code' => 'NAL-CURR90',
+            'user_id' => $this->user->id,
+            'student_name' => $this->user->name,
+            'score' => 85,
+            'status' => 'in_progress',
+        ]);
+
+        $aiService = app(NumeracyAiAgentService::class);
+        $profile = $aiService->analyzeHistoricalPerformance($newSession, 85);
+
+        $this->assertEquals('Menantang', $profile['difficulty_level']);
+        $this->assertEquals(90, $profile['avg_previous_score']);
+        $this->assertStringContainsString('LEBIH MENANTANG', $profile['prompt_instruction']);
+    }
+
+    public function test_adaptive_difficulty_assigns_mudah_for_low_performing_user_history(): void
+    {
+        // Buat riwayat sesi sebelumnya dengan skor rendah
+        AssessmentSession::create([
+            'session_code' => 'NAL-PAST30',
+            'user_id' => $this->user->id,
+            'student_name' => $this->user->name,
+            'score' => 35,
+            'status' => 'completed',
+        ]);
+
+        $newSession = AssessmentSession::create([
+            'session_code' => 'NAL-CURR40',
+            'user_id' => $this->user->id,
+            'student_name' => $this->user->name,
+            'score' => 40,
+            'status' => 'in_progress',
+        ]);
+
+        $aiService = app(NumeracyAiAgentService::class);
+        $profile = $aiService->analyzeHistoricalPerformance($newSession, 40);
+
+        $this->assertEquals('Mudah', $profile['difficulty_level']);
+        $this->assertEquals(35, $profile['avg_previous_score']);
+        $this->assertStringContainsString('LEBIH MUDAH', $profile['prompt_instruction']);
+    }
+
+    public function test_generate_adaptive_practice_persists_adaptive_difficulty_level(): void
+    {
+        // User dengan riwayat skor rendah
+        AssessmentSession::create([
+            'session_code' => 'NAL-LOW01',
+            'user_id' => $this->user->id,
+            'student_name' => $this->user->name,
+            'score' => 30,
+            'status' => 'completed',
+        ]);
+
+        $diagSession = DiagnosticSession::create([
+            'session_code' => 'NAL-TESTADAPT',
+            'student_name' => $this->user->name,
+            'score' => 40,
+            'status' => 'in_progress',
+        ]);
+
+        $currAssessmentSession = AssessmentSession::create([
+            'session_code' => 'NAL-TESTADAPT',
+            'user_id' => $this->user->id,
+            'student_name' => $this->user->name,
+            'score' => 40,
+            'status' => 'in_progress',
+        ]);
+
+        $aiService = app(NumeracyAiAgentService::class);
+        $diagnosis = [
+            'score' => 40,
+            'detected_misconceptions' => [
+                [
+                    'domain' => 'aritmatika_sosial',
+                    'misconception' => 'Additive error on sequential discounts',
+                ],
+            ],
+            'domain_scores' => [
+                'aritmatika_sosial' => ['total' => 1, 'correct' => 0],
+            ],
+        ];
+
+        $practices = $aiService->generateAdaptivePractice($diagSession, $diagnosis, $currAssessmentSession);
+
+        $this->assertNotEmpty($practices);
+        $firstPractice = $practices->first();
+        $this->assertEquals('Mudah', $firstPractice->difficulty);
+
+        // Verifikasi di recommendations
+        $this->assertDatabaseHas('recommendations', [
+            'session_id' => $currAssessmentSession->id,
+            'difficulty_level' => 'Mudah',
+        ]);
+    }
 }

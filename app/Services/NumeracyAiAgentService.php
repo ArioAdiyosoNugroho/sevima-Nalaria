@@ -183,12 +183,84 @@ class NumeracyAiAgentService
     }
 
     /**
+     * Menganalisis riwayat performa user dari sesi-sesi sebelumnya untuk menentukan
+     * tingkat kesulitan adaptif (Tahap 6):
+     * - Skor sebelumnya tinggi (>= 80): Tingkat kesulitan ditingkatkan (Menantang/Sulit, HOTS Level 4/5)
+     * - Skor sebelumnya sedang (60 - 79): Tingkat kesulitan standar (Sedang, Level 3 PISA)
+     * - Skor sebelumnya rendah (< 60): Tingkat kesulitan dipermudah (Mudah, Level 2 PISA fondasi dasar)
+     *
+     * @return array{
+     *     difficulty_level: string,
+     *     blended_score: int,
+     *     avg_previous_score: ?int,
+     *     previous_sessions_count: int,
+     *     prompt_instruction: string
+     * }
+     */
+    public function analyzeHistoricalPerformance(?AssessmentSession $assessmentSession, int $currentScore): array
+    {
+        $userId = $assessmentSession?->user_id;
+
+        $previousSessions = collect();
+        if ($userId) {
+            $previousSessions = AssessmentSession::where('user_id', $userId)
+                ->when($assessmentSession?->id, fn ($q) => $q->where('id', '!=', $assessmentSession->id))
+                ->where('status', 'completed')
+                ->orderByDesc('created_at')
+                ->get();
+        }
+
+        $sessionCount = $previousSessions->count();
+
+        if ($sessionCount > 0) {
+            $avgScore = (int) round($previousSessions->avg('score'));
+            // Kombinasikan riwayat rata-rata sesi terdahulu (bobot 60%) dengan sesi terkini (40%)
+            $blendedScore = (int) round(($avgScore * 0.6) + ($currentScore * 0.4));
+        } else {
+            $avgScore = null;
+            $blendedScore = $currentScore;
+        }
+
+        if ($blendedScore >= 80) {
+            $difficultyLevel = 'Menantang';
+            $guidance = "Siswa memiliki riwayat performa TINGGI (skor gabungan {$blendedScore}%"
+                .($avgScore !== null ? ", rerata {$sessionCount} sesi terdahulu {$avgScore}%" : '')
+                .'). Buat soal latihan yang LEBIH MENANTANG (HOTS / Level 4-5 PISA). Gunakan skenario kontekstual multivariabel, konversi unit bertingkat, atau penalaran multi-langkah agar memicu perkembangan kognitif lebih tinggi.';
+        } elseif ($blendedScore >= 60) {
+            $difficultyLevel = 'Sedang';
+            $guidance = "Siswa memiliki riwayat performa SEDANG (skor gabungan {$blendedScore}%"
+                .($avgScore !== null ? ", rerata {$sessionCount} sesi terdahulu {$avgScore}%" : '')
+                .'). Buat soal latihan pada level SEDANG (Level 3 PISA). Fokus pada pemantapan konsep kontekstual dengan alur penalaran terstruktur.';
+        } else {
+            $difficultyLevel = 'Mudah';
+            $guidance = "Siswa memiliki riwayat performa RENDAH (skor gabungan {$blendedScore}%"
+                .($avgScore !== null ? ", rerata {$sessionCount} sesi terdahulu {$avgScore}%" : '')
+                .'). Buat soal latihan yang LEBIH MUDAH / BERTARAF DASAR (Level 2 PISA). Gunakan angka bulat sederhana, kurangi kerumitan narasi teks, dan berikan petunjuk scaffolding yang sangat memandu langkah bernalar dasar.';
+        }
+
+        return [
+            'difficulty_level' => $difficultyLevel,
+            'blended_score' => $blendedScore,
+            'avg_previous_score' => $avgScore,
+            'previous_sessions_count' => $sessionCount,
+            'prompt_instruction' => $guidance,
+        ];
+    }
+
+    /**
      * ACTION 2: Generate Paket Soal Latihan Bertarget & Scaffolding Remedial
+     * Mengadaptasi tingkat kesulitan berdasarkan riwayat performa sesi sebelumnya (Tahap 6)
      */
     public function generateAdaptivePractice(DiagnosticSession $session, array $diagnosis, ?AssessmentSession $assessmentSession = null): Collection
     {
         $detectedMisconceptions = $diagnosis['detected_misconceptions'] ?? [];
         $domainScores = $diagnosis['domain_scores'] ?? [];
+        $currentScore = (int) ($diagnosis['score'] ?? $session->score ?? 0);
+
+        // Analisis performa sesi lalu untuk adaptasi level kesulitan (Tahap 6)
+        $adaptiveProfile = $this->analyzeHistoricalPerformance($assessmentSession, $currentScore);
+        $targetDifficulty = $adaptiveProfile['difficulty_level'];
+        $difficultyPromptInstruction = $adaptiveProfile['prompt_instruction'];
 
         // Hapus latihan lama jika sesi ini digenerate ulang
         AdaptivePracticeQuestion::where('diagnostic_session_id', $session->id)->delete();
@@ -213,19 +285,22 @@ class NumeracyAiAgentService
                 $targetDomain = $item['domain'];
                 $misconceptionName = $item['misconception'];
 
-                // Coba generate via OpenRouter nemotron LLM jika API key tersedia
+                // Coba generate via OpenRouter nemotron LLM dengan prompt tingkat kesulitan adaptif
                 $aiQuestion = $this->generatePracticeWithOpenRouter(
                     $session,
                     $targetDomain,
                     $misconceptionName,
-                    $idx + 1
+                    $idx + 1,
+                    $targetDifficulty,
+                    $difficultyPromptInstruction
                 );
 
                 $generatedQuestions[] = $aiQuestion ?: $this->buildAdaptivePracticeItem(
                     $session,
                     $targetDomain,
                     $misconceptionName,
-                    $idx + 1
+                    $idx + 1,
+                    $targetDifficulty
                 );
             }
         } else {
@@ -234,35 +309,40 @@ class NumeracyAiAgentService
                 $session,
                 'aritmatika_sosial',
                 'Pengayaan: Optimasi Penganggaran Proyek Energi Mandiri',
-                1
+                1,
+                $targetDifficulty,
+                $difficultyPromptInstruction
             );
             $generatedQuestions[] = $aiQuestion1 ?: $this->buildAdaptivePracticeItem(
                 $session,
                 'aritmatika_sosial',
                 'Pengayaan: Optimasi Penganggaran Proyek Energi Mandiri',
                 1,
-                'Menantang'
+                $targetDifficulty
             );
 
             $aiQuestion2 = $this->generatePracticeWithOpenRouter(
                 $session,
                 'data_ketidakpastian',
                 'Pengayaan: Analisis Tren Emisi Karbon Sekolah',
-                2
+                2,
+                $targetDifficulty,
+                $difficultyPromptInstruction
             );
             $generatedQuestions[] = $aiQuestion2 ?: $this->buildAdaptivePracticeItem(
                 $session,
                 'data_ketidakpastian',
                 'Pengayaan: Analisis Tren Emisi Karbon Sekolah',
                 2,
-                'Menantang'
+                $targetDifficulty
             );
         }
 
-        // Simpan rencana remediasi umum di sesi
-        $remediationOverview = 'Paket latihan ini difokuskan untuk memperbaiki pola pikir pada domain '
+        // Simpan rencana remediasi umum di sesi dengan label kesulitan adaptif
+        $remediationOverview = "Paket latihan adaptif ini disesuaikan ke level [{$targetDifficulty}] berdasarkan analisis riwayat performa numerasi Anda. "
+            .'Fokus remediasi pada domain '
             .implode(', ', array_map(fn ($q) => ucfirst(str_replace('_', ' ', $q->domain)), $generatedQuestions))
-            .'. Setiap soal dilengkapi petunjuk penalaran (scaffolding hint) untuk memandu proses berpikir tanpa langsung mengungkap jawaban.';
+            .'. Setiap butir soal dilengkapi petunjuk penalaran (scaffolding hint) untuk membimbing langkah berpikir konseptual.';
 
         $session->update([
             'ai_remediation_plan' => $remediationOverview,
@@ -283,7 +363,7 @@ class NumeracyAiAgentService
                     'correct_answer' => $q->correct_answer,
                     'explanation' => $q->conceptual_explanation,
                     'scaffolding_hint' => $q->scaffolding_hint,
-                    'difficulty_level' => $q->difficulty ?? 'Sedang',
+                    'difficulty_level' => $q->difficulty ?? $targetDifficulty,
                     'is_solved' => false,
                 ]);
             }
@@ -298,14 +378,17 @@ class NumeracyAiAgentService
 
     /**
      * Generate 1 soal latihan adaptif kontekstual secara dinamis menggunakan OpenRouter (nemotron LLM)
+     * Menggabungkan parameter target tingkat kesulitan berbasis riwayat performa siswa (Tahap 6)
      */
     protected function generatePracticeWithOpenRouter(
         DiagnosticSession $session,
         string $domain,
         string $misconception,
-        int $number
+        int $number,
+        string $targetDifficulty = 'Sedang',
+        string $difficultyGuidance = ''
     ): ?AdaptivePracticeQuestion {
-        $apiKey = env('OPENROUTER_API_KEY');
+        $apiKey = config('services.openrouter.key') ?: env('OPENROUTER_API_KEY');
         if (empty($apiKey)) {
             return null;
         }
@@ -313,7 +396,9 @@ class NumeracyAiAgentService
         $systemPrompt = 'Kamu adalah Pakar Desain Soal Numerasi Kontekstual Indonesia berstandar PISA. '
             .'Hasilkan 1 soal latihan adaptif kontekstual bertema keberlanjutan masa depan (energi surya, daur ulang sampah, penghematan air, atau alokasi anggaran hijau) dalam format JSON valid.';
 
-        $userPrompt = "Buat 1 soal latihan untuk memperbaiki miskonsepsi: '{$misconception}' pada domain numerasi: '{$domain}'.\n"
+        $userPrompt = "Buat 1 soal latihan adaptif untuk memperbaiki miskonsepsi: '{$misconception}' pada domain numerasi: '{$domain}'.\n"
+            ."TARGET TINGKAT KESULITAN ADAPTIF BERBASIS RIWAYAT SISWA: '{$targetDifficulty}'.\n"
+            .(! empty($difficultyGuidance) ? "PEDOMAN KESULITAN RIWAYAT PERFORMA: {$difficultyGuidance}\n\n" : "\n")
             ."Berikan output HANYA berupa JSON valid (tanpa markdown atau teks lain) dengan struktur persis seperti ini:\n"
             ."{\n"
             ."  \"title\": \"Latihan Adaptif #{$number}: ...\",\n"
@@ -346,7 +431,7 @@ class NumeracyAiAgentService
                     'correct_answer' => strtoupper($data['correct_answer']),
                     'scaffolding_hint' => $data['scaffolding_hint'] ?? '',
                     'conceptual_explanation' => $data['conceptual_explanation'] ?? '',
-                    'difficulty' => 'Sedang',
+                    'difficulty' => $targetDifficulty,
                 ]);
             }
         }
