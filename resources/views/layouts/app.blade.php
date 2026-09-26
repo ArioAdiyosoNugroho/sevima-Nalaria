@@ -167,6 +167,8 @@
         }
     </style>
     @stack('styles')
+    {{-- dotLottie Player (Web Component) for Lottie animations --}}
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 </head>
 <body class="min-h-screen flex flex-col bg-white text-black selection:bg-[#FF5500] selection:text-white overflow-x-hidden">
 

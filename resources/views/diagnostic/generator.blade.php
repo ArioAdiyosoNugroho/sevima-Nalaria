@@ -3,6 +3,88 @@
 @section('title', 'Generator Soal AI Literasi & Numerasi — Nalaria')
 
 @section('content')
+
+{{-- ═══════════════════════════════════════════════════
+     LOTTIE AI LOADING OVERLAY
+     Muncul saat AI sedang generate paket soal
+═══════════════════════════════════════════════════ --}}
+<div id="aiLoadingOverlay"
+    class="fixed inset-0 z-[9999] flex flex-col items-center justify-center
+           bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-500">
+
+    {{-- Glassmorphism Card --}}
+    <div class="relative bg-white/10 border border-white/20 rounded-3xl p-8 sm:p-12
+                shadow-2xl flex flex-col items-center gap-6 max-w-sm w-full mx-4
+                animate-[overlayCardIn_0.4s_ease-out_forwards] opacity-0" id="overlayCard">
+
+        {{-- Glow Orb --}}
+        <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-32 h-32
+                    rounded-full bg-[#FF5500]/30 blur-3xl pointer-events-none"></div>
+
+        {{-- Lottie Animation --}}
+        <div class="relative z-10">
+            <dotlottie-player
+                src="https://lottie.host/1fdb347e-78b2-4c87-9dce-d6190a7159fa/lC6PHZqOv2.lottie"
+                background="transparent"
+                speed="1"
+                style="width: 200px; height: 200px;"
+                loop
+                autoplay
+            ></dotlottie-player>
+        </div>
+
+        {{-- Badge AI --}}
+        <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FF5500]/20 border border-[#FF5500]/40">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-pulse"></span>
+            <span class="text-[11px] font-black text-[#FF5500] uppercase tracking-widest">AI Agent Aktif</span>
+        </div>
+
+        {{-- Title --}}
+        <div class="text-center space-y-2">
+            <h3 id="overlayTitle" class="text-lg sm:text-xl font-black text-white tracking-tight">
+                Memproses Paket Soal AI
+            </h3>
+            <p id="overlaySubtitle" class="text-xs text-white/60 font-medium leading-relaxed">
+                NVIDIA Nemotron LLM sedang merancang soal kontekstual PISA...
+            </p>
+        </div>
+
+        {{-- Rotating Status Messages --}}
+        <div class="w-full space-y-2">
+            <div id="overlayStatus"
+                class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10">
+                <span class="w-4 h-4 rounded-full border-2 border-[#FF5500] border-t-transparent
+                             animate-spin shrink-0"></span>
+                <span id="overlayStatusText" class="text-xs text-white/80 font-semibold">Menginisialisasi generator...</span>
+            </div>
+        </div>
+
+        {{-- Progress Dots --}}
+        <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#FF5500] animate-bounce" style="animation-delay:0ms"></span>
+            <span class="w-2 h-2 rounded-full bg-[#FF5500] animate-bounce" style="animation-delay:150ms"></span>
+            <span class="w-2 h-2 rounded-full bg-[#FF5500] animate-bounce" style="animation-delay:300ms"></span>
+        </div>
+
+        {{-- Count indicator --}}
+        <p id="overlayCountText" class="text-[11px] text-white/40 font-medium">Mempersiapkan soal...</p>
+    </div>
+</div>
+
+<style>
+    @keyframes overlayCardIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.96); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    #aiLoadingOverlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+    #aiLoadingOverlay.active #overlayCard {
+        animation: overlayCardIn 0.4s ease-out 0.1s forwards;
+    }
+</style>
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
 
     {{-- Page Hero --}}
@@ -811,17 +893,74 @@ document.addEventListener('DOMContentLoaded', function () {
         form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     });
 
+    // ─────────────── LOADING OVERLAY ───────────────
+
+    const aiLoadingOverlay  = document.getElementById('aiLoadingOverlay');
+    const overlayTitle      = document.getElementById('overlayTitle');
+    const overlaySubtitle   = document.getElementById('overlaySubtitle');
+    const overlayStatusText = document.getElementById('overlayStatusText');
+    const overlayCountText  = document.getElementById('overlayCountText');
+
+    const statusMessages = [
+        'Menginisialisasi generator AI...',
+        'Mengirim prompt ke NVIDIA Nemotron LLM...',
+        'Merancang skenario kontekstual PISA...',
+        'Menyusun butir soal & pilihan jawaban...',
+        'Memvalidasi struktur soal literasi-numerasi...',
+        'Menambahkan petunjuk scaffolding bernalar...',
+        'Menyusun pembahasan konsep...',
+        'Memfinalisasi paket soal adaptif...',
+    ];
+
+    let statusInterval = null;
+    let statusIndex = 0;
+
+    function showLoadingOverlay(count) {
+        const domainCard = document.querySelector('.domain-card input[type="radio"]:checked');
+        const domainLabel = domainCard ? domainCard.closest('.domain-card').querySelector('span.text-xs')?.textContent : 'Terpadu';
+        const diffCard = document.querySelector('.difficulty-card input[type="radio"]:checked');
+        const diffLabel = diffCard ? diffCard.closest('.difficulty-card').querySelector('div.text-xs')?.textContent : 'Sedang';
+
+        overlayTitle.textContent = `Membuat ${count} Soal ${domainLabel || 'AI'}`;
+        overlaySubtitle.textContent = `Tingkat kesulitan: ${diffLabel || 'Sedang'} • Berstandar AKM & PISA`;
+        overlayCountText.textContent = `${count} butir soal sedang disiapkan, harap tunggu...`;
+
+        statusIndex = 0;
+        overlayStatusText.textContent = statusMessages[0];
+        statusInterval = setInterval(() => {
+            statusIndex = (statusIndex + 1) % statusMessages.length;
+            overlayStatusText.style.opacity = '0';
+            setTimeout(() => {
+                overlayStatusText.textContent = statusMessages[statusIndex];
+                overlayStatusText.style.opacity = '1';
+            }, 200);
+        }, 1800);
+
+        aiLoadingOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function hideLoadingOverlay() {
+        clearInterval(statusInterval);
+        aiLoadingOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
     // ─────────────── FORM SUBMIT (AJAX) ───────────────
 
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        // Loading state
+        const selectedCount = parseInt(countRange.value, 10);
+
+        // Button loading state
         generateBtn.disabled = true;
-        const selectedCount = countRange.value;
         btnText.textContent = `Generating ${selectedCount} Soal AI...`;
         btnIcon.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-white"></i>';
         renderLucideIcons();
+
+        // Show full-screen Lottie loading overlay
+        showLoadingOverlay(selectedCount);
 
         const formData = new FormData(form);
 
@@ -840,6 +979,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const resData = await response.json();
             if (resData.success && resData.package && resData.package.questions?.length > 0) {
+                // Brief success flash before hiding
+                overlayStatusText.textContent = '✓ Paket soal berhasil dibuat!';
+                overlayStatusText.style.color = '#4ade80';
+                await new Promise(r => setTimeout(r, 700));
+
+                hideLoadingOverlay();
                 loadPackage(resData.package);
 
                 // Scroll to question card on mobile
@@ -847,12 +992,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('packageInfoBar').scrollIntoView({ behavior: 'smooth' });
                 }
             } else {
+                hideLoadingOverlay();
                 alert('Gagal mendapatkan paket soal. Coba lagi beberapa saat.');
             }
         } catch (err) {
             console.error(err);
+            hideLoadingOverlay();
             form.submit(); // fallback full page reload
         } finally {
+            overlayStatusText.style.color = '';
             generateBtn.disabled = false;
             btnText.textContent = 'Generate Paket Soal AI';
             btnIcon.innerHTML = '<i data-lucide="zap" class="w-4 h-4 text-white"></i>';
