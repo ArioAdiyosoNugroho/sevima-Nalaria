@@ -24,7 +24,7 @@
 
             <!-- Subtitle -->
             <p class="text-base sm:text-lg text-neutral-600 max-w-xl leading-relaxed font-normal">
-                Bukan sekadar hafalan rumus. <strong>Nalaria AI Agent</strong> (bertenaga <em>Nvidia Nemotron 550B via OpenRouter</em>) membedah akar miskonsepsi berpikir kontekstual dan menyusun paket latihan adaptif personal untuk masa depan berkelanjutan.
+                Bukan sekadar hafalan rumus. <strong>Nalaria AI Agent</strong> membedah akar miskonsepsi berpikir kontekstual dan menyusun paket latihan adaptif personal untuk masa depan berkelanjutan.
             </p>
 
             <!-- CTA Button (Meekoo Pill + Arrow Circle) -->
@@ -47,54 +47,46 @@
             </div>
         </div>
 
-        <!-- Right Column: Student Illustration & Floating Badges -->
+        <!-- Right Column: Student Illustration & Floating Badges (Exact Meekoo Reference) -->
         <div class="lg:col-span-5 relative">
             <!-- Background Container with soft rounded shape -->
-            <div class="relative w-full aspect-[4/5] max-w-md mx-auto rounded-[36px] bg-[#F6F6F8] p-6 flex items-end justify-center overflow-hidden border border-neutral-200/70">
-                
-                <!-- Doodle lines and squiggles -->
-                <svg class="absolute top-6 left-6 w-12 h-12 text-[#FF5500]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
-                </svg>
+            <div class="relative w-full aspect-[4/5] max-w-md mx-auto">
+                <!-- Inner card with rounded background, warm arch, and student -->
+                <div class="relative w-full h-full rounded-[36px] flex items-end justify-center overflow-hidden ">
+                    
+                    <!-- Soft Warm Arch/Semicircle behind student (like in image.png) -->
+                    <div class="absolute -bottom-16 w-80 h-80 rounded-full bg-[#FFE8D6] z-0 opacity-80"></div>
 
-                <svg class="absolute top-1/3 right-4 w-10 h-10 text-black/30" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/>
-                </svg>
-
-                <!-- Student Center Illustration / Image (Using the provided reference image or clean representation) -->
-                <div class="relative z-10 w-full flex flex-col items-center justify-center text-center space-y-4 my-auto py-10">
-                    <div class="w-40 h-40 rounded-full bg-white border-4 border-black shadow-xl flex items-center justify-center overflow-hidden p-2">
-                        <img src="{{ asset('ref/image/image.png') }}" alt="Student" class="w-full h-full object-cover object-top rounded-full scale-125">
-                    </div>
-                    <div class="space-y-1">
-                        <h4 class="text-xl font-black text-black">Ario & Pelajar Indonesia</h4>
-                        <p class="text-xs font-bold text-[#FF5500] uppercase tracking-wider">Pemecah Masalah Berkelanjutan</p>
-                    </div>
+                    <!-- Student Portrait (Full Height Cutout Style from reference image.png) -->
+                    <img src="{{ asset('images/hero.png') }}" alt="Student Nalaria" 
+                        class="relative z-10 w-full h-[80%] object-cover object-top filter contrast-[1.03]">
                 </div>
 
                 <!-- Floating Badge 1: Top Right (Dark Pill with Student Count) -->
-                <div class="absolute top-6 right-4 z-20 px-4 py-2.5 rounded-full bg-black text-white text-xs font-bold flex items-center gap-2.5 shadow-xl border border-neutral-800">
+                <div class="absolute top-6 right-4 sm:-right-4 z-20 px-4 py-2.5 rounded-full bg-black text-white text-xs font-bold flex items-center gap-2.5 shadow-xl border border-neutral-800">
                     <div class="flex -space-x-2">
                         <span class="w-6 h-6 rounded-full bg-[#FF5500] border-2 border-black flex items-center justify-center text-[10px] font-black">1</span>
                         <span class="w-6 h-6 rounded-full bg-white text-black border-2 border-black flex items-center justify-center text-[10px] font-black">2</span>
                         <span class="w-6 h-6 rounded-full bg-neutral-700 border-2 border-black flex items-center justify-center text-[10px] font-black">+</span>
                     </div>
-                    <span>600,000+ Siswa</span>
+                    <span>More than 600,000+ students</span>
                 </div>
 
-                <!-- Floating Badge 2: Middle Right (Bright Orange Pill) -->
-                <div class="absolute top-1/2 -right-2 z-20 px-4 py-2 rounded-full bg-[#FF5500] text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-orange-500/30">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-                    </svg>
-                    <span>AI Agent 2-Aksi</span>
+                <!-- Floating Badge 2: Middle Right (Bright Orange Pill - Best Collaboration / AI Agent) -->
+                <div class="absolute top-1/2 -right-3 sm:-right-6 z-20 px-5 py-3 rounded-2xl bg-[#FF5500] text-white text-xs font-black flex items-center gap-2.5 shadow-xl shadow-orange-600/30 border-2 border-white">
+                    <span class="w-6 h-6 rounded-full bg-white text-[#FF5500] flex items-center justify-center">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </span>
+                    <span>Best Collaboration</span>
                 </div>
 
-                <!-- Floating Badge 3: Middle Left (Orange Card - PISA / Accuracy) -->
-                <div class="absolute bottom-8 left-4 z-20 p-4 rounded-2xl bg-[#FF5500] text-white space-y-1 shadow-xl shadow-orange-600/30 max-w-[170px] text-left">
-                    <span class="text-[10px] font-black uppercase tracking-wider bg-black/20 px-2 py-0.5 rounded-md">Standar PISA</span>
-                    <div class="text-2xl font-black tracking-tight leading-none pt-1">Level 4</div>
-                    <div class="text-[11px] font-semibold text-white/90">Penalaran Adaptif & Kontekstual</div>
+                <!-- Floating Badge 3: Bottom Left (Orange Card - Exact Meekoo Price/Stats Badge) -->
+                <div class="absolute bottom-8 left-2 sm:-left-6 z-20 p-4 rounded-2xl bg-[#FF5500] text-white space-y-1.5 shadow-2xl shadow-orange-600/40 min-w-[180px] text-left border-2 border-white/90">
+                    <span class="text-[9px] font-black uppercase tracking-wider bg-black text-white px-2 py-0.5 rounded-md inline-block">AKM & PISA 2026</span>
+                    <div class="text-3xl font-black tracking-tight leading-none pt-0.5">100%</div>
+                    <div class="text-[11px] font-bold text-white/90 leading-tight">Diagnostik Adaptif & Rekomendasi AI</div>
                 </div>
 
             </div>
@@ -317,12 +309,6 @@
                         <div class="text-lg font-black text-black">Peningkatan Penalaran</div>
                         <div class="text-xs text-neutral-500 font-semibold">Setelah Menuntaskan Remediasi AI</div>
                     </div>
-                </div>
-
-                <!-- Floating Bottom Badge -->
-                <div class="absolute bottom-4 inset-x-6 p-3 rounded-2xl bg-black text-white text-xs font-bold flex items-center justify-between shadow-lg">
-                    <span class="text-[#FF5500]">Model AI:</span>
-                    <span class="font-mono text-[11px]">nvidia/nemotron-3-ultra-550b</span>
                 </div>
             </div>
         </div>

@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\Models\AdaptivePracticeQuestion;
+use App\Models\Answer;
+use App\Models\AssessmentSession;
 use App\Models\DiagnosticQuestion;
 use App\Models\DiagnosticSession;
+use App\Models\Recommendation;
 use App\Models\StudentResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
@@ -13,11 +16,28 @@ use Illuminate\Support\Facades\Log;
 class NumeracyAiAgentService
 {
     /**
+     * Memetakan domain ke salah satu Kategori Miskonsepsi Tetap (Standar Tahap 4):
+     * - Aljabar
+     * - Geometri Spasial
+     * - Aritmatika Sosial
+     * - Data & Statistik
+     */
+    public static function mapDomainToCategory(?string $domain): string
+    {
+        return match (strtolower(trim($domain ?? ''))) {
+            'aljabar' => 'Aljabar',
+            'geometri', 'geometri_spasial' => 'Geometri Spasial',
+            'data_ketidakpastian', 'statistika', 'data & statistik' => 'Data & Statistik',
+            default => 'Aritmatika Sosial',
+        };
+    }
+
+    /**
      * ACTION 1: Diagnosa Miskonsepsi & Profiling Kognitif Penalaran Siswa
      *
      * @param  array  $submittedAnswers  Array of ['question_id' => int, 'selected_option' => string, 'reasoning' => string]
      */
-    public function diagnoseSession(DiagnosticSession $session, array $submittedAnswers): array
+    public function diagnoseSession(DiagnosticSession $session, array $submittedAnswers, ?AssessmentSession $assessmentSession = null): array
     {
         $questions = DiagnosticQuestion::all()->keyBy('id');
         $totalQuestions = count($submittedAnswers);
@@ -69,7 +89,7 @@ class NumeracyAiAgentService
                 ];
             }
 
-            // Simpan record response siswa
+            // Simpan record response siswa (Fase 1)
             StudentResponse::create([
                 'diagnostic_session_id' => $session->id,
                 'diagnostic_question_id' => $question->id,
@@ -78,6 +98,21 @@ class NumeracyAiAgentService
                 'student_reasoning' => $studentReasoning,
                 'detected_misconception' => $misconception,
             ]);
+
+            // Simpan record ke tabel answers (Fase 2 multi-sesi schema)
+            if ($assessmentSession) {
+                $misconceptionCategory = ! $isCorrect ? self::mapDomainToCategory($domain) : null;
+                Answer::create([
+                    'session_id' => $assessmentSession->id,
+                    'diagnostic_question_id' => $question->id,
+                    'question_text' => $question->question_text,
+                    'student_answer' => $selectedOption,
+                    'student_reasoning' => $studentReasoning,
+                    'is_correct' => $isCorrect,
+                    'misconception_category' => $misconceptionCategory,
+                    'misconception_detail' => $misconception,
+                ]);
+            }
         }
 
         $calculatedScore = $totalQuestions > 0 ? (int) round(($correctCount / $totalQuestions) * 100) : 0;
@@ -109,7 +144,7 @@ class NumeracyAiAgentService
             $detectedMisconceptions
         );
 
-        // Update Sesi
+        // Update Sesi Fase 1
         $session->update([
             'score' => $calculatedScore,
             'total_questions' => $totalQuestions,
@@ -120,6 +155,20 @@ class NumeracyAiAgentService
             'ai_diagnosis_summary' => $aiDiagnosisSummary,
             'status' => 'completed',
         ]);
+
+        // Update Sesi Fase 2 (AssessmentSession)
+        if ($assessmentSession) {
+            $assessmentSession->update([
+                'score' => $calculatedScore,
+                'total_questions' => $totalQuestions,
+                'correct_count' => $correctCount,
+                'mastery_level' => $masteryLevel,
+                'primary_misconception' => $primaryMisconception,
+                'domain_scores' => $domainScores,
+                'ai_diagnosis_summary' => $aiDiagnosisSummary,
+                'status' => 'completed',
+            ]);
+        }
 
         return [
             'score' => $calculatedScore,
@@ -136,7 +185,7 @@ class NumeracyAiAgentService
     /**
      * ACTION 2: Generate Paket Soal Latihan Bertarget & Scaffolding Remedial
      */
-    public function generateAdaptivePractice(DiagnosticSession $session, array $diagnosis): Collection
+    public function generateAdaptivePractice(DiagnosticSession $session, array $diagnosis, ?AssessmentSession $assessmentSession = null): Collection
     {
         $detectedMisconceptions = $diagnosis['detected_misconceptions'] ?? [];
         $domainScores = $diagnosis['domain_scores'] ?? [];
@@ -218,6 +267,31 @@ class NumeracyAiAgentService
         $session->update([
             'ai_remediation_plan' => $remediationOverview,
         ]);
+
+        // Simpan ke tabel recommendations (Fase 2 multi-sesi)
+        if ($assessmentSession) {
+            Recommendation::where('session_id', $assessmentSession->id)->delete();
+            foreach ($generatedQuestions as $q) {
+                Recommendation::create([
+                    'session_id' => $assessmentSession->id,
+                    'target_misconception' => $q->target_misconception,
+                    'domain' => $q->domain,
+                    'title' => $q->title,
+                    'context_scenario' => $q->context_scenario,
+                    'generated_question' => $q->question_text,
+                    'options' => $q->options,
+                    'correct_answer' => $q->correct_answer,
+                    'explanation' => $q->conceptual_explanation,
+                    'scaffolding_hint' => $q->scaffolding_hint,
+                    'difficulty_level' => $q->difficulty ?? 'Sedang',
+                    'is_solved' => false,
+                ]);
+            }
+
+            $assessmentSession->update([
+                'ai_remediation_plan' => $remediationOverview,
+            ]);
+        }
 
         return collect($generatedQuestions);
     }

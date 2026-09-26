@@ -44,6 +44,33 @@
         </div>
     </div>
 
+    @if(isset($userMastery) && $userMastery['total_sessions'] > 0)
+        <!-- User Aggregate Mastery Progress Banner (Tahap 5) -->
+        <div class="bg-black text-white rounded-[28px] p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-6 border border-neutral-800 shadow-xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-[#FF5500]/20 blur-2xl pointer-events-none"></div>
+            <div class="space-y-1 z-10">
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full bg-[#FF5500] text-white text-[11px] font-extrabold uppercase">
+                        Skor Penguasaan Numerasi Akun
+                    </span>
+                    <span class="text-xs text-neutral-400 font-semibold">• {{ $userMastery['total_sessions'] }} Sesi Tersimpan</span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-black text-white">
+                    Skor Kumulatif: {{ $userMastery['mastery_score'] }}/100 — <span class="text-[#FF5500]">{{ $userMastery['level'] }}</span>
+                </h3>
+                <p class="text-xs text-neutral-400">
+                    Kombinasi skor tes diagnostik (70%) + penyelesaian soal remediasi adaptif ({{ $userMastery['remediation_completion_rate'] }}%).
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3 z-10">
+                <a href="{{ route('diagnostic.history') }}" class="px-5 py-2.5 rounded-full bg-white hover:bg-[#FF5500] hover:text-white text-black text-xs font-bold transition-all shadow-sm">
+                    Buka Riwayat & Portofolio Saya →
+                </a>
+            </div>
+        </div>
+    @endif
+
     <!-- METRICS STRIP (Exact Meekoo 4-Stat Strip with Dots in Orange/Black/White) -->
     <div class="meekoo-stat-strip p-8 sm:p-10 border border-neutral-200">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 items-center text-center">

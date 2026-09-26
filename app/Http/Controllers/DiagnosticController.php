@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdaptivePracticeQuestion;
+use App\Models\AssessmentSession;
 use App\Models\DiagnosticQuestion;
 use App\Models\DiagnosticSession;
+use App\Models\Recommendation;
 use App\Services\NumeracyAiAgentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -59,6 +61,18 @@ class DiagnosticController extends Controller
             'status' => 'in_progress',
         ]);
 
+        $assessmentSession = null;
+        if (auth()->check()) {
+            $assessmentSession = AssessmentSession::create([
+                'session_code' => $sessionCode,
+                'user_id' => auth()->id(),
+                'student_name' => $request->input('student_name'),
+                'student_grade' => $request->input('student_grade'),
+                'time_spent_seconds' => (int) $request->input('time_spent', 0),
+                'status' => 'in_progress',
+            ]);
+        }
+
         $answersData = [];
         $reasonsData = $request->input('reasoning', []);
 
@@ -71,13 +85,32 @@ class DiagnosticController extends Controller
         }
 
         // AKSI 1 AI AGENT: Diagnosis Pola Miskonsepsi Kognitif Siswa
-        $diagnosis = $aiAgent->diagnoseSession($session, $answersData);
+        $diagnosis = $aiAgent->diagnoseSession($session, $answersData, $assessmentSession);
 
         // AKSI 2 AI AGENT: Generate Paket Soal Latihan Bertarget & Scaffolding
-        $aiAgent->generateAdaptivePractice($session, $diagnosis);
+        $aiAgent->generateAdaptivePractice($session, $diagnosis, $assessmentSession);
 
         return redirect()->route('diagnostic.result', ['code' => $sessionCode])
             ->with('success', 'Asesmen diagnostik numerasi dan analisis AI berhasil diselesaikan!');
+    }
+
+    /**
+     * Halaman Riwayat Tes Siswa & Penguasaan Numerasi Agregat
+     */
+    public function history()
+    {
+        $user = auth()->user();
+        $sessions = AssessmentSession::with(['answers', 'recommendations'])
+            ->where('user_id', $user->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $masteryData = AssessmentSession::calculateUserMasteryScore($user->id);
+
+        return view('diagnostic.history', [
+            'sessions' => $sessions,
+            'masteryData' => $masteryData,
+        ]);
     }
 
     /**
@@ -90,8 +123,13 @@ class DiagnosticController extends Controller
             'adaptivePracticeQuestions',
         ])->where('session_code', $code)->firstOrFail();
 
+        $userMastery = auth()->check()
+            ? AssessmentSession::calculateUserMasteryScore(auth()->id())
+            : null;
+
         return view('diagnostic.result', [
             'session' => $session,
+            'userMastery' => $userMastery,
         ]);
     }
 
@@ -116,6 +154,18 @@ class DiagnosticController extends Controller
             'student_answer' => $studentAnswer,
             'is_solved' => $isSolved,
         ]);
+
+        // Sync ke tabel recommendations jika ada sesi assessment
+        $recommendation = Recommendation::where('title', $practiceQuestion->title)
+            ->whereHas('session', fn ($q) => $q->where('session_code', $code))
+            ->first();
+
+        if ($recommendation) {
+            $recommendation->update([
+                'student_answer' => $studentAnswer,
+                'is_solved' => $isSolved,
+            ]);
+        }
 
         return response()->json([
             'success' => true,

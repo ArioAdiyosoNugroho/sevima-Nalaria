@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AssessmentSession;
 use App\Models\DiagnosticQuestion;
 use App\Models\DiagnosticSession;
 use App\Models\User;
@@ -242,5 +243,74 @@ class DiagnosticWorkflowTest extends TestCase
         $this->assertNotEmpty($result['primary_misconception']);
         $this->assertNotEmpty($result['ai_diagnosis_summary']);
         $this->assertEquals('completed', $session->fresh()->status);
+    }
+
+    public function test_history_page_requires_authentication(): void
+    {
+        $response = $this->get(route('diagnostic.history'));
+        $response->assertRedirect(route('login'));
+    }
+
+    public function test_history_page_renders_with_user_sessions_and_mastery_score(): void
+    {
+        // Buat assessment session untuk user
+        $session = AssessmentSession::create([
+            'session_code' => 'NAL-HIST01',
+            'user_id' => $this->user->id,
+            'student_name' => $this->user->name,
+            'student_grade' => 'Kelas 10 SMK',
+            'score' => 80,
+            'total_questions' => 5,
+            'correct_count' => 4,
+            'mastery_level' => 'Mahir (Level 4/5 PISA)',
+            'primary_misconception' => 'Additive error on sequential percentages',
+            'status' => 'completed',
+        ]);
+
+        $response = $this->actingAs($this->user)->get(route('diagnostic.history'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Riwayat Asesmen');
+        $response->assertSee('NAL-HIST01');
+        $response->assertSee('80%');
+        $response->assertSee('Mahir');
+    }
+
+    public function test_submitting_quiz_persists_assessment_session_and_answers(): void
+    {
+        $questions = DiagnosticQuestion::orderBy('order')->get();
+
+        $payload = [
+            'student_name' => 'Ario Adiyoso',
+            'student_grade' => 'Kelas 10 SMK',
+            'time_spent' => 90,
+            'answers' => [
+                $questions[0]->id => 'A',
+                $questions[1]->id => 'C',
+            ],
+            'reasoning' => [
+                $questions[0]->id => 'Alasan A',
+                $questions[1]->id => 'Alasan C',
+            ],
+        ];
+
+        $response = $this->actingAs($this->user)->post(route('diagnostic.submit'), $payload);
+
+        $response->assertSessionHasNoErrors();
+
+        // Verifikasi AssessmentSession
+        $assessmentSession = AssessmentSession::where('user_id', $this->user->id)->first();
+        $this->assertNotNull($assessmentSession);
+        $this->assertEquals('Ario Adiyoso', $assessmentSession->student_name);
+        $this->assertDatabaseHas('answers', [
+            'session_id' => $assessmentSession->id,
+            'diagnostic_question_id' => $questions[0]->id,
+            'student_answer' => 'A',
+            'is_correct' => false,
+            'misconception_category' => 'Aritmatika Sosial',
+        ]);
+        $this->assertDatabaseHas('recommendations', [
+            'session_id' => $assessmentSession->id,
+        ]);
     }
 }

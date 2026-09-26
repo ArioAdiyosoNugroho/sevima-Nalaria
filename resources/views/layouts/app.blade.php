@@ -126,6 +126,11 @@
                 <a href="{{ route('diagnostic.quiz') }}" class="hover:text-[#FF5500] transition-colors {{ request()->routeIs('diagnostic.quiz') ? 'text-[#FF5500] font-bold' : '' }}">
                     Asesmen AI
                 </a>
+                @auth
+                <a href="{{ route('diagnostic.history') }}" class="hover:text-[#FF5500] transition-colors {{ request()->routeIs('diagnostic.history') ? 'text-[#FF5500] font-bold' : '' }}">
+                    Riwayat Tes Saya
+                </a>
+                @endauth
                 <a href="{{ route('diagnostic.landing') }}#features" class="hover:text-[#FF5500] transition-colors">
                     Fitur & AI Agent
                 </a>
@@ -141,9 +146,9 @@
             <div class="flex items-center gap-3">
                 @auth
                     <div class="hidden sm:flex items-center gap-3 mr-1 text-xs">
-                        <span class="px-3 py-1.5 rounded-full bg-neutral-100 font-bold text-neutral-800">
+                        <a href="{{ route('diagnostic.history') }}" class="px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200 font-bold text-neutral-800 transition-colors">
                             👤 {{ Auth::user()->name }}
-                        </span>
+                        </a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
                             <button type="submit" class="font-bold text-neutral-500 hover:text-black transition-colors cursor-pointer">
