@@ -4,254 +4,7 @@
 
 @section('content')
 
-{{-- ═══════════════════════════════════════════════════
-     LOTTIE AI LOADING OVERLAY
-     Muncul saat AI sedang generate paket soal
-═══════════════════════════════════════════════════ --}}
-<div id="aiLoadingOverlay" style="display: none; position: fixed; inset: 0; z-index: 999999;" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/85 backdrop-blur-md p-4">
 
-    {{-- Glassmorphism Card --}}
-    <div id="overlayCard">
-
-        {{-- Glow Orb --}}
-        <div class="overlay-glow"></div>
-
-        {{-- High-tech Animated AI Core (Pure CSS/SVG - Guaranteed to Render 100% Offline & Online) --}}
-        <div class="relative w-28 h-28 flex items-center justify-center my-1">
-            <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-[#FF5500] to-amber-400 blur-xl opacity-60 animate-pulse"></div>
-            <div class="absolute inset-1 rounded-full border-2 border-dashed border-[#FF5500]/70 animate-spin" style="animation-duration: 9s;"></div>
-            <div class="relative w-16 h-16 rounded-full bg-black/95 border border-white/20 flex items-center justify-center shadow-2xl">
-                <svg class="w-8 h-8 text-[#FF5500] animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                </svg>
-            </div>
-        </div>
-
-        {{-- Badge AI --}}
-        <div class="overlay-badge">
-            <span class="overlay-dot"></span>
-            <span>AI Agent Aktif</span>
-        </div>
-
-        {{-- Title --}}
-        <div class="overlay-title-wrap">
-            <h3 id="overlayTitle">Memproses Paket Soal AI</h3>
-            <p id="overlaySubtitle">Model AI sedang merancang butir soal AKM & PISA...</p>
-        </div>
-
-        {{-- Progress Bar & Percentage Section --}}
-        <div class="w-full space-y-2.5 pt-1">
-            <div class="flex items-center justify-between text-xs font-bold text-white/90">
-                <span id="overlayPhase" class="truncate pr-2 text-white/80">Inisialisasi sistem...</span>
-                <span id="overlayPercent" class="font-mono text-base font-black text-[#FF5500] shrink-0">0%</span>
-            </div>
-
-            {{-- Progress Bar Track --}}
-            <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/10">
-                <div id="overlayProgressBar" class="h-full rounded-full bg-gradient-to-r from-[#FF5500] via-[#FF8800] to-[#FFAA00] transition-all duration-300 shadow-sm" style="width: 5%"></div>
-            </div>
-
-            {{-- Heartbeat & Timer --}}
-            <div class="flex items-center justify-between text-[11px] pt-0.5">
-                <span id="overlayHeartbeat" class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Proses AI Berjalan Normal</span>
-                </span>
-                <span class="text-white/50 font-mono" id="overlayTimerWrap">Waktu: <span id="overlayTimerText" class="text-white font-bold">0 detik</span></span>
-            </div>
-        </div>
-
-        {{-- Rotating Status Description --}}
-        <div class="overlay-status-row">
-            <span class="overlay-spinner"></span>
-            <span id="overlayStatusText" class="overlay-status-text">Menginisialisasi generator AI...</span>
-        </div>
-
-        {{-- Count Text --}}
-        <p id="overlayCountText" class="overlay-count-text">Mempersiapkan butir soal adaptif...</p>
-
-        {{-- Cancel / Close Button --}}
-        <button type="button" id="cancelOverlayBtn"
-            class="px-5 py-2 rounded-full border border-white/20 hover:border-white/50 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-xs font-bold transition-all duration-200 cursor-pointer">
-            ✕ Batal & Tutup
-        </button>
-    </div>
-</div>
-
-<style>
-    /* ── Base Overlay ── */
-    #aiLoadingOverlay {
-        display: none !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        z-index: 999999 !important;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0,0,0,0.85) !important;
-        backdrop-filter: blur(14px) !important;
-        -webkit-backdrop-filter: blur(14px) !important;
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transition: opacity 0.25s ease, visibility 0.25s ease;
-    }
-    #aiLoadingOverlay.active {
-        display: flex !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: auto !important;
-    }
-
-    /* ── Card ── */
-    #overlayCard {
-        position: relative;
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.18);
-        border-radius: 28px;
-        padding: 2.25rem 2rem;
-        max-width: 440px;
-        width: calc(100% - 2rem);
-        margin: 0 1rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1.25rem;
-        box-shadow: 0 32px 80px rgba(0,0,0,0.5);
-        animation: cardSlideIn 0.4s cubic-bezier(0.16,1,0.3,1) 0.1s both;
-    }
-
-    /* ── Glow ── */
-    .overlay-glow {
-        position: absolute;
-        top: -3rem;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 8rem;
-        height: 8rem;
-        border-radius: 50%;
-        background: rgba(255,85,0,0.35);
-        filter: blur(3rem);
-        pointer-events: none;
-    }
-
-    /* ── Badge ── */
-    .overlay-badge {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.375rem 1rem;
-        border-radius: 99px;
-        background: rgba(255,85,0,0.18);
-        border: 1px solid rgba(255,85,0,0.4);
-        font-size: 11px;
-        font-weight: 900;
-        color: #FF5500;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-    }
-    .overlay-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #FF5500;
-        animation: pulse 1.4s infinite;
-    }
-
-    /* ── Title ── */
-    .overlay-title-wrap { text-align: center; }
-    #overlayTitle {
-        font-size: 1.2rem;
-        font-weight: 900;
-        color: white;
-        margin: 0 0 0.35rem;
-        letter-spacing: -0.02em;
-    }
-    #overlaySubtitle {
-        font-size: 0.72rem;
-        color: rgba(255,255,255,0.55);
-        font-weight: 500;
-        margin: 0;
-        line-height: 1.5;
-    }
-
-    /* ── Status Row ── */
-    .overlay-status-row {
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-        width: 100%;
-        padding: 0.65rem 1rem;
-        border-radius: 14px;
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-    }
-    .overlay-spinner {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        border: 2px solid rgba(255,85,0,0.3);
-        border-top-color: #FF5500;
-        animation: spin 0.75s linear infinite;
-        flex-shrink: 0;
-    }
-    .overlay-status-text {
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: rgba(255,255,255,0.8);
-        transition: opacity 0.2s;
-    }
-
-    /* ── Progress Dots ── */
-    .overlay-dots {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .overlay-dots span {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #FF5500;
-        animation: bounce 1s ease-in-out infinite;
-    }
-
-    /* ── Count Text ── */
-    .overlay-count-text {
-        font-size: 11px;
-        color: rgba(255,255,255,0.35);
-        font-weight: 500;
-        margin: 0;
-        text-align: center;
-    }
-
-    /* ── Keyframes ── */
-    @keyframes overlayFadeIn {
-        from { opacity: 0; }
-        to   { opacity: 1; }
-    }
-    @keyframes cardSlideIn {
-        from { opacity: 0; transform: translateY(24px) scale(0.94); }
-        to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    @keyframes pulse {
-        0%,100% { opacity: 1; }
-        50%      { opacity: 0.3; }
-    }
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-    @keyframes bounce {
-        0%,100% { transform: translateY(0); }
-        50%     { transform: translateY(-6px); }
-    }
-</style>
 
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -293,30 +46,33 @@
                 <form id="generatorForm" action="{{ route('diagnostic.generator.generate') }}" method="POST" class="space-y-6">
                     @csrf
 
-                    {{-- 0. Mode Kecepatan / Engine --}}
+                    {{-- 0. Metode Generator --}}
                     <div class="space-y-2">
                         <label class="block text-xs font-bold text-black uppercase tracking-wider flex items-center justify-between">
-                            <span>Mode Kecepatan <span class="text-[#FF5500]">*</span></span>
-                            <span class="text-[10px] text-emerald-600 font-extrabold uppercase">Rekomendasi: Mode Kilat</span>
+                            <span>Metode Generator <span class="text-[#FF5500]">*</span></span>
+                            <span class="text-[10px] text-[#FF5500] font-extrabold uppercase flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-pulse"></span>
+                                AI Agent Aktif
+                            </span>
                         </label>
                         <div class="grid grid-cols-2 gap-2.5" id="engineSelector">
                             <label class="engine-card flex flex-col p-3 rounded-2xl border-2 cursor-pointer transition-all duration-200 border-[#FF5500] bg-orange-50/60 shadow-xs">
-                                <input type="radio" name="engine" value="fast" class="sr-only" checked>
-                                <div class="flex items-center gap-1.5 mb-1">
-                                    <span class="text-sm">⚡</span>
-                                    <span class="text-xs font-black text-black">Mode Kilat</span>
-                                    <span class="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase ml-auto">Instan</span>
-                                </div>
-                                <span class="text-[10px] text-neutral-600 font-medium leading-snug">~0.5 Detik • Bank Soal AKM & PISA Teruji (Bebas Kuota)</span>
-                            </label>
-                            <label class="engine-card flex flex-col p-3 rounded-2xl border-2 cursor-pointer transition-all duration-200 border-neutral-200 bg-white hover:border-neutral-300">
-                                <input type="radio" name="engine" value="ai" class="sr-only">
+                                <input type="radio" name="engine" value="ai" class="sr-only" checked>
                                 <div class="flex items-center gap-1.5 mb-1">
                                     <span class="text-sm">🤖</span>
-                                    <span class="text-xs font-black text-black">AI Generatif</span>
-                                    <span class="px-1.5 py-0.5 rounded-full bg-neutral-100 text-neutral-600 text-[9px] font-bold uppercase ml-auto">LLM</span>
+                                    <span class="text-xs font-black text-black">AI Agent</span>
+                                    <span class="px-1.5 py-0.5 rounded-full bg-orange-100 text-[#FF5500] text-[9px] font-black uppercase ml-auto">Pintar</span>
                                 </div>
-                                <span class="text-[10px] text-neutral-500 font-medium leading-snug">~3–6 Detik • OpenRouter GPT-4o-mini</span>
+                                <span class="text-[10px] text-neutral-600 font-medium leading-snug">Soal baru unik dirancang on-demand oleh AI Agent</span>
+                            </label>
+                            <label class="engine-card flex flex-col p-3 rounded-2xl border-2 cursor-pointer transition-all duration-200 border-neutral-200 bg-white hover:border-neutral-300">
+                                <input type="radio" name="engine" value="fast" class="sr-only">
+                                <div class="flex items-center gap-1.5 mb-1">
+                                    <span class="text-sm">⚡</span>
+                                    <span class="text-xs font-black text-black">Bank Kurikulum</span>
+                                    <span class="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase ml-auto">Instan</span>
+                                </div>
+                                <span class="text-[10px] text-neutral-500 font-medium leading-snug">Soal terverifikasi kurikulum tanpa menunggu API</span>
                             </label>
                         </div>
                     </div>
@@ -425,9 +181,9 @@
                     <button type="submit" id="generateBtn"
                         class="w-full py-4 rounded-full bg-[#FF5500] hover:bg-[#E04B00] text-white text-xs font-black tracking-wide uppercase transition-all duration-200 shadow-lg shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
                         <span id="btnIcon" class="flex items-center">
-                            <x-lucide name="zap" class="w-4 h-4 text-white" />
+                            <x-lucide name="sparkles" class="w-4 h-4 text-white" />
                         </span>
-                        <span id="btnText">Generate Paket Soal Kilat (Instan)</span>
+                        <span id="btnText">Generate Soal dengan AI Agent</span>
                     </button>
                 </form>
             </div>
@@ -471,6 +227,38 @@
         {{-- Right Column: Question Display --}}
         <div class="lg:col-span-7 space-y-5">
 
+            {{-- Notification Toast / Banner --}}
+            <div id="generatorNotification" class="hidden"></div>
+
+            {{-- AI Agent Inline Loading State (Sleek, Clean & Responsive) --}}
+            <div id="aiInlineLoading" class="hidden meekoo-card p-8 sm:p-12 bg-gradient-to-br from-[#FFF9F5] via-white to-orange-50/40 border-2 border-orange-200/90 text-center space-y-5 transition-all">
+                <div class="relative w-16 h-16 mx-auto flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full bg-[#FF5500]/15 animate-ping"></div>
+                    <div class="relative w-14 h-14 rounded-full bg-gradient-to-tr from-[#FF5500] to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/25">
+                        <svg class="w-7 h-7 text-white animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-[#FF5500] text-[11px] font-black uppercase tracking-wider">
+                        <span class="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse"></span>
+                        <span>AI Agent Aktif</span>
+                    </div>
+                    <h3 id="inlineLoadingTitle" class="meekoo-heading text-lg sm:text-xl font-black text-black">
+                        Merancang Soal Adaptif...
+                    </h3>
+                    <p id="inlineLoadingDesc" class="text-xs sm:text-sm text-neutral-600 max-w-md mx-auto leading-relaxed font-medium">
+                        AI Agent sedang menyusun stimulus narasi PISA/AKM, perumusan pertanyaan penalaran kritis, dan validasi kunci jawaban.
+                    </p>
+                </div>
+                <div class="w-48 h-1.5 bg-neutral-200 rounded-full mx-auto overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-[#FF5500] to-amber-500 rounded-full animate-pulse w-3/4"></div>
+                </div>
+                <p class="text-[11px] text-neutral-400 font-medium">Biasanya 3–6 detik • Instant fallback jika API lambat</p>
+            </div>
+
             {{-- Package Info Bar + Tab Navigation --}}
             <div id="packageInfoBar" class="meekoo-card p-4 sm:p-5 space-y-3">
                 <div class="flex flex-wrap items-center justify-between gap-2">
@@ -480,6 +268,9 @@
                         </span>
                         <span id="pkgCompetencyBadge" class="px-2.5 py-0.5 rounded-full bg-[#FF5500] text-white text-[10px] font-black uppercase tracking-wider">
                             {{ $initialPackage['competency'] ?? 'Literasi & Numerasi' }}
+                        </span>
+                        <span id="pkgSourceBadge" aria-live="polite" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-wider">
+                            Soal Dummy Lokal
                         </span>
                     </div>
                     <span id="pkgDifficultyBadge" class="px-2.5 py-0.5 rounded-full bg-black text-white text-[10px] font-black uppercase tracking-wider">
@@ -700,6 +491,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const packageInfoBar    = document.getElementById('packageInfoBar');
     const pkgTitle          = document.getElementById('pkgTitle');
     const pkgCompetencyBadge= document.getElementById('pkgCompetencyBadge');
+    const pkgSourceBadge    = document.getElementById('pkgSourceBadge');
     const pkgDifficultyBadge= document.getElementById('pkgDifficultyBadge');
     const questionTabs      = document.getElementById('questionTabs');
 
@@ -956,6 +748,15 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update package info bar
         if (pkgTitle) pkgTitle.textContent = pkg.package_title || 'Paket Soal AI';
         if (pkgCompetencyBadge) pkgCompetencyBadge.textContent = pkg.competency || 'Numerasi';
+        if (pkgSourceBadge) {
+            const aiGeneratedCount = Number(pkg.ai_generated_count || 0);
+            pkgSourceBadge.textContent = aiGeneratedCount > 0
+                ? `AI Generatif ${aiGeneratedCount}/${pkg.questions.length}`
+                : 'Soal Dummy Lokal';
+            pkgSourceBadge.className = aiGeneratedCount > 0
+                ? 'px-2.5 py-0.5 rounded-full bg-violet-100 text-violet-700 text-[10px] font-black uppercase tracking-wider'
+                : 'px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-wider';
+        }
         if (pkgDifficultyBadge) pkgDifficultyBadge.textContent = 'Level: ' + (pkg.difficulty || 'Sedang');
 
         // Show question card, hide completion card
@@ -1154,9 +955,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (radio) {
                 radio.checked = true;
                 if (radio.value === 'fast') {
-                    btnText.textContent = 'Generate Paket Soal Kilat (Instan)';
+                    btnText.textContent = 'Muat Soal dari Bank Kurikulum';
                 } else {
-                    btnText.textContent = 'Generate Paket Soal AI Generatif';
+                    btnText.textContent = 'Generate Soal dengan AI Agent';
                 }
             }
         });
@@ -1170,265 +971,65 @@ document.addEventListener('DOMContentLoaded', function () {
         form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     });
 
-    // ─────────────── LOADING OVERLAY & LIVE PROGRESS SYSTEM ───────────────
+    // ─────────────── SIMPLE & ROBUST GENERATOR SUBMIT (AI AGENT) ───────────────
 
-    const aiLoadingOverlay  = document.getElementById('aiLoadingOverlay');
-    const overlayTitle      = document.getElementById('overlayTitle');
-    const overlaySubtitle   = document.getElementById('overlaySubtitle');
-    const overlayPhase      = document.getElementById('overlayPhase');
-    const overlayPercent    = document.getElementById('overlayPercent');
-    const overlayProgressBar= document.getElementById('overlayProgressBar');
-    const overlayHeartbeat  = document.getElementById('overlayHeartbeat');
-    const overlayStatusText = document.getElementById('overlayStatusText');
-    const overlayCountText  = document.getElementById('overlayCountText');
-    const overlayTimerText  = document.getElementById('overlayTimerText');
-    const cancelOverlayBtn  = document.getElementById('cancelOverlayBtn');
-
-    const progressPhases = [
-        { threshold: 0,  phase: '1/4 • Inisialisasi Sistem', text: 'Menghubungkan ke AI Engine & menyiapkan konteks...' },
-        { threshold: 30, phase: '2/4 • Merancang Konsep', text: 'Menyusun stimulus narasi keberlanjutan standar PISA...' },
-        { threshold: 60, phase: '3/4 • Merumuskan Soal', text: 'Menyusun pertanyaan penalaran kritis & opsi jawaban A-D...' },
-        { threshold: 85, phase: '4/4 • Finalisasi Paket', text: 'Memvalidasi kunci jawaban & petunjuk bernalar...' },
-    ];
-
-    let progressTimer = null;
-    let elapsedMs = 0;
-    let currentPercent = 5;
-    let activeController = null;
     let isGenerating = false;
+    const aiInlineLoading = document.getElementById('aiInlineLoading');
+    const generatorNotification = document.getElementById('generatorNotification');
 
-    function resetProgressUI() {
-        elapsedMs = 0;
-        currentPercent = 5;
-        if (overlayPercent) {
-            overlayPercent.textContent = '5%';
-            overlayPercent.className = 'font-mono text-base font-black text-[#FF5500] shrink-0';
-        }
-        if (overlayProgressBar) {
-            overlayProgressBar.style.width = '5%';
-            overlayProgressBar.className = 'h-full rounded-full bg-gradient-to-r from-[#FF5500] via-[#FF8800] to-[#FFAA00] transition-all duration-200 shadow-sm';
-        }
-        if (overlayHeartbeat) {
-            overlayHeartbeat.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Proses Berjalan Lancar</span>';
-        }
-        if (overlayTimerText) overlayTimerText.textContent = '0 detik';
-        if (overlayPhase) overlayPhase.textContent = progressPhases[0].phase;
-        if (overlayStatusText) {
-            overlayStatusText.style.color = '';
-            overlayStatusText.textContent = progressPhases[0].text;
-        }
-    }
-
-    function showLoadingOverlay(count, controller, engine) {
-        activeController = controller;
-        isGenerating = true;
-
-        if (aiLoadingOverlay) {
-            aiLoadingOverlay.classList.remove('hidden');
-            aiLoadingOverlay.classList.add('active');
-            aiLoadingOverlay.style.setProperty('display', 'flex', 'important');
-            aiLoadingOverlay.style.setProperty('opacity', '1', 'important');
-            aiLoadingOverlay.style.setProperty('visibility', 'visible', 'important');
-            aiLoadingOverlay.style.setProperty('pointer-events', 'auto', 'important');
-        }
-        document.body.style.overflow = 'hidden';
-
-        const isFast = engine === 'fast';
-
-        try {
-            const domainCard = document.querySelector('.domain-card input[type="radio"]:checked');
-            const domainLabel = domainCard ? domainCard.closest('.domain-card')?.querySelector('span.text-xs')?.textContent : 'Terpadu';
-            const diffCard = document.querySelector('.difficulty-card input[type="radio"]:checked');
-            const diffLabel = diffCard ? diffCard.closest('.difficulty-card')?.querySelector('div.text-xs')?.textContent : 'Sedang';
-
-            if (overlayTitle) overlayTitle.textContent = isFast
-                ? `Memuat ${count} Butir Soal Kilat (${domainLabel || 'AKM & PISA'})`
-                : `Membuat ${count} Butir Soal AI Generatif (${domainLabel || 'AI'})`;
-            if (overlaySubtitle) overlaySubtitle.textContent = isFast
-                ? `Mode Kilat Instan • Tingkat: ${diffLabel || 'Sedang'} • Standar Kurikulum PISA`
-                : `OpenRouter GPT-4o-mini • Tingkat: ${diffLabel || 'Sedang'} • Real-time AI`;
-            if (overlayCountText) overlayCountText.textContent = isFast
-                ? `${count} butir soal kurikulum adaptif sedang disiapkan...`
-                : `${count} butir soal adaptif sedang dirancang AI...`;
-        } catch (e) {
-            console.warn('Error reading form labels:', e);
-        }
-
-        resetProgressUI();
-        if (progressTimer) clearInterval(progressTimer);
-
-        const currentPhases = isFast ? [
-            { threshold: 0,  phase: '1/3 • Menyiapkan Soal', text: 'Mengambil paket soal adaptif terverifikasi AKM & PISA...' },
-            { threshold: 45, phase: '2/3 • Mengonfigurasi Butir', text: 'Menyiapkan opsi jawaban, stimulus & petunjuk bernalar...' },
-            { threshold: 80, phase: '3/3 • Memvalidasi Paket', text: 'Memvalidasi kunci jawaban & format tampilan...' },
-        ] : progressPhases;
-
-        const timeDivisor = isFast ? 0.35 : 2.5;
-
-        progressTimer = setInterval(() => {
-            if (!isGenerating) return;
-            elapsedMs += 40;
-            const elapsedSec = elapsedMs / 1000;
-
-            const target = 95 * (1 - Math.exp(-elapsedSec / timeDivisor));
-            currentPercent = Math.max(5, Math.min(95, target));
-
-            const rounded = Math.round(currentPercent);
-            if (overlayPercent) overlayPercent.textContent = `${rounded}%`;
-            if (overlayProgressBar) overlayProgressBar.style.width = `${rounded}%`;
-            if (overlayTimerText) overlayTimerText.textContent = `${Math.floor(elapsedSec)} detik`;
-
-            let activePhase = currentPhases[0];
-            for (let i = currentPhases.length - 1; i >= 0; i--) {
-                if (rounded >= currentPhases[i].threshold) {
-                    activePhase = currentPhases[i];
-                    break;
-                }
-            }
-            if (overlayPhase) overlayPhase.textContent = activePhase.phase;
-            if (overlayStatusText && overlayStatusText.style.color === '') {
-                overlayStatusText.textContent = activePhase.text;
-            }
-        }, 40);
-    }
-
-    function finishSuccess(packageData) {
-        if (progressTimer) clearInterval(progressTimer);
-        isGenerating = false;
-
-        // 1. Tampilkan 100% hijau terang dengan animasi mantap
-        if (overlayPhase) overlayPhase.textContent = 'Selesai 100%!';
-        if (overlayPercent) {
-            overlayPercent.textContent = '100%';
-            overlayPercent.className = 'font-mono text-base font-black text-emerald-400 shrink-0';
-        }
-        if (overlayProgressBar) {
-            overlayProgressBar.style.width = '100%';
-            overlayProgressBar.className = 'h-full rounded-full bg-emerald-500 transition-all duration-300 shadow-md shadow-emerald-500/50';
-        }
-        if (overlayHeartbeat) {
-            overlayHeartbeat.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-400 font-bold">Paket Soal Selesai</span>';
-        }
-        if (overlayStatusText) {
-            overlayStatusText.style.color = '#4ade80';
-            overlayStatusText.textContent = '✓ Seluruh butir soal siap digunakan!';
-        }
-
-        // 2. Render soal ke tampilan kartu
-        try {
-            loadPackage(packageData);
-        } catch (loadErr) {
-            console.error('Error in loadPackage:', loadErr);
-        }
-
-        // 3. Beri jeda 350ms agar user melihat konfirmasi 100%, lalu tutup overlay secara mulus
+    function showNotification(message, type = 'success') {
+        if (!generatorNotification) return;
+        generatorNotification.className = `p-3.5 rounded-2xl text-xs font-bold transition-all duration-300 flex items-center justify-between gap-3 shadow-sm ${
+            type === 'success' ? 'bg-emerald-50 text-emerald-900 border border-emerald-300' : 'bg-red-50 text-red-900 border border-red-300'
+        }`;
+        generatorNotification.innerHTML = `
+            <div class="flex items-center gap-2">
+                <span class="text-sm">${type === 'success' ? '✓' : '⚠️'}</span>
+                <span>${message}</span>
+            </div>
+            <button type="button" onclick="this.parentElement.classList.add('hidden')" class="text-sm font-black cursor-pointer opacity-60 hover:opacity-100">&times;</button>
+        `;
+        generatorNotification.classList.remove('hidden');
         setTimeout(() => {
-            hideLoadingOverlay();
-            if (window.innerWidth < 1024) {
-                document.getElementById('packageInfoBar')?.scrollIntoView({ behavior: 'smooth' });
-            }
-        }, 350);
+            if (generatorNotification) generatorNotification.classList.add('hidden');
+        }, 6000);
     }
-
-    function setErrorProgress(message) {
-        if (progressTimer) clearInterval(progressTimer);
-        isGenerating = false;
-
-        if (overlayPhase) overlayPhase.textContent = 'Proses Terhenti';
-        if (overlayPercent) {
-            overlayPercent.textContent = 'Gagal';
-            overlayPercent.className = 'font-mono text-xs font-black text-red-400 shrink-0';
-        }
-        if (overlayProgressBar) {
-            overlayProgressBar.className = 'h-full rounded-full bg-red-500 transition-all duration-300 shadow-md shadow-red-500/50';
-        }
-        if (overlayHeartbeat) {
-            overlayHeartbeat.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-400"></span><span class="text-red-400 font-bold">Terjadi Kesalahan</span>';
-        }
-        if (overlayStatusText) {
-            overlayStatusText.style.color = '#f87171';
-            overlayStatusText.textContent = message;
-        }
-
-        setTimeout(() => {
-            hideLoadingOverlay();
-            alert('Terjadi kendala: ' + message + '. Silakan coba kembali.');
-        }, 1200);
-    }
-
-    function hideLoadingOverlay() {
-        if (progressTimer) clearInterval(progressTimer);
-        isGenerating = false;
-        activeController = null;
-        if (aiLoadingOverlay) {
-            aiLoadingOverlay.classList.remove('active');
-            aiLoadingOverlay.classList.add('hidden');
-            aiLoadingOverlay.style.setProperty('display', 'none', 'important');
-            aiLoadingOverlay.style.setProperty('opacity', '0', 'important');
-            aiLoadingOverlay.style.setProperty('visibility', 'hidden', 'important');
-            aiLoadingOverlay.style.setProperty('pointer-events', 'none', 'important');
-        }
-        document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
-    }
-
-    if (aiLoadingOverlay) {
-        aiLoadingOverlay.addEventListener('click', function (e) {
-            if (e.target === aiLoadingOverlay) {
-                hideLoadingOverlay();
-            }
-        });
-    }
-
-    if (cancelOverlayBtn) {
-        cancelOverlayBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            if (activeController) {
-                activeController.abort('dibatalkan');
-            }
-            hideLoadingOverlay();
-        });
-    }
-
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-            if (activeController) {
-                activeController.abort('dibatalkan');
-            }
-            hideLoadingOverlay();
-        }
-    });
-
-    // ─────────────── FORM SUBMIT (AJAX) ───────────────
 
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
-
-        // Cegah double submit
         if (isGenerating) return;
 
         const selectedCount = parseInt(countRange.value, 10);
         const engineInput = document.querySelector('input[name="engine"]:checked');
-        const selectedEngine = engineInput ? engineInput.value : 'fast';
-        const isFast = selectedEngine === 'fast';
+        const selectedEngine = engineInput ? engineInput.value : 'ai';
+        const isAi = selectedEngine === 'ai';
 
-        let controller = null;
-        let clientTimeout = null;
+        isGenerating = true;
+        generateBtn.disabled = true;
+        btnText.textContent = isAi ? `AI Agent Sedang Merancang Soal...` : `Memuat ${selectedCount} Soal...`;
+        btnIcon.innerHTML = '<svg class="w-4 h-4 animate-spin text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+
+        // Tampilkan state loading inline yang bersih pada panel soal
+        if (questionDisplayCard) questionDisplayCard.classList.add('hidden');
+        if (packageCompleteCard) packageCompleteCard.classList.add('hidden');
+        if (aiInlineLoading) {
+            aiInlineLoading.classList.remove('hidden');
+            const inlineTitle = document.getElementById('inlineLoadingTitle');
+            const inlineDesc = document.getElementById('inlineLoadingDesc');
+            if (inlineTitle) inlineTitle.textContent = isAi ? `AI Agent Sedang Merancang ${selectedCount} Soal...` : `Memuat ${selectedCount} Soal...`;
+            if (inlineDesc) inlineDesc.textContent = isAi 
+                ? 'AI Agent sedang menyusun stimulus narasi PISA/AKM, perumusan penalaran kritis, dan opsi jawaban...'
+                : 'Menyiapkan paket butir soal kurikulum adaptif...';
+            if (window.innerWidth < 1024) {
+                aiInlineLoading.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        const formData = new FormData(form);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
 
         try {
-            // 1. Tampilkan loading overlay
-            controller = new AbortController();
-            const timeoutMs = isFast ? 8000 : 25000;
-            clientTimeout = setTimeout(() => controller.abort('timeout'), timeoutMs);
-            showLoadingOverlay(selectedCount, controller, selectedEngine);
-
-            // 2. Set button loading state
-            generateBtn.disabled = true;
-            btnText.textContent = isFast ? `Memuat ${selectedCount} Soal Kilat...` : `Merancang ${selectedCount} Soal AI...`;
-            btnIcon.innerHTML = '<svg class="w-4 h-4 animate-spin text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
-
-            const formData = new FormData(form);
-
             const response = await fetch(form.action, {
                 method: 'POST',
                 body: formData,
@@ -1440,45 +1041,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
             });
 
-            if (clientTimeout) clearTimeout(clientTimeout);
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 const errJson = await response.json().catch(() => null);
-                const errMsg = errJson?.message || ('Server error ' + response.status);
-                throw new Error(errMsg);
+                throw new Error(errJson?.message || ('Server error ' + response.status));
             }
 
             const resData = await response.json();
             if (resData && resData.package && resData.package.questions && resData.package.questions.length > 0) {
-                // Beri jeda visual halus (minimal ~400ms) agar transisi progress bar terlihat elegan
-                const minDelay = isFast ? Math.max(0, 400 - elapsedMs) : 0;
-                setTimeout(() => {
-                    finishSuccess(resData.package);
-                }, minDelay);
-            } else {
-                setErrorProgress('Gagal mendapatkan butir soal.');
-            }
-        } catch (err) {
-            if (clientTimeout) clearTimeout(clientTimeout);
-            if (err.name === 'AbortError') {
-                if (controller?.signal?.reason === 'dibatalkan') {
-                    hideLoadingOverlay();
-                } else {
-                    setErrorProgress('Waktu proses melebihi batas.');
+                if (aiInlineLoading) aiInlineLoading.classList.add('hidden');
+                loadPackage(resData.package);
+                const modelUsed = resData.package.ai_model || 'AI Agent';
+                showNotification(`Paket ${resData.package.questions.length} butir soal siap digunakan! (${modelUsed})`, 'success');
+                if (window.innerWidth < 1024) {
+                    document.getElementById('packageInfoBar')?.scrollIntoView({ behavior: 'smooth' });
                 }
             } else {
-                console.error('Generator error:', err);
-                setErrorProgress(err.message || 'Koneksi ke generator bermasalah');
+                throw new Error('Format data paket soal tidak valid.');
             }
+        } catch (err) {
+            clearTimeout(timeoutId);
+            console.error('Generator error:', err);
+            if (aiInlineLoading) aiInlineLoading.classList.add('hidden');
+            if (questionDisplayCard) questionDisplayCard.classList.remove('hidden');
+            const msg = err.name === 'AbortError' 
+                ? 'Waktu proses melebihi batas. Silakan coba kembali.' 
+                : (err.message || 'Koneksi ke generator bermasalah.');
+            showNotification(msg, 'error');
         } finally {
-            if (clientTimeout) clearTimeout(clientTimeout);
+            clearTimeout(timeoutId);
             isGenerating = false;
             generateBtn.disabled = false;
             const currentEngineInput = document.querySelector('input[name="engine"]:checked');
-            btnText.textContent = (currentEngineInput && currentEngineInput.value === 'ai')
-                ? 'Generate Paket Soal AI Generatif'
-                : 'Generate Paket Soal Kilat (Instan)';
-            btnIcon.innerHTML = '<svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>';
+            btnText.textContent = (currentEngineInput && currentEngineInput.value === 'fast')
+                ? 'Muat Soal dari Bank Kurikulum'
+                : 'Generate Soal dengan AI Agent';
+            btnIcon.innerHTML = '<svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>';
+            renderLucideIcons();
         }
     });
 

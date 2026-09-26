@@ -226,9 +226,9 @@ class DiagnosticController extends Controller
         $difficulty = $request->input('difficulty', 'Sedang');
         $count = (int) $request->input('count', 3);
         $context = $request->input('context');
-        $engine = $request->input('engine');
+        $engine = $request->input('engine', 'ai');
 
-        // Mode Kilat (Instan): langsung sajikan paket soal kurikulum adaptif terverifikasi dalam hitungan milidetik
+        // Mode Bank Kurikulum (Instan) atau AI Agent Generatif (Default)
         if ($engine === 'fast') {
             $package = $aiAgent->getFallbackOnDemandPackage($domain, $difficulty, $count, $context ?? '');
         } else {

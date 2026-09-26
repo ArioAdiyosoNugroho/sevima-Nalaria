@@ -25,7 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderLucide();
 
     if (document.body) {
+        let isRendering = false;
         const observer = new MutationObserver((mutations) => {
+            if (isRendering) return;
             let shouldRender = false;
             for (const mutation of mutations) {
                 if (mutation.addedNodes && mutation.addedNodes.length > 0) {
@@ -45,7 +47,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (shouldRender) break;
             }
             if (shouldRender) {
-                renderLucide();
+                isRendering = true;
+                try {
+                    observer.disconnect();
+                    renderLucide();
+                } finally {
+                    observer.observe(document.body, { childList: true, subtree: true });
+                    isRendering = false;
+                }
             }
         });
 
