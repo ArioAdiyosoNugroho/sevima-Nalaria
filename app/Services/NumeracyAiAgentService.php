@@ -555,7 +555,7 @@ class NumeracyAiAgentService
         $siteName = config('services.openrouter.site_name') ?: env('OPENROUTER_SITE_NAME', 'Nalaria');
 
         try {
-            $response = Http::timeout(25)
+            $response = Http::timeout(10)
                 ->withHeaders([
                     'Authorization' => 'Bearer '.$apiKey,
                     'HTTP-Referer' => $siteUrl,

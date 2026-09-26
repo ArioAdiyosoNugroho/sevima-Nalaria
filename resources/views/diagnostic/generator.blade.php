@@ -58,20 +58,27 @@
 
 <style>
     /* ── Base Overlay ── */
+    /* NOTE: menggunakan opacity+visibility bukan display:none
+       karena display tidak bisa di-CSS-transition */
     #aiLoadingOverlay {
-        display: none;
         position: fixed;
         inset: 0;
         z-index: 9999;
+        display: flex;
         align-items: center;
         justify-content: center;
         background: rgba(0,0,0,0.82);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        animation: overlayFadeIn 0.35s ease forwards;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.35s ease, visibility 0.35s ease;
     }
     #aiLoadingOverlay.active {
-        display: flex;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: all;
     }
 
     /* ── Card ── */
@@ -1100,10 +1107,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const formData = new FormData(form);
 
+        // Client-side timeout: abort setelah 60 detik (max 8 soal × 10s server timeout)
+        const controller = new AbortController();
+        const clientTimeout = setTimeout(() => controller.abort(), 60000);
+
         try {
             const response = await fetch(form.action, {
                 method: 'POST',
                 body: formData,
+                signal: controller.signal,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json',
@@ -1111,13 +1123,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
             });
 
+            clearTimeout(clientTimeout);
+
             if (!response.ok) throw new Error('Server error ' + response.status);
 
             const resData = await response.json();
             if (resData.success && resData.package && resData.package.questions?.length > 0) {
                 // Brief success flash before hiding
-                overlayStatusText.textContent = '✓ Paket soal berhasil dibuat!';
                 overlayStatusText.style.color = '#4ade80';
+                overlayStatusText.textContent = '✓ Paket soal berhasil dibuat!';
                 await new Promise(r => setTimeout(r, 700));
 
                 hideLoadingOverlay();
@@ -1132,9 +1146,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('Gagal mendapatkan paket soal. Coba lagi beberapa saat.');
             }
         } catch (err) {
-            console.error(err);
+            clearTimeout(clientTimeout);
             hideLoadingOverlay();
-            form.submit(); // fallback full page reload
+            if (err.name === 'AbortError') {
+                alert('Permintaan terlalu lama. Sistem sedang menggunakan bank soal lokal sebagai gantinya.');
+                // Reload dengan fallback
+                window.location.reload();
+            } else {
+                console.error(err);
+                // Fallback: POST biasa (server pakai fallback bank)
+                form.submit();
+            }
         } finally {
             overlayStatusText.style.color = '';
             generateBtn.disabled = false;
