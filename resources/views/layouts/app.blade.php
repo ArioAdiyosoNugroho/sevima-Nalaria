@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Nalaria — Shape Your Future with Adaptive AI Numeracy')</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo.svg') }}">
     
     <!-- Google Fonts: Plus Jakarta Sans for exact Meekoo geometric bold typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -106,14 +107,10 @@
     <!-- Top Navigation Bar (Exact Meekoo Header) -->
     <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-neutral-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-22 flex items-center justify-between">
-            <!-- Brand Logo (Meekoo Drop / Flame Style in Orange & Black) -->
+            <!-- Brand Logo (User Custom Logo) -->
             <a href="{{ route('diagnostic.landing') }}" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
-                    <!-- Stylized Flame/Droplet Icon in Orange -->
-                    <svg class="w-5 h-5 text-[#FF5500]" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C8.5 7 5 10.5 5 15a7 7 0 0 0 14 0c0-4.5-3.5-8-7-13zm0 18a5 5 0 0 1-5-5c0-3 2.5-5.5 5-9 2.5 3.5 5 6 5 9a5 5 0 0 1-5 5z"/>
-                        <circle cx="12" cy="16" r="2.5" fill="#FF5500"/>
-                    </svg>
+                <div class="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <x-logo class="w-10 h-10" fill="#FF5500" />
                 </div>
                 <div class="flex items-center">
                     <span class="text-2xl font-black tracking-tight text-black">Nalaria</span>
@@ -179,10 +176,8 @@
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-10 border-b border-neutral-800">
                 <div class="space-y-3 max-w-md">
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-black">
-                            <svg class="w-5 h-5 text-[#FF5500]" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C8.5 7 5 10.5 5 15a7 7 0 0 0 14 0c0-4.5-3.5-8-7-13zm0 18a5 5 0 0 1-5-5c0-3 2.5-5.5 5-9 2.5 3.5 5 6 5 9a5 5 0 0 1-5 5z"/>
-                            </svg>
+                        <div class="w-10 h-10 flex items-center justify-center">
+                            <x-logo class="w-9 h-9" fill="#FF5500" />
                         </div>
                         <span class="text-2xl font-black tracking-tight text-white">Nalaria</span>
                     </div>
