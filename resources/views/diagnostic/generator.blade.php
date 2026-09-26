@@ -81,7 +81,7 @@
 <style>
     /* ── Base Overlay ── */
     #aiLoadingOverlay {
-        display: none;
+        display: none !important;
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -95,11 +95,16 @@
         background: rgba(0,0,0,0.85) !important;
         backdrop-filter: blur(14px) !important;
         -webkit-backdrop-filter: blur(14px) !important;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.25s ease, visibility 0.25s ease;
     }
     #aiLoadingOverlay.active {
         display: flex !important;
         opacity: 1 !important;
         visibility: visible !important;
+        pointer-events: auto !important;
     }
 
     /* ── Card ── */
@@ -288,6 +293,34 @@
                 <form id="generatorForm" action="{{ route('diagnostic.generator.generate') }}" method="POST" class="space-y-6">
                     @csrf
 
+                    {{-- 0. Mode Kecepatan / Engine --}}
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-black uppercase tracking-wider flex items-center justify-between">
+                            <span>Mode Kecepatan <span class="text-[#FF5500]">*</span></span>
+                            <span class="text-[10px] text-emerald-600 font-extrabold uppercase">Rekomendasi: Mode Kilat</span>
+                        </label>
+                        <div class="grid grid-cols-2 gap-2.5" id="engineSelector">
+                            <label class="engine-card flex flex-col p-3 rounded-2xl border-2 cursor-pointer transition-all duration-200 border-[#FF5500] bg-orange-50/60 shadow-xs">
+                                <input type="radio" name="engine" value="fast" class="sr-only" checked>
+                                <div class="flex items-center gap-1.5 mb-1">
+                                    <span class="text-sm">⚡</span>
+                                    <span class="text-xs font-black text-black">Mode Kilat</span>
+                                    <span class="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase ml-auto">Instan</span>
+                                </div>
+                                <span class="text-[10px] text-neutral-600 font-medium leading-snug">~0.5 Detik • Bank Soal AKM & PISA Teruji (Bebas Kuota)</span>
+                            </label>
+                            <label class="engine-card flex flex-col p-3 rounded-2xl border-2 cursor-pointer transition-all duration-200 border-neutral-200 bg-white hover:border-neutral-300">
+                                <input type="radio" name="engine" value="ai" class="sr-only">
+                                <div class="flex items-center gap-1.5 mb-1">
+                                    <span class="text-sm">🤖</span>
+                                    <span class="text-xs font-black text-black">AI Generatif</span>
+                                    <span class="px-1.5 py-0.5 rounded-full bg-neutral-100 text-neutral-600 text-[9px] font-bold uppercase ml-auto">LLM</span>
+                                </div>
+                                <span class="text-[10px] text-neutral-500 font-medium leading-snug">~3–6 Detik • OpenRouter GPT-4o-mini</span>
+                            </label>
+                        </div>
+                    </div>
+
                     {{-- 1. Domain / Mode --}}
                     <div class="space-y-2.5">
                         <label class="block text-xs font-bold text-black uppercase tracking-wider">
@@ -394,7 +427,7 @@
                         <span id="btnIcon" class="flex items-center">
                             <x-lucide name="zap" class="w-4 h-4 text-white" />
                         </span>
-                        <span id="btnText">Generate Paket Soal AI</span>
+                        <span id="btnText">Generate Paket Soal Kilat (Instan)</span>
                     </button>
                 </form>
             </div>
@@ -620,7 +653,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // ─────────────── MARKDOWN HELPER ───────────────
     function formatMarkdown(text) {
-        if (!text) return '';
+        if (!text || typeof text !== 'string') return '';
         let escaped = text
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
@@ -629,7 +662,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .replace(/'/g, '&#039;');
         escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold text-black">$1</strong>');
         escaped = escaped.replace(/__(.*?)__/g, '<strong class="font-extrabold text-black">$1</strong>');
-        escaped = escaped.replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+        escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
         escaped = escaped.replace(/^\s*[-*]\s+(.*)$/gm, '<li class="ml-4 list-disc">$1</li>');
         escaped = escaped.replace(/\n\n+/g, '</p><p class="mt-2.5">');
         escaped = escaped.replace(/\n/g, '<br>');
@@ -637,7 +670,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function formatInlineMarkdown(text) {
-        if (!text) return '';
+        if (!text || typeof text !== 'string') return '';
         let escaped = text
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
@@ -718,10 +751,14 @@ document.addEventListener('DOMContentLoaded', function () {
             if (typeof window.renderLucide === 'function') {
                 window.renderLucide();
             } else if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                window.lucide.createIcons(window.lucide.icons ? { icons: window.lucide.icons } : undefined);
+                if (window.lucide.icons) {
+                    window.lucide.createIcons({ icons: window.lucide.icons });
+                } else {
+                    window.lucide.createIcons();
+                }
             }
         } catch (e) {
-            console.warn('Lucide icon render warning:', e);
+            // Silently swallow Lucide errors so UI never breaks
         }
     }
 
@@ -784,116 +821,126 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function switchQuestion(idx) {
-        const questions = currentPackage.questions || [];
+        const questions = currentPackage?.questions || [];
         if (idx < 0 || idx >= questions.length) return;
         currentQuestionIndex = idx;
 
         const q = questions[idx];
+        if (!q) return;
 
         // Update question card UI
-        qNumberBadge.textContent = `Soal ${idx + 1}`;
-        qDomainBadge.textContent = q.domain_label || '';
-        qCompetencyBadge.textContent = q.competency || 'Numerasi';
-        qTitle.textContent = q.title || '';
-        qScenario.innerHTML = formatMarkdown(q.context_scenario || '');
-        qText.innerHTML = formatMarkdown(q.question_text || '');
-        qHint.innerHTML = formatMarkdown(q.scaffolding_hint || '');
-        qExplanation.innerHTML = formatMarkdown(q.conceptual_explanation || '');
-        qCorrectKey.textContent = q.correct_answer || '';
+        if (qNumberBadge) qNumberBadge.textContent = `Soal ${idx + 1}`;
+        if (qDomainBadge) qDomainBadge.textContent = q.domain_label || '';
+        if (qCompetencyBadge) qCompetencyBadge.textContent = q.competency || 'Numerasi';
+        if (qTitle) qTitle.textContent = q.title || '';
+        if (qScenario) qScenario.innerHTML = formatMarkdown(q.context_scenario || '');
+        if (qText) qText.innerHTML = formatMarkdown(q.question_text || '');
+        if (qHint) qHint.innerHTML = formatMarkdown(q.scaffolding_hint || '');
+        if (qExplanation) qExplanation.innerHTML = formatMarkdown(q.conceptual_explanation || '');
+        if (qCorrectKey) qCorrectKey.textContent = q.correct_answer || '';
 
         // Status badge
         const ans = studentAnswers[idx];
-        if (ans === undefined) {
-            qStatusDot.className = 'w-2 h-2 rounded-full bg-neutral-300';
-            qStatusText.textContent = 'Belum Dijawab';
-        } else if (ans.isCorrect) {
-            qStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
-            qStatusText.textContent = 'Benar ✓';
-        } else {
-            qStatusDot.className = 'w-2 h-2 rounded-full bg-red-500';
-            qStatusText.textContent = 'Salah ✗';
+        if (qStatusDot && qStatusText) {
+            if (ans === undefined) {
+                qStatusDot.className = 'w-2 h-2 rounded-full bg-neutral-300';
+                qStatusText.textContent = 'Belum Dijawab';
+            } else if (ans.isCorrect) {
+                qStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                qStatusText.textContent = 'Benar ✓';
+            } else {
+                qStatusDot.className = 'w-2 h-2 rounded-full bg-red-500';
+                qStatusText.textContent = 'Salah ✗';
+            }
         }
 
         // Re-render options
-        optionsContainer.innerHTML = '';
-        const rawOptions = Array.isArray(q.options)
-            ? q.options
-            : (q.options && typeof q.options === 'object' ? Object.values(q.options) : []);
+        if (optionsContainer) {
+            optionsContainer.innerHTML = '';
+            const rawOptions = Array.isArray(q.options)
+                ? q.options
+                : (q.options && typeof q.options === 'object' ? Object.values(q.options) : []);
 
-        rawOptions.forEach(opt => {
-            const optKey = (opt && opt.key) ? opt.key : '';
-            const optText = (opt && opt.text) ? opt.text : (typeof opt === 'string' ? opt : '');
-            const label = document.createElement('label');
-            let rowClass = 'option-row flex items-start gap-3.5 p-3.5 sm:p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ';
-            let keyClass = 'opt-key w-7 h-7 rounded-full text-xs font-black flex items-center justify-center shrink-0 border ';
+            rawOptions.forEach(opt => {
+                const optKey = (opt && opt.key) ? opt.key : '';
+                const optText = (opt && opt.text) ? opt.text : (typeof opt === 'string' ? opt : '');
+                const label = document.createElement('label');
+                let rowClass = 'option-row flex items-start gap-3.5 p-3.5 sm:p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ';
+                let keyClass = 'opt-key w-7 h-7 rounded-full text-xs font-black flex items-center justify-center shrink-0 border ';
 
-            if (ans !== undefined) {
-                // Show result state
-                if (optKey === q.correct_answer) {
-                    rowClass += 'border-emerald-400 bg-emerald-50';
-                    keyClass += 'bg-emerald-500 text-white border-emerald-500';
-                } else if (ans.selectedKey === optKey) {
-                    rowClass += 'border-red-400 bg-red-50';
-                    keyClass += 'bg-red-500 text-white border-red-500';
-                } else {
-                    rowClass += 'border-neutral-200 bg-white';
+                if (ans !== undefined) {
+                    // Show result state
+                    if (optKey === q.correct_answer) {
+                        rowClass += 'border-emerald-400 bg-emerald-50';
+                        keyClass += 'bg-emerald-500 text-white border-emerald-500';
+                    } else if (ans.selectedKey === optKey) {
+                        rowClass += 'border-red-400 bg-red-50';
+                        keyClass += 'bg-red-500 text-white border-red-500';
+                    } else {
+                        rowClass += 'border-neutral-200 bg-white';
+                        keyClass += 'bg-neutral-100 text-black border-neutral-300';
+                    }
+                } else if (ans === undefined) {
+                    rowClass += 'border-neutral-200 bg-white hover:border-black';
                     keyClass += 'bg-neutral-100 text-black border-neutral-300';
                 }
-            } else if (ans === undefined) {
-                rowClass += 'border-neutral-200 bg-white hover:border-black';
-                keyClass += 'bg-neutral-100 text-black border-neutral-300';
-            }
 
-            label.className = rowClass;
-            label.innerHTML = `
-                <input type="radio" name="practice_answer" value="${optKey}" class="sr-only" ${ans?.selectedKey === optKey ? 'checked' : ''}>
-                <span class="${keyClass}">${optKey}</span>
-                <span class="opt-text text-xs sm:text-sm font-semibold text-neutral-800 leading-snug pt-0.5">${formatInlineMarkdown(optText)}</span>
-            `;
-            optionsContainer.appendChild(label);
-        });
+                label.className = rowClass;
+                label.innerHTML = `
+                    <input type="radio" name="practice_answer" value="${optKey}" class="sr-only" ${ans?.selectedKey === optKey ? 'checked' : ''}>
+                    <span class="${keyClass}">${optKey}</span>
+                    <span class="opt-text text-xs sm:text-sm font-semibold text-neutral-800 leading-snug pt-0.5">${formatInlineMarkdown(optText)}</span>
+                `;
+                optionsContainer.appendChild(label);
+            });
+        }
 
         // Reset accordions
-        hintContent.classList.add('hidden');
-        hintChevron.textContent = '↓';
-        explanationContent.classList.add('hidden');
-        explanationChevron.textContent = '↓';
+        if (hintContent) hintContent.classList.add('hidden');
+        if (hintChevron) hintChevron.textContent = '↓';
+        if (explanationContent) explanationContent.classList.add('hidden');
+        if (explanationChevron) explanationChevron.textContent = '↓';
 
         // Feedback box
-        answerFeedbackBox.classList.add('hidden');
-        answerFeedbackBox.classList.remove('bg-emerald-50', 'border-emerald-300', 'text-emerald-900', 'bg-red-50', 'border-red-300', 'text-red-900');
+        if (answerFeedbackBox) {
+            answerFeedbackBox.classList.add('hidden');
+            answerFeedbackBox.classList.remove('bg-emerald-50', 'border-emerald-300', 'text-emerald-900', 'bg-red-50', 'border-red-300', 'text-red-900');
 
-        if (ans !== undefined) {
-            // Re-show feedback for already answered questions
-            answerFeedbackBox.classList.remove('hidden');
-            if (ans.isCorrect) {
-                answerFeedbackBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
-                feedbackIcon.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>';
-                feedbackTitle.textContent = 'Jawabanmu Tepat!';
-                feedbackMessage.textContent = 'Luar biasa! Penalaran yang kamu gunakan sudah benar.';
-            } else {
-                answerFeedbackBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
-                feedbackIcon.innerHTML = '<i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>';
-                feedbackTitle.textContent = 'Jawabanmu Belum Tepat';
-                feedbackMessage.textContent = `Kamu memilih opsi ${ans.selectedKey}. Kunci jawaban yang benar adalah opsi ${q.correct_answer}. Lihat pembahasan di bawah.`;
+            if (ans !== undefined) {
+                // Re-show feedback for already answered questions
+                answerFeedbackBox.classList.remove('hidden');
+                if (ans.isCorrect) {
+                    answerFeedbackBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                    if (feedbackIcon) feedbackIcon.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>';
+                    if (feedbackTitle) feedbackTitle.textContent = 'Jawabanmu Tepat!';
+                    if (feedbackMessage) feedbackMessage.textContent = 'Luar biasa! Penalaran yang kamu gunakan sudah benar.';
+                } else {
+                    answerFeedbackBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
+                    if (feedbackIcon) feedbackIcon.innerHTML = '<i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>';
+                    if (feedbackTitle) feedbackTitle.textContent = 'Jawabanmu Belum Tepat';
+                    if (feedbackMessage) feedbackMessage.textContent = `Kamu memilih opsi ${ans.selectedKey}. Kunci jawaban yang benar adalah opsi ${q.correct_answer}. Lihat pembahasan di bawah.`;
+                }
+                if (explanationContent) explanationContent.classList.remove('hidden');
+                if (explanationChevron) explanationChevron.textContent = '↑';
             }
-            // Auto-open explanation for answered questions
-            explanationContent.classList.remove('hidden');
-            explanationChevron.textContent = '↑';
         }
 
         // Check if answer was submitted — lock radio buttons
-        if (ans !== undefined) {
-            optionsContainer.querySelectorAll('.option-row').forEach(row => {
-                row.style.cursor = 'default';
-                row.style.pointerEvents = 'none';
-            });
-            checkAnswerBtn.disabled = true;
-            checkAnswerBtn.className = checkAnswerBtn.className.replace('hover:bg-[#FF5500] cursor-pointer', 'opacity-40 cursor-not-allowed');
-        } else {
-            checkAnswerBtn.disabled = false;
-            checkAnswerBtn.className = 'w-full sm:w-auto px-6 py-3 rounded-full bg-black hover:bg-[#FF5500] text-white text-xs font-black uppercase tracking-wider transition-colors duration-200 active:scale-95 cursor-pointer';
-            setupOptionRowEvents();
+        if (checkAnswerBtn) {
+            if (ans !== undefined) {
+                if (optionsContainer) {
+                    optionsContainer.querySelectorAll('.option-row').forEach(row => {
+                        row.style.cursor = 'default';
+                        row.style.pointerEvents = 'none';
+                    });
+                }
+                checkAnswerBtn.disabled = true;
+                checkAnswerBtn.className = checkAnswerBtn.className.replace('hover:bg-[#FF5500] cursor-pointer', 'opacity-40 cursor-not-allowed');
+            } else {
+                checkAnswerBtn.disabled = false;
+                checkAnswerBtn.className = 'w-full sm:w-auto px-6 py-3 rounded-full bg-black hover:bg-[#FF5500] text-white text-xs font-black uppercase tracking-wider transition-colors duration-200 active:scale-95 cursor-pointer';
+                setupOptionRowEvents();
+            }
         }
 
         renderTabs();
@@ -901,18 +948,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function loadPackage(pkg) {
+        if (!pkg || !pkg.questions || !pkg.questions.length) return;
         currentPackage = pkg;
         currentQuestionIndex = 0;
         studentAnswers = {};
 
         // Update package info bar
-        pkgTitle.textContent = pkg.package_title || 'Paket Soal AI';
-        pkgCompetencyBadge.textContent = pkg.competency || 'Numerasi';
-        pkgDifficultyBadge.textContent = 'Level: ' + (pkg.difficulty || 'Sedang');
+        if (pkgTitle) pkgTitle.textContent = pkg.package_title || 'Paket Soal AI';
+        if (pkgCompetencyBadge) pkgCompetencyBadge.textContent = pkg.competency || 'Numerasi';
+        if (pkgDifficultyBadge) pkgDifficultyBadge.textContent = 'Level: ' + (pkg.difficulty || 'Sedang');
 
         // Show question card, hide completion card
-        questionDisplayCard.classList.remove('hidden');
-        packageCompleteCard.classList.add('hidden');
+        if (questionDisplayCard) questionDisplayCard.classList.remove('hidden');
+        if (packageCompleteCard) packageCompleteCard.classList.add('hidden');
 
         updatePackageScoreCard();
         renderTabs();
@@ -1090,6 +1138,30 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // ─────────────── ENGINE SELECTOR ───────────────
+
+    document.querySelectorAll('.engine-card').forEach(card => {
+        card.addEventListener('click', function () {
+            document.querySelectorAll('.engine-card').forEach(c => {
+                c.classList.remove('border-[#FF5500]', 'bg-orange-50/60', 'shadow-xs');
+                c.classList.add('border-neutral-200', 'bg-white');
+                const radio = c.querySelector('input[type="radio"]');
+                if (radio) radio.checked = false;
+            });
+            this.classList.remove('border-neutral-200', 'bg-white');
+            this.classList.add('border-[#FF5500]', 'bg-orange-50/60', 'shadow-xs');
+            const radio = this.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+                if (radio.value === 'fast') {
+                    btnText.textContent = 'Generate Paket Soal Kilat (Instan)';
+                } else {
+                    btnText.textContent = 'Generate Paket Soal AI Generatif';
+                }
+            }
+        });
+    });
+
     // ─────────────── REGENERATE BUTTON ───────────────
 
     regenerateBtn.addEventListener('click', function () {
@@ -1112,12 +1184,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const overlayTimerText  = document.getElementById('overlayTimerText');
     const cancelOverlayBtn  = document.getElementById('cancelOverlayBtn');
 
-    const progressMilestones = [
-        { time: 0,  minP: 5,  maxP: 18, phase: '1/5 • Inisialisasi API', text: 'Menghubungkan ke OpenRouter LLM engine...' },
-        { time: 3,  minP: 18, maxP: 42, phase: '2/5 • Merancang Konsep', text: 'Menyusun stimulus konteks keberlanjutan standar PISA...' },
-        { time: 7,  minP: 42, maxP: 68, phase: '3/5 • Menyusun Soal', text: 'Merumuskan pertanyaan penalaran kritis & opsi jawaban A-D...' },
-        { time: 13, minP: 68, maxP: 86, phase: '4/5 • Scaffolding & Kunci', text: 'Memvalidasi pembahasan konsep & petunjuk bernalar...' },
-        { time: 19, minP: 86, maxP: 96, phase: '5/5 • Finalisasi JSON', text: 'Memverifikasi paket soal agar siap dikerjakan...' },
+    const progressPhases = [
+        { threshold: 0,  phase: '1/4 • Inisialisasi Sistem', text: 'Menghubungkan ke AI Engine & menyiapkan konteks...' },
+        { threshold: 30, phase: '2/4 • Merancang Konsep', text: 'Menyusun stimulus narasi keberlanjutan standar PISA...' },
+        { threshold: 60, phase: '3/4 • Merumuskan Soal', text: 'Menyusun pertanyaan penalaran kritis & opsi jawaban A-D...' },
+        { threshold: 85, phase: '4/4 • Finalisasi Paket', text: 'Memvalidasi kunci jawaban & petunjuk bernalar...' },
     ];
 
     let progressTimer = null;
@@ -1135,30 +1206,34 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (overlayProgressBar) {
             overlayProgressBar.style.width = '5%';
-            overlayProgressBar.className = 'h-full rounded-full bg-gradient-to-r from-[#FF5500] via-[#FF8800] to-[#FFAA00] transition-all duration-300 shadow-sm';
+            overlayProgressBar.className = 'h-full rounded-full bg-gradient-to-r from-[#FF5500] via-[#FF8800] to-[#FFAA00] transition-all duration-200 shadow-sm';
         }
         if (overlayHeartbeat) {
-            overlayHeartbeat.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Proses AI Berjalan Normal</span>';
+            overlayHeartbeat.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Proses Berjalan Lancar</span>';
         }
         if (overlayTimerText) overlayTimerText.textContent = '0 detik';
-        if (overlayPhase) overlayPhase.textContent = progressMilestones[0].phase;
+        if (overlayPhase) overlayPhase.textContent = progressPhases[0].phase;
         if (overlayStatusText) {
             overlayStatusText.style.color = '';
-            overlayStatusText.textContent = progressMilestones[0].text;
+            overlayStatusText.textContent = progressPhases[0].text;
         }
     }
 
-    function showLoadingOverlay(count, controller) {
+    function showLoadingOverlay(count, controller, engine) {
         activeController = controller;
         isGenerating = true;
 
-        // Force overlay visible IMMEDIATELY
         if (aiLoadingOverlay) {
-            aiLoadingOverlay.style.display = 'flex';
             aiLoadingOverlay.classList.remove('hidden');
             aiLoadingOverlay.classList.add('active');
+            aiLoadingOverlay.style.setProperty('display', 'flex', 'important');
+            aiLoadingOverlay.style.setProperty('opacity', '1', 'important');
+            aiLoadingOverlay.style.setProperty('visibility', 'visible', 'important');
+            aiLoadingOverlay.style.setProperty('pointer-events', 'auto', 'important');
         }
         document.body.style.overflow = 'hidden';
+
+        const isFast = engine === 'fast';
 
         try {
             const domainCard = document.querySelector('.domain-card input[type="radio"]:checked');
@@ -1166,56 +1241,62 @@ document.addEventListener('DOMContentLoaded', function () {
             const diffCard = document.querySelector('.difficulty-card input[type="radio"]:checked');
             const diffLabel = diffCard ? diffCard.closest('.difficulty-card')?.querySelector('div.text-xs')?.textContent : 'Sedang';
 
-            if (overlayTitle) overlayTitle.textContent = `Membuat ${count} Butir Soal ${domainLabel || 'AI'}`;
-            if (overlaySubtitle) overlaySubtitle.textContent = `Tingkat kesulitan: ${diffLabel || 'Sedang'} • Berstandar AKM & PISA`;
-            if (overlayCountText) overlayCountText.textContent = `${count} butir soal adaptif sedang diproses, harap tunggu...`;
+            if (overlayTitle) overlayTitle.textContent = isFast
+                ? `Memuat ${count} Butir Soal Kilat (${domainLabel || 'AKM & PISA'})`
+                : `Membuat ${count} Butir Soal AI Generatif (${domainLabel || 'AI'})`;
+            if (overlaySubtitle) overlaySubtitle.textContent = isFast
+                ? `Mode Kilat Instan • Tingkat: ${diffLabel || 'Sedang'} • Standar Kurikulum PISA`
+                : `OpenRouter GPT-4o-mini • Tingkat: ${diffLabel || 'Sedang'} • Real-time AI`;
+            if (overlayCountText) overlayCountText.textContent = isFast
+                ? `${count} butir soal kurikulum adaptif sedang disiapkan...`
+                : `${count} butir soal adaptif sedang dirancang AI...`;
         } catch (e) {
             console.warn('Error reading form labels:', e);
         }
 
         resetProgressUI();
-        clearInterval(progressTimer);
+        if (progressTimer) clearInterval(progressTimer);
+
+        const currentPhases = isFast ? [
+            { threshold: 0,  phase: '1/3 • Menyiapkan Soal', text: 'Mengambil paket soal adaptif terverifikasi AKM & PISA...' },
+            { threshold: 45, phase: '2/3 • Mengonfigurasi Butir', text: 'Menyiapkan opsi jawaban, stimulus & petunjuk bernalar...' },
+            { threshold: 80, phase: '3/3 • Memvalidasi Paket', text: 'Memvalidasi kunci jawaban & format tampilan...' },
+        ] : progressPhases;
+
+        const timeDivisor = isFast ? 0.35 : 2.5;
 
         progressTimer = setInterval(() => {
             if (!isGenerating) return;
-            elapsedMs += 100;
-            const elapsedSec = Math.floor(elapsedMs / 1000);
+            elapsedMs += 40;
+            const elapsedSec = elapsedMs / 1000;
 
-            // Tentukan milestone berdasarkan detik berjalan
-            let activeMilestone = progressMilestones[0];
-            for (let i = progressMilestones.length - 1; i >= 0; i--) {
-                if (elapsedSec >= progressMilestones[i].time) {
-                    activeMilestone = progressMilestones[i];
-                    break;
-                }
-            }
-
-            if (overlayPhase) overlayPhase.textContent = activeMilestone.phase;
-            if (overlayStatusText && overlayStatusText.style.color === '') {
-                overlayStatusText.textContent = activeMilestone.text;
-            }
-
-            // Interpolasi persentase secara perlahan menuju maxP stage
-            if (currentPercent < activeMilestone.maxP) {
-                const delta = (activeMilestone.maxP - currentPercent) * 0.05;
-                currentPercent = Math.min(activeMilestone.maxP, currentPercent + Math.max(0.12, delta));
-            } else if (currentPercent < 97 && elapsedSec > 20) {
-                // Di atas 20 detik, naik perlahan sampai max 97% agar terasa tidak berhenti
-                currentPercent = Math.min(97, currentPercent + 0.05);
-            }
+            const target = 95 * (1 - Math.exp(-elapsedSec / timeDivisor));
+            currentPercent = Math.max(5, Math.min(95, target));
 
             const rounded = Math.round(currentPercent);
             if (overlayPercent) overlayPercent.textContent = `${rounded}%`;
             if (overlayProgressBar) overlayProgressBar.style.width = `${rounded}%`;
-            if (overlayTimerText) overlayTimerText.textContent = `${elapsedSec} detik`;
-        }, 100);
+            if (overlayTimerText) overlayTimerText.textContent = `${Math.floor(elapsedSec)} detik`;
+
+            let activePhase = currentPhases[0];
+            for (let i = currentPhases.length - 1; i >= 0; i--) {
+                if (rounded >= currentPhases[i].threshold) {
+                    activePhase = currentPhases[i];
+                    break;
+                }
+            }
+            if (overlayPhase) overlayPhase.textContent = activePhase.phase;
+            if (overlayStatusText && overlayStatusText.style.color === '') {
+                overlayStatusText.textContent = activePhase.text;
+            }
+        }, 40);
     }
 
-    function setSuccessProgress() {
-        clearInterval(progressTimer);
+    function finishSuccess(packageData) {
+        if (progressTimer) clearInterval(progressTimer);
         isGenerating = false;
-        currentPercent = 100;
 
+        // 1. Tampilkan 100% hijau terang dengan animasi mantap
         if (overlayPhase) overlayPhase.textContent = 'Selesai 100%!';
         if (overlayPercent) {
             overlayPercent.textContent = '100%';
@@ -1230,12 +1311,27 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (overlayStatusText) {
             overlayStatusText.style.color = '#4ade80';
-            overlayStatusText.textContent = '✓ Seluruh butir soal berhasil dirancang AI!';
+            overlayStatusText.textContent = '✓ Seluruh butir soal siap digunakan!';
         }
+
+        // 2. Render soal ke tampilan kartu
+        try {
+            loadPackage(packageData);
+        } catch (loadErr) {
+            console.error('Error in loadPackage:', loadErr);
+        }
+
+        // 3. Beri jeda 350ms agar user melihat konfirmasi 100%, lalu tutup overlay secara mulus
+        setTimeout(() => {
+            hideLoadingOverlay();
+            if (window.innerWidth < 1024) {
+                document.getElementById('packageInfoBar')?.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 350);
     }
 
     function setErrorProgress(message) {
-        clearInterval(progressTimer);
+        if (progressTimer) clearInterval(progressTimer);
         isGenerating = false;
 
         if (overlayPhase) overlayPhase.textContent = 'Proses Terhenti';
@@ -1253,22 +1349,40 @@ document.addEventListener('DOMContentLoaded', function () {
             overlayStatusText.style.color = '#f87171';
             overlayStatusText.textContent = message;
         }
+
+        setTimeout(() => {
+            hideLoadingOverlay();
+            alert('Terjadi kendala: ' + message + '. Silakan coba kembali.');
+        }, 1200);
     }
 
     function hideLoadingOverlay() {
-        clearInterval(progressTimer);
+        if (progressTimer) clearInterval(progressTimer);
         isGenerating = false;
         activeController = null;
         if (aiLoadingOverlay) {
-            aiLoadingOverlay.style.display = 'none';
-            aiLoadingOverlay.classList.add('hidden');
             aiLoadingOverlay.classList.remove('active');
+            aiLoadingOverlay.classList.add('hidden');
+            aiLoadingOverlay.style.setProperty('display', 'none', 'important');
+            aiLoadingOverlay.style.setProperty('opacity', '0', 'important');
+            aiLoadingOverlay.style.setProperty('visibility', 'hidden', 'important');
+            aiLoadingOverlay.style.setProperty('pointer-events', 'none', 'important');
         }
         document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+    }
+
+    if (aiLoadingOverlay) {
+        aiLoadingOverlay.addEventListener('click', function (e) {
+            if (e.target === aiLoadingOverlay) {
+                hideLoadingOverlay();
+            }
+        });
     }
 
     if (cancelOverlayBtn) {
-        cancelOverlayBtn.addEventListener('click', function () {
+        cancelOverlayBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
             if (activeController) {
                 activeController.abort('dibatalkan');
             }
@@ -1276,24 +1390,41 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            if (activeController) {
+                activeController.abort('dibatalkan');
+            }
+            hideLoadingOverlay();
+        }
+    });
+
     // ─────────────── FORM SUBMIT (AJAX) ───────────────
 
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
+        // Cegah double submit
+        if (isGenerating) return;
+
         const selectedCount = parseInt(countRange.value, 10);
+        const engineInput = document.querySelector('input[name="engine"]:checked');
+        const selectedEngine = engineInput ? engineInput.value : 'fast';
+        const isFast = selectedEngine === 'fast';
+
         let controller = null;
         let clientTimeout = null;
 
         try {
-            // 1. Show full-screen loading overlay FIRST
+            // 1. Tampilkan loading overlay
             controller = new AbortController();
-            clientTimeout = setTimeout(() => controller.abort('timeout'), 90000);
-            showLoadingOverlay(selectedCount, controller);
+            const timeoutMs = isFast ? 8000 : 25000;
+            clientTimeout = setTimeout(() => controller.abort('timeout'), timeoutMs);
+            showLoadingOverlay(selectedCount, controller, selectedEngine);
 
-            // 2. Set button loading state (inline SVG spinner to avoid any Lucide dependency)
+            // 2. Set button loading state
             generateBtn.disabled = true;
-            btnText.textContent = `Memproses ${selectedCount} Soal AI...`;
+            btnText.textContent = isFast ? `Memuat ${selectedCount} Soal Kilat...` : `Merancang ${selectedCount} Soal AI...`;
             btnIcon.innerHTML = '<svg class="w-4 h-4 animate-spin text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
             const formData = new FormData(form);
@@ -1318,22 +1449,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const resData = await response.json();
-            if (resData.success && resData.package && resData.package.questions?.length > 0) {
-                setSuccessProgress();
-                await new Promise(r => setTimeout(r, 600));
-
-                hideLoadingOverlay();
-                loadPackage(resData.package);
-
-                // Scroll to question card on mobile
-                if (window.innerWidth < 1024) {
-                    document.getElementById('packageInfoBar')?.scrollIntoView({ behavior: 'smooth' });
-                }
+            if (resData && resData.package && resData.package.questions && resData.package.questions.length > 0) {
+                // Beri jeda visual halus (minimal ~400ms) agar transisi progress bar terlihat elegan
+                const minDelay = isFast ? Math.max(0, 400 - elapsedMs) : 0;
+                setTimeout(() => {
+                    finishSuccess(resData.package);
+                }, minDelay);
             } else {
-                setErrorProgress('Gagal mendapatkan paket soal AI dari server.');
-                await new Promise(r => setTimeout(r, 1200));
-                hideLoadingOverlay();
-                alert('Gagal mendapatkan paket soal AI. Silakan coba kembali.');
+                setErrorProgress('Gagal mendapatkan butir soal.');
             }
         } catch (err) {
             if (clientTimeout) clearTimeout(clientTimeout);
@@ -1341,22 +1464,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (controller?.signal?.reason === 'dibatalkan') {
                     hideLoadingOverlay();
                 } else {
-                    setErrorProgress('Waktu proses melebihi 90 detik.');
-                    await new Promise(r => setTimeout(r, 1000));
-                    hideLoadingOverlay();
-                    alert('Permintaan memakan waktu lebih dari 90 detik. Silakan coba kurangi jumlah butir soal.');
+                    setErrorProgress('Waktu proses melebihi batas.');
                 }
             } else {
                 console.error('Generator error:', err);
-                setErrorProgress(err.message || 'Koneksi ke AI bermasalah');
-                await new Promise(r => setTimeout(r, 1200));
-                hideLoadingOverlay();
-                alert('Terjadi kendala saat memproses soal: ' + (err.message || 'Koneksi bermasalah') + '. Silakan coba lagi.');
+                setErrorProgress(err.message || 'Koneksi ke generator bermasalah');
             }
         } finally {
             if (clientTimeout) clearTimeout(clientTimeout);
+            isGenerating = false;
             generateBtn.disabled = false;
-            btnText.textContent = 'Generate Paket Soal AI';
+            const currentEngineInput = document.querySelector('input[name="engine"]:checked');
+            btnText.textContent = (currentEngineInput && currentEngineInput.value === 'ai')
+                ? 'Generate Paket Soal AI Generatif'
+                : 'Generate Paket Soal Kilat (Instan)';
             btnIcon.innerHTML = '<svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>';
         }
     });

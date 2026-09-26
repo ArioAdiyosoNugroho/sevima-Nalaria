@@ -55,7 +55,6 @@
                 <div class="relative w-full h-full rounded-[36px] flex items-end justify-center overflow-hidden">
                     
                     <!-- Soft Warm Arch/Semicircle behind student (like in image.png) -->
-                    <div class="absolute -bottom-16 w-80 h-80 rounded-full bg-[#FFE8D6] z-0 opacity-80"></div>
 
                     <!-- Student Portrait (Full Height Cutout Style from reference image.png) -->
                     <img src="{{ asset('images/hero.png') }}" alt="Student Nalaria" 

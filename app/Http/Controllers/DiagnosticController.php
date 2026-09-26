@@ -219,16 +219,23 @@ class DiagnosticController extends Controller
             'difficulty' => 'nullable|string|in:Mudah,Sedang,Menantang',
             'count' => 'nullable|integer|min:1|max:8',
             'context' => 'nullable|string|max:200',
+            'engine' => 'nullable|string|in:fast,ai',
         ]);
 
         $domain = $request->input('domain', 'campuran');
         $difficulty = $request->input('difficulty', 'Sedang');
         $count = (int) $request->input('count', 3);
         $context = $request->input('context');
+        $engine = $request->input('engine');
 
-        $package = $aiAgent->generateOnDemandPackage($domain, $difficulty, $count, $context);
+        // Mode Kilat (Instan): langsung sajikan paket soal kurikulum adaptif terverifikasi dalam hitungan milidetik
+        if ($engine === 'fast') {
+            $package = $aiAgent->getFallbackOnDemandPackage($domain, $difficulty, $count, $context ?? '');
+        } else {
+            $package = $aiAgent->generateOnDemandPackage($domain, $difficulty, $count, $context);
+        }
 
-        if ($request->wantsJson() || $request->ajax()) {
+        if ($request->wantsJson() || $request->ajax() || $request->expectsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
             return response()->json([
                 'success' => true,
                 'package' => $package,

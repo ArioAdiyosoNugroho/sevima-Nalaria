@@ -13,6 +13,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -602,6 +603,11 @@ class NumeracyAiAgentService
             return [];
         }
 
+        // Jika kuota harian OpenRouter sudah habis (429), langsung pakai bank lokal instan tanpa menunggu lag jaringan
+        if (Cache::has('openrouter_daily_rate_limited')) {
+            return array_fill(0, count($requestSpecs), null);
+        }
+
         try {
             // Request WAJIB dibangun lewat $pool (bukan closure atas facade Http) agar mewarisi
             // handler & stub dari factory, sehingga tetap bisa di-fake saat pengujian.
@@ -610,6 +616,7 @@ class NumeracyAiAgentService
 
                 foreach ($requestSpecs as $spec) {
                     $requests[] = $pool
+                        ->withOptions(['force_ip_resolve' => 'v4'])
                         ->timeout($this->openRouterTimeoutSeconds())
                         ->withHeaders($this->openRouterHeaders())
                         ->post($this->openRouterEndpoint(), $this->openRouterPayload($spec['system'], $spec['user']));
@@ -640,11 +647,11 @@ class NumeracyAiAgentService
     }
 
     /**
-     * Timeout per request OpenRouter API (default 30 detik untuk memberikan ruang proses LLM berkualitas tinggi).
+     * Timeout per request OpenRouter API (default 8 detik agar UI selalu responsif).
      */
     protected function openRouterTimeoutSeconds(): int
     {
-        return (int) (config('services.openrouter.timeout') ?: env('OPENROUTER_TIMEOUT', 60));
+        return (int) (config('services.openrouter.timeout') ?: env('OPENROUTER_TIMEOUT', 8));
     }
 
     /**
@@ -703,6 +710,10 @@ class NumeracyAiAgentService
         if (! $response->successful()) {
             Log::warning('OpenRouter API returned error: '.$response->status().' - '.$response->body());
 
+            if ($response->status() === 429) {
+                Cache::put('openrouter_daily_rate_limited', true, now()->addMinutes(10));
+            }
+
             return null;
         }
 
@@ -721,8 +732,13 @@ class NumeracyAiAgentService
             return null;
         }
 
+        if (Cache::has('openrouter_daily_rate_limited')) {
+            return null;
+        }
+
         try {
-            $response = Http::timeout($this->openRouterTimeoutSeconds())
+            $response = Http::withOptions(['force_ip_resolve' => 'v4'])
+                ->timeout($this->openRouterTimeoutSeconds())
                 ->withHeaders($this->openRouterHeaders())
                 ->post($this->openRouterEndpoint(), $this->openRouterPayload($systemPrompt, $userPrompt));
 
