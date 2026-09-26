@@ -180,16 +180,24 @@ class DiagnosticController extends Controller
 
     /**
      * Halaman Dedicated Generator Soal Adaptif AI On-Demand (Literasi & Numerasi)
+     *
+     * Page load HANYA menggunakan fallback bank (instant, tanpa AI API call).
+     * AI hanya dipanggil saat user mengklik Generate (POST endpoint).
      */
     public function generator(Request $request, NumeracyAiAgentService $aiAgent)
     {
         $domain = $request->query('domain', 'campuran');
         $difficulty = $request->query('difficulty', 'Sedang');
-        $count = (int) $request->query('count', 3);
+        $count = max(1, min(8, (int) $request->query('count', 3)));
         $context = $request->query('context');
 
-        // Generate default initial package so the page loads with a complete interactive package
-        $initialPackage = $aiAgent->generateOnDemandPackage($domain, $difficulty, $count, $context);
+        // Langsung pakai fallback bank — cepat, tidak bergantung API eksternal
+        $initialPackage = $aiAgent->getFallbackOnDemandPackage(
+            $domain,
+            $difficulty,
+            $count,
+            $context ?? ''
+        );
 
         return view('diagnostic.generator', [
             'initialPackage' => $initialPackage,

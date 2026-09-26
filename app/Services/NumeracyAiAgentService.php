@@ -828,7 +828,7 @@ class NumeracyAiAgentService
     /**
      * Fallback Bank Paket Soal On-Demand Multi-Butir (Literasi & Numerasi)
      */
-    protected function getFallbackOnDemandPackage(string $domain, string $difficulty, int $count, string $topic): array
+    public function getFallbackOnDemandPackage(string $domain, string $difficulty, int $count, string $topic): array
     {
         $categoryLabel = self::mapDomainToCategory($domain);
         $competencyLabel = self::mapDomainToCompetency($domain);

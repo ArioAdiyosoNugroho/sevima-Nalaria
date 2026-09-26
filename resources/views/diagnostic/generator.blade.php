@@ -8,82 +8,218 @@
      LOTTIE AI LOADING OVERLAY
      Muncul saat AI sedang generate paket soal
 ═══════════════════════════════════════════════════ --}}
-<div id="aiLoadingOverlay"
-    class="fixed inset-0 z-[9999] flex flex-col items-center justify-center
-           bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-500">
+<div id="aiLoadingOverlay">
 
     {{-- Glassmorphism Card --}}
-    <div class="relative bg-white/10 border border-white/20 rounded-3xl p-8 sm:p-12
-                shadow-2xl flex flex-col items-center gap-6 max-w-sm w-full mx-4
-                animate-[overlayCardIn_0.4s_ease-out_forwards] opacity-0" id="overlayCard">
+    <div id="overlayCard">
 
         {{-- Glow Orb --}}
-        <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-32 h-32
-                    rounded-full bg-[#FF5500]/30 blur-3xl pointer-events-none"></div>
+        <div class="overlay-glow"></div>
 
         {{-- Lottie Animation --}}
-        <div class="relative z-10">
-            <dotlottie-player
-                src="https://lottie.host/1fdb347e-78b2-4c87-9dce-d6190a7159fa/lC6PHZqOv2.lottie"
-                background="transparent"
-                speed="1"
-                style="width: 200px; height: 200px;"
-                loop
-                autoplay
-            ></dotlottie-player>
-        </div>
+        <dotlottie-player
+            src="https://lottie.host/1fdb347e-78b2-4c87-9dce-d6190a7159fa/lC6PHZqOv2.lottie"
+            background="transparent"
+            speed="1"
+            style="width: 200px; height: 200px;"
+            loop
+            autoplay
+        ></dotlottie-player>
 
         {{-- Badge AI --}}
-        <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FF5500]/20 border border-[#FF5500]/40">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-pulse"></span>
-            <span class="text-[11px] font-black text-[#FF5500] uppercase tracking-widest">AI Agent Aktif</span>
+        <div class="overlay-badge">
+            <span class="overlay-dot"></span>
+            <span>AI Agent Aktif</span>
         </div>
 
         {{-- Title --}}
-        <div class="text-center space-y-2">
-            <h3 id="overlayTitle" class="text-lg sm:text-xl font-black text-white tracking-tight">
-                Memproses Paket Soal AI
-            </h3>
-            <p id="overlaySubtitle" class="text-xs text-white/60 font-medium leading-relaxed">
-                NVIDIA Nemotron LLM sedang merancang soal kontekstual PISA...
-            </p>
+        <div class="overlay-title-wrap">
+            <h3 id="overlayTitle">Memproses Paket Soal AI</h3>
+            <p id="overlaySubtitle">NVIDIA Nemotron LLM sedang merancang soal PISA...</p>
         </div>
 
-        {{-- Rotating Status Messages --}}
-        <div class="w-full space-y-2">
-            <div id="overlayStatus"
-                class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10">
-                <span class="w-4 h-4 rounded-full border-2 border-[#FF5500] border-t-transparent
-                             animate-spin shrink-0"></span>
-                <span id="overlayStatusText" class="text-xs text-white/80 font-semibold">Menginisialisasi generator...</span>
-            </div>
+        {{-- Rotating Status --}}
+        <div class="overlay-status-row">
+            <span class="overlay-spinner"></span>
+            <span id="overlayStatusText" class="overlay-status-text">Menginisialisasi generator...</span>
         </div>
 
         {{-- Progress Dots --}}
-        <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-[#FF5500] animate-bounce" style="animation-delay:0ms"></span>
-            <span class="w-2 h-2 rounded-full bg-[#FF5500] animate-bounce" style="animation-delay:150ms"></span>
-            <span class="w-2 h-2 rounded-full bg-[#FF5500] animate-bounce" style="animation-delay:300ms"></span>
+        <div class="overlay-dots">
+            <span style="animation-delay:0ms"></span>
+            <span style="animation-delay:160ms"></span>
+            <span style="animation-delay:320ms"></span>
         </div>
 
-        {{-- Count indicator --}}
-        <p id="overlayCountText" class="text-[11px] text-white/40 font-medium">Mempersiapkan soal...</p>
+        {{-- Count Text --}}
+        <p id="overlayCountText" class="overlay-count-text">Mempersiapkan soal...</p>
     </div>
 </div>
 
 <style>
-    @keyframes overlayCardIn {
-        from { opacity: 0; transform: translateY(20px) scale(0.96); }
-        to   { opacity: 1; transform: translateY(0) scale(1); }
+    /* ── Base Overlay ── */
+    #aiLoadingOverlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.82);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        animation: overlayFadeIn 0.35s ease forwards;
     }
     #aiLoadingOverlay.active {
-        opacity: 1;
-        pointer-events: all;
+        display: flex;
     }
-    #aiLoadingOverlay.active #overlayCard {
-        animation: overlayCardIn 0.4s ease-out 0.1s forwards;
+
+    /* ── Card ── */
+    #overlayCard {
+        position: relative;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 28px;
+        padding: 2.5rem;
+        max-width: 360px;
+        width: calc(100% - 2rem);
+        margin: 0 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+        box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+        animation: cardSlideIn 0.4s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+    }
+
+    /* ── Glow ── */
+    .overlay-glow {
+        position: absolute;
+        top: -3rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 8rem;
+        height: 8rem;
+        border-radius: 50%;
+        background: rgba(255,85,0,0.35);
+        filter: blur(3rem);
+        pointer-events: none;
+    }
+
+    /* ── Badge ── */
+    .overlay-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.375rem 1rem;
+        border-radius: 99px;
+        background: rgba(255,85,0,0.18);
+        border: 1px solid rgba(255,85,0,0.4);
+        font-size: 11px;
+        font-weight: 900;
+        color: #FF5500;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+    .overlay-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #FF5500;
+        animation: pulse 1.4s infinite;
+    }
+
+    /* ── Title ── */
+    .overlay-title-wrap { text-align: center; }
+    #overlayTitle {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: white;
+        margin: 0 0 0.35rem;
+        letter-spacing: -0.02em;
+    }
+    #overlaySubtitle {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.55);
+        font-weight: 500;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* ── Status Row ── */
+    .overlay-status-row {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        width: 100%;
+        padding: 0.65rem 1rem;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .overlay-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,85,0,0.3);
+        border-top-color: #FF5500;
+        animation: spin 0.75s linear infinite;
+        flex-shrink: 0;
+    }
+    .overlay-status-text {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: rgba(255,255,255,0.8);
+        transition: opacity 0.2s;
+    }
+
+    /* ── Progress Dots ── */
+    .overlay-dots {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .overlay-dots span {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #FF5500;
+        animation: bounce 1s ease-in-out infinite;
+    }
+
+    /* ── Count Text ── */
+    .overlay-count-text {
+        font-size: 11px;
+        color: rgba(255,255,255,0.35);
+        font-weight: 500;
+        margin: 0;
+        text-align: center;
+    }
+
+    /* ── Keyframes ── */
+    @keyframes overlayFadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+    @keyframes cardSlideIn {
+        from { opacity: 0; transform: translateY(24px) scale(0.94); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes pulse {
+        0%,100% { opacity: 1; }
+        50%      { opacity: 0.3; }
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    @keyframes bounce {
+        0%,100% { transform: translateY(0); }
+        50%     { transform: translateY(-6px); }
     }
 </style>
+
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
 
