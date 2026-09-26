@@ -164,7 +164,15 @@ class NumeracyAiAgentService
                 $targetDomain = $item['domain'];
                 $misconceptionName = $item['misconception'];
 
-                $generatedQuestions[] = $this->buildAdaptivePracticeItem(
+                // Coba generate via OpenRouter nemotron LLM jika API key tersedia
+                $aiQuestion = $this->generatePracticeWithOpenRouter(
+                    $session,
+                    $targetDomain,
+                    $misconceptionName,
+                    $idx + 1
+                );
+
+                $generatedQuestions[] = $aiQuestion ?: $this->buildAdaptivePracticeItem(
                     $session,
                     $targetDomain,
                     $misconceptionName,
@@ -173,14 +181,27 @@ class NumeracyAiAgentService
             }
         } else {
             // Jika siswa benar semua atau tidak ada miskonsepsi eksplisit, generate tantangan pengayaan
-            $generatedQuestions[] = $this->buildAdaptivePracticeItem(
+            $aiQuestion1 = $this->generatePracticeWithOpenRouter(
+                $session,
+                'aritmatika_sosial',
+                'Pengayaan: Optimasi Penganggaran Proyek Energi Mandiri',
+                1
+            );
+            $generatedQuestions[] = $aiQuestion1 ?: $this->buildAdaptivePracticeItem(
                 $session,
                 'aritmatika_sosial',
                 'Pengayaan: Optimasi Penganggaran Proyek Energi Mandiri',
                 1,
                 'Menantang'
             );
-            $generatedQuestions[] = $this->buildAdaptivePracticeItem(
+
+            $aiQuestion2 = $this->generatePracticeWithOpenRouter(
+                $session,
+                'data_ketidakpastian',
+                'Pengayaan: Analisis Tren Emisi Karbon Sekolah',
+                2
+            );
+            $generatedQuestions[] = $aiQuestion2 ?: $this->buildAdaptivePracticeItem(
                 $session,
                 'data_ketidakpastian',
                 'Pengayaan: Analisis Tren Emisi Karbon Sekolah',
@@ -199,6 +220,64 @@ class NumeracyAiAgentService
         ]);
 
         return collect($generatedQuestions);
+    }
+
+    /**
+     * Generate 1 soal latihan adaptif kontekstual secara dinamis menggunakan OpenRouter (nemotron LLM)
+     */
+    protected function generatePracticeWithOpenRouter(
+        DiagnosticSession $session,
+        string $domain,
+        string $misconception,
+        int $number
+    ): ?AdaptivePracticeQuestion {
+        $apiKey = env('OPENROUTER_API_KEY');
+        if (empty($apiKey)) {
+            return null;
+        }
+
+        $systemPrompt = 'Kamu adalah Pakar Desain Soal Numerasi Kontekstual Indonesia berstandar PISA. '
+            .'Hasilkan 1 soal latihan adaptif kontekstual bertema keberlanjutan masa depan (energi surya, daur ulang sampah, penghematan air, atau alokasi anggaran hijau) dalam format JSON valid.';
+
+        $userPrompt = "Buat 1 soal latihan untuk memperbaiki miskonsepsi: '{$misconception}' pada domain numerasi: '{$domain}'.\n"
+            ."Berikan output HANYA berupa JSON valid (tanpa markdown atau teks lain) dengan struktur persis seperti ini:\n"
+            ."{\n"
+            ."  \"title\": \"Latihan Adaptif #{$number}: ...\",\n"
+            ."  \"context_scenario\": \"... cerita skenario situasi nyata ...\",\n"
+            ."  \"question_text\": \"... pertanyaan ...\",\n"
+            ."  \"options\": [\n"
+            ."    {\"key\": \"A\", \"text\": \"...\"},\n"
+            ."    {\"key\": \"B\", \"text\": \"...\"},\n"
+            ."    {\"key\": \"C\", \"text\": \"...\"},\n"
+            ."    {\"key\": \"D\", \"text\": \"...\"}\n"
+            ."  ],\n"
+            ."  \"correct_answer\": \"B\",\n"
+            ."  \"scaffolding_hint\": \"... petunjuk langkah bernalar tanpa membocorkan jawaban ...\",\n"
+            ."  \"conceptual_explanation\": \"... penjelasan konsep yang benar ...\"\n"
+            .'}';
+
+        $raw = $this->callOpenRouter($systemPrompt, $userPrompt);
+        if (! empty($raw)) {
+            $cleanJson = preg_replace('/^```(?:json)?\s*|\s*```$/i', '', trim($raw));
+            $data = json_decode($cleanJson, true);
+            if (is_array($data) && ! empty($data['question_text']) && ! empty($data['options']) && ! empty($data['correct_answer'])) {
+                return AdaptivePracticeQuestion::create([
+                    'diagnostic_session_id' => $session->id,
+                    'target_misconception' => $misconception,
+                    'domain' => $domain,
+                    'title' => $data['title'] ?? "Latihan Adaptif #{$number}",
+                    'context_scenario' => $data['context_scenario'] ?? '',
+                    'question_text' => $data['question_text'],
+                    'options' => $data['options'],
+                    'correct_answer' => strtoupper($data['correct_answer']),
+                    'scaffolding_hint' => $data['scaffolding_hint'] ?? '',
+                    'conceptual_explanation' => $data['conceptual_explanation'] ?? '',
+                    'difficulty' => 'Sedang',
+                ]);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -287,7 +366,55 @@ class NumeracyAiAgentService
     }
 
     /**
-     * Memanggil LLM API jika tersedia, atau menggunakan intelligent rule-based generator
+     * Memanggil OpenRouter API dengan model pilihan (default: nvidia/nemotron-3-ultra-550b-a55b:free)
+     */
+    protected function callOpenRouter(string $systemPrompt, string $userPrompt): ?string
+    {
+        $apiKey = config('services.openrouter.key') ?: env('OPENROUTER_API_KEY');
+        if (empty($apiKey)) {
+            return null;
+        }
+
+        $model = config('services.openrouter.model') ?: env('OPENROUTER_MODEL', 'nvidia/nemotron-3-ultra-550b-a55b:free');
+        $siteUrl = config('services.openrouter.site_url') ?: env('OPENROUTER_SITE_URL', 'http://127.0.0.1:8000');
+        $siteName = config('services.openrouter.site_name') ?: env('OPENROUTER_SITE_NAME', 'Nalaria');
+
+        try {
+            $response = Http::timeout(25)
+                ->withHeaders([
+                    'Authorization' => 'Bearer '.$apiKey,
+                    'HTTP-Referer' => $siteUrl,
+                    'X-OpenRouter-Title' => $siteName,
+                    'Content-Type' => 'application/json',
+                ])
+                ->post('https://openrouter.ai/api/v1/chat/completions', [
+                    'model' => $model,
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user', 'content' => $userPrompt],
+                    ],
+                    'temperature' => 0.7,
+                ]);
+
+            if ($response->successful()) {
+                $json = $response->json();
+                $content = $json['choices'][0]['message']['content'] ?? null;
+                if ($content) {
+                    return trim($content);
+                }
+            } else {
+                Log::warning('OpenRouter API returned error: '.$response->status().' - '.$response->body());
+            }
+        } catch (\Throwable $e) {
+            Log::warning('OpenRouter API call failed: '.$e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Memanggil LLM API OpenRouter (nvidia/nemotron-3-ultra-550b-a55b:free) jika tersedia,
+     * atau menggunakan intelligent rule-based generator
      */
     protected function callAiForDiagnosis(
         string $studentName,
@@ -296,36 +423,27 @@ class NumeracyAiAgentService
         array $domainScores,
         array $detectedMisconceptions
     ): string {
-        $apiKey = env('GEMINI_API_KEY') ?: env('OPENAI_API_KEY');
+        $openRouterApiKey = config('services.openrouter.key') ?: env('OPENROUTER_API_KEY');
 
-        // Jika API Key tersedia dan terkonfigurasi, panggil LLM
-        if ($apiKey && env('GEMINI_API_KEY')) {
-            try {
-                $prompt = 'Kamu adalah Pakar AI Diagnostik Literasi-Numerasi Indonesia. '
-                    ."Berikan diagnosis kognitif ringkas (3-4 paragraf empatik dan konstruktif) untuk siswa bernama {$studentName}. "
-                    ."Skor: {$score}/100. Tingkat: {$masteryLevel}. "
-                    .'Miskonsepsi terdeteksi: '.json_encode($detectedMisconceptions).'. '
-                    .'Fokuskan analisis pada penyebab cara berpikir kontekstualnya dan apa langkah pembenahan kognitifnya.';
+        // Panggil OpenRouter API jika API key diatur
+        if (! empty($openRouterApiKey)) {
+            $systemPrompt = 'Kamu adalah Pakar AI Diagnostik Literasi-Numerasi Indonesia berstandar AKM dan PISA.';
+            $userPrompt = "Berikan diagnosis kognitif ringkas (3 paragraf empatik, mendalam, dan konstruktif) dalam bahasa Indonesia untuk siswa bernama {$studentName}.\n"
+                ."Skor Numerasi: {$score}/100. Tingkat Kemampuan: {$masteryLevel}.\n"
+                .'Rekap Domain: '.json_encode($domainScores)."\n"
+                .'Miskonsepsi Kognitif yang Terdeteksi dari Pilihan dan Alasan Siswa: '.json_encode($detectedMisconceptions)."\n\n"
+                ."Instruksi:\n"
+                ."1. Analisis pola penalaran siswa dan mengapa mereka terjebak pada miskonsepsi tersebut.\n"
+                ."2. Sebutkan domain mana yang perlu pembenahan konsep dasar.\n"
+                .'3. Berikan kalimat penguatan motivasi dan rekomendasi aksi nyata belajar.';
 
-                $response = Http::timeout(5)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
-                    'contents' => [
-                        ['parts' => [['text' => $prompt]]],
-                    ],
-                ]);
-
-                if ($response->successful()) {
-                    $json = $response->json();
-                    $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
-                    if ($text) {
-                        return trim($text);
-                    }
-                }
-            } catch (\Throwable $e) {
-                Log::warning('LLM call failed, fallback to heuristic generator: '.$e->getMessage());
+            $aiText = $this->callOpenRouter($systemPrompt, $userPrompt);
+            if (! empty($aiText)) {
+                return $aiText;
             }
         }
 
-        // Heuristic Generator berkualitas tinggi (Jaminan 100% reliabel & cepat)
+        // Heuristic Generator berkualitas tinggi (Jaminan 100% reliabel & cepat bila offline/tanpa API key)
         $domainWeaknessText = [];
         foreach ($domainScores as $dom => $stat) {
             $total = $stat['total'] ?? 0;

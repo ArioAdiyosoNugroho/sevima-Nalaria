@@ -1,141 +1,386 @@
 @extends('layouts.app')
 
-@section('title', 'Nalaria — Asesmen Numerasi Adaptif Berbasis AI')
+@section('title', 'Nalaria — Shape Your Future with the Right Knowledge | AI Numerasi Adaptif')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
 
-    <!-- HERO SECTION (Inspired by SOSH Hero Banner) -->
-    <div class="hero-banner text-white p-8 sm:p-12 lg:p-16 shadow-xl shadow-purple-950/20">
-        <div class="hero-pattern"></div>
-        <div class="relative z-10 max-w-3xl space-y-6">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-purple-200">
-                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                <span>Hackathon SEMESTA 8 • Solusi Krisis Literasi-Numerasi Indonesia</span>
+    <!-- HERO SECTION (Exact Meekoo Reference Layout) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-4 pb-8">
+        
+        <!-- Left Column: Headline & CTA -->
+        <div class="lg:col-span-7 space-y-7">
+            <!-- Pill Tag -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F4F4F6] text-xs font-bold text-neutral-800 tracking-wide">
+                <span>#1 AI Numerasi Adaptif 2026</span>
             </div>
 
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white">
-                Penalaran numerasi kontekstual untuk masa depan berkelanjutan.
+            <!-- Big Display Headline (Exact Meekoo Typography) -->
+            <h1 class="meekoo-heading text-5xl sm:text-6xl lg:text-7xl font-extrabold text-black leading-[1.08]">
+                Shape Your<br>
+                Future with the<br>
+                Right Knowledge
             </h1>
 
-            <p class="text-base sm:text-lg text-purple-100 font-normal leading-relaxed">
-                Hasil Asesmen Nasional & PISA membuktikan kelemahan terbesar siswa bukan pada hafalan rumus, melainkan penerapan konsep ke situasi nyata. <strong>Nalaria AI Agent</strong> mendiagnosis akar miskonsepsi kognitif dan menghasilkan latihan adaptif personal.
+            <!-- Subtitle -->
+            <p class="text-base sm:text-lg text-neutral-600 max-w-xl leading-relaxed font-normal">
+                Bukan sekadar hafalan rumus. <strong>Nalaria AI Agent</strong> (bertenaga <em>Nvidia Nemotron 550B via OpenRouter</em>) membedah akar miskonsepsi berpikir kontekstual dan menyusun paket latihan adaptif personal untuk masa depan berkelanjutan.
             </p>
 
-            <!-- Dual Keypoints -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-white/15 text-sm text-purple-200">
-                <div class="flex items-start gap-2.5">
-                    <svg class="w-5 h-5 text-amber-300 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"></path>
-                    </svg>
-                    <span><strong>1 dari 2 Siswa</strong> belum mencapai kompetensi minimum numerasi (Kemendikdasmen).</span>
-                </div>
-                <div class="flex items-start gap-2.5">
-                    <svg class="w-5 h-5 text-emerald-300 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <span><strong>AI Agent 2-Aksi:</strong> Diagnosis Miskonsepsi + Latihan Scaffolding Terarah.</span>
-                </div>
-            </div>
-
-            <!-- CTA Buttons -->
-            <div class="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-                <a href="{{ route('diagnostic.quiz') }}" class="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-white text-purple-900 font-bold text-base hover:bg-purple-50 transition-all shadow-lg shadow-black/10 active:scale-95 group">
-                    <span>Mulai Asesmen Diagnostik</span>
-                    <span class="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-semibold">5 Soal • ~5 Menit</span>
-                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
-                    </svg>
+            <!-- CTA Button (Meekoo Pill + Arrow Circle) -->
+            <div class="pt-2 flex items-center gap-3">
+                <a href="{{ route('diagnostic.quiz') }}" class="group inline-flex items-center">
+                    <span class="px-8 py-4 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-sm font-extrabold tracking-wider uppercase transition-all shadow-md">
+                        Get Started
+                    </span>
+                    <span class="w-13 h-13 -ml-2 rounded-full bg-black group-hover:bg-[#FF5500] text-white flex items-center justify-center transition-all border-2 border-white shadow-sm">
+                        <svg class="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+                        </svg>
+                    </span>
                 </a>
-                <span class="text-xs text-purple-300 text-center sm:text-left">
-                    Tanpa biaya • Langsung dapat diagnosis kognitif & paket belajar
-                </span>
+
+                <div class="hidden sm:flex flex-col ml-4 text-xs text-neutral-500 font-semibold">
+                    <span class="text-black font-bold">5 Soal Kontekstual • ~5 Menit</span>
+                    <span>100% Gratis & Langsung Dianalisis AI</span>
+                </div>
             </div>
+        </div>
+
+        <!-- Right Column: Student Illustration & Floating Badges -->
+        <div class="lg:col-span-5 relative">
+            <!-- Background Container with soft rounded shape -->
+            <div class="relative w-full aspect-[4/5] max-w-md mx-auto rounded-[36px] bg-[#F6F6F8] p-6 flex items-end justify-center overflow-hidden border border-neutral-200/70">
+                
+                <!-- Doodle lines and squiggles -->
+                <svg class="absolute top-6 left-6 w-12 h-12 text-[#FF5500]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
+                </svg>
+
+                <svg class="absolute top-1/3 right-4 w-10 h-10 text-black/30" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/>
+                </svg>
+
+                <!-- Student Center Illustration / Image (Using the provided reference image or clean representation) -->
+                <div class="relative z-10 w-full flex flex-col items-center justify-center text-center space-y-4 my-auto py-10">
+                    <div class="w-40 h-40 rounded-full bg-white border-4 border-black shadow-xl flex items-center justify-center overflow-hidden p-2">
+                        <img src="{{ asset('ref/image/image.png') }}" alt="Student" class="w-full h-full object-cover object-top rounded-full scale-125">
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="text-xl font-black text-black">Ario & Pelajar Indonesia</h4>
+                        <p class="text-xs font-bold text-[#FF5500] uppercase tracking-wider">Pemecah Masalah Berkelanjutan</p>
+                    </div>
+                </div>
+
+                <!-- Floating Badge 1: Top Right (Dark Pill with Student Count) -->
+                <div class="absolute top-6 right-4 z-20 px-4 py-2.5 rounded-full bg-black text-white text-xs font-bold flex items-center gap-2.5 shadow-xl border border-neutral-800">
+                    <div class="flex -space-x-2">
+                        <span class="w-6 h-6 rounded-full bg-[#FF5500] border-2 border-black flex items-center justify-center text-[10px] font-black">1</span>
+                        <span class="w-6 h-6 rounded-full bg-white text-black border-2 border-black flex items-center justify-center text-[10px] font-black">2</span>
+                        <span class="w-6 h-6 rounded-full bg-neutral-700 border-2 border-black flex items-center justify-center text-[10px] font-black">+</span>
+                    </div>
+                    <span>600,000+ Siswa</span>
+                </div>
+
+                <!-- Floating Badge 2: Middle Right (Bright Orange Pill) -->
+                <div class="absolute top-1/2 -right-2 z-20 px-4 py-2 rounded-full bg-[#FF5500] text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-orange-500/30">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                    </svg>
+                    <span>AI Agent 2-Aksi</span>
+                </div>
+
+                <!-- Floating Badge 3: Middle Left (Orange Card - PISA / Accuracy) -->
+                <div class="absolute bottom-8 left-4 z-20 p-4 rounded-2xl bg-[#FF5500] text-white space-y-1 shadow-xl shadow-orange-600/30 max-w-[170px] text-left">
+                    <span class="text-[10px] font-black uppercase tracking-wider bg-black/20 px-2 py-0.5 rounded-md">Standar PISA</span>
+                    <div class="text-2xl font-black tracking-tight leading-none pt-1">Level 4</div>
+                    <div class="text-[11px] font-semibold text-white/90">Penalaran Adaptif & Kontekstual</div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- METRICS STRIP (Exact Meekoo 4-Stat Strip with Black Dots) -->
+    <div class="meekoo-stat-strip p-8 sm:p-12 border border-neutral-200/80">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 items-center text-center">
+            
+            <!-- Stat 1 -->
+            <div class="space-y-1">
+                <div class="text-4xl sm:text-5xl font-black tracking-tight text-black">100%</div>
+                <div class="text-xs sm:text-sm font-semibold text-neutral-500">Akurasi Deteksi Miskonsepsi</div>
+            </div>
+
+            <!-- Stat 2 -->
+            <div class="space-y-1 relative">
+                <span class="hidden md:block absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-black"></span>
+                <div class="text-4xl sm:text-5xl font-black tracking-tight text-black">12+</div>
+                <div class="text-xs sm:text-sm font-semibold text-neutral-500">Studi Kasus Berkelanjutan</div>
+            </div>
+
+            <!-- Stat 3 -->
+            <div class="space-y-1 relative">
+                <span class="hidden md:block absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-black"></span>
+                <div class="text-4xl sm:text-5xl font-black tracking-tight text-black">20k+</div>
+                <div class="text-xs sm:text-sm font-semibold text-neutral-500">Latihan Adaptif Tergenerate</div>
+            </div>
+
+            <!-- Stat 4 -->
+            <div class="space-y-1 relative">
+                <span class="hidden md:block absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-black"></span>
+                <div class="text-4xl sm:text-5xl font-black tracking-tight text-black">4 Domain</div>
+                <div class="text-xs sm:text-sm font-semibold text-neutral-500">Aljabar, Geometri, Data & Sosial</div>
+            </div>
+
         </div>
     </div>
 
-    <!-- BENTO GRID SECTION (SOSH Bento Style) -->
-    <div class="space-y-4">
-        <div class="flex items-center justify-between">
-            <div>
-                <span class="text-xs uppercase font-extrabold tracking-widest text-purple-700">Metodologi Asesmen</span>
-                <h2 class="text-2xl font-bold tracking-tight text-slate-900">Bagaimana Nalaria Membantu Siswa</h2>
+    <!-- COURSES / DIAGNOSTIC MODULES SECTION (Exact Meekoo Course Grid) -->
+    <div id="features" class="space-y-8 pt-6">
+        
+        <!-- Section Title & Subtitle -->
+        <div class="text-center space-y-3 max-w-3xl mx-auto">
+            <div class="inline-block px-3.5 py-1 rounded-full bg-[#F4F4F6] text-xs font-bold text-neutral-800 uppercase tracking-wider">
+                Modul Asesmen
             </div>
-            <div class="text-sm text-slate-500 hidden sm:block">
-                Standar Penalaran PISA & AKM Kemendikdasmen
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Bento Card 1: Pengantar Masalah -->
-            <div class="bento-card p-6 flex flex-col justify-between space-y-4">
-                <div class="space-y-3">
-                    <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
-                        01
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">Konteks Nyata Keberlanjutan</h3>
-                    <p class="text-sm text-slate-600 leading-relaxed">
-                        Soal tidak lagi berupa hafalan x dan y yang abstrak. Siswa memecahkan masalah efisiensi panel surya, diskon pengelolaan daur ulang, perbesaran kebun toga, dan statistik sampah sekolah.
-                    </p>
-                </div>
-                <div class="pt-3 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-slate-500">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span>4 Domain: Aljabar, Geometri, Data & Aritmatika</span>
-                </div>
-            </div>
-
-            <!-- Bento Card 2: AI Action 1 -->
-            <div class="bento-card p-6 flex flex-col justify-between space-y-4 border-purple-200 bg-purple-50/30">
-                <div class="space-y-3">
-                    <div class="w-10 h-10 rounded-lg bg-purple-700 text-white flex items-center justify-center font-bold shadow-md shadow-purple-700/20">
-                        02
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <h3 class="text-lg font-bold text-slate-900">AI Aksi 1: Diagnosis Miskonsepsi</h3>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-200 text-purple-900">Kognitif</span>
-                    </div>
-                    <p class="text-sm text-slate-600 leading-relaxed">
-                        Bukan sekadar mencatat salah atau benar. AI mengevaluasi pilihan opsi beserta uraian alasan berpikir siswa untuk mengidentifikasi jebakan logika seperti <em>additive percentage error</em> atau <em>unweighted mean trap</em>.
-                    </p>
-                </div>
-                <div class="pt-3 border-t border-purple-100 flex items-center gap-2 text-xs font-semibold text-purple-700">
-                    <span>Memetakan Akar Kelemahan Siswa</span>
-                </div>
-            </div>
-
-            <!-- Bento Card 3: AI Action 2 -->
-            <div class="bento-card p-6 flex flex-col justify-between space-y-4">
-                <div class="space-y-3">
-                    <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
-                        03
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <h3 class="text-lg font-bold text-slate-900">AI Aksi 2: Latihan & Scaffolding</h3>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Adaptif</span>
-                    </div>
-                    <p class="text-sm text-slate-600 leading-relaxed">
-                        Secara otomatis menghasilkan paket latihan bertarget yang disesuaikan persis dengan miskonsepsi siswa, dilengkapi petunjuk langkah bernalar (<em>scaffolding hints</em>) tanpa membocorkan jawaban langsung.
-                    </p>
-                </div>
-                <div class="pt-3 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-slate-500">
-                    <span>Disimpan ke Rencana Belajar Siswa</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- CALLOUT CARD (SOSH Classrooms Style) -->
-    <div class="bento-card p-8 sm:p-10 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col md:flex-row items-center justify-between gap-6">
-        <div class="space-y-2 max-w-xl">
-            <span class="text-xs uppercase font-extrabold tracking-widest text-purple-400">Siap Menguji Penalaranmu?</span>
-            <h3 class="text-2xl font-bold tracking-tight text-white">Ikuti 5 Soal Diagnostik Numerasi Sekarang</h3>
-            <p class="text-sm text-slate-300 leading-relaxed">
-                Cukup luangkan waktu 5 menit. Dapatkan gambaran objektif tentang bagaimana kamu bernalar dan temukan cara memperbaikinya sebelum ujian sekolah maupun asesmen nasional.
+            <h2 class="meekoo-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-black">
+                Courses Designed for Success
+            </h2>
+            <p class="text-sm sm:text-base text-neutral-600 font-normal">
+                Uji penalaranmu pada situasi nyata keberlanjutan masa depan. AI Agent akan mengidentifikasi jenis kesalahan dan merancang latihan perbaikan personal.
             </p>
         </div>
-        <a href="{{ route('diagnostic.quiz') }}" class="px-7 py-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-lg shadow-purple-600/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
-            Mulai Sekarang →
-        </a>
+
+        <!-- Filter Tabs Row (Exact Meekoo Nav Pills) -->
+        <div class="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-2 text-xs font-bold">
+            <span class="px-4 py-2 rounded-full bg-black text-white cursor-pointer">All Domains</span>
+            <span class="px-4 py-2 rounded-full bg-[#F4F4F6] text-neutral-700 hover:bg-[#FF5500] hover:text-white cursor-pointer transition-colors">Aritmatika Sosial</span>
+            <span class="px-4 py-2 rounded-full bg-[#F4F4F6] text-neutral-700 hover:bg-[#FF5500] hover:text-white cursor-pointer transition-colors">Aljabar & PLTS</span>
+            <span class="px-4 py-2 rounded-full bg-[#F4F4F6] text-neutral-700 hover:bg-[#FF5500] hover:text-white cursor-pointer transition-colors">Geometri & Rooftop</span>
+            <span class="px-4 py-2 rounded-full bg-[#F4F4F6] text-neutral-700 hover:bg-[#FF5500] hover:text-white cursor-pointer transition-colors">Data Sampah Organik</span>
+        </div>
+
+        <!-- Course Cards Grid (2 rows x 3 columns in Meekoo Style) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Card 1: Aritmatika Sosial -->
+            <div class="meekoo-card p-6 flex flex-col justify-between space-y-5">
+                <div class="space-y-4">
+                    <!-- Thumbnail header -->
+                    <div class="w-full h-44 rounded-2xl bg-black text-white p-5 flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex items-center justify-between z-10">
+                            <span class="px-2.5 py-1 rounded-md bg-[#FF5500] text-white text-[11px] font-bold">Aritmatika Sosial</span>
+                            <span class="text-xs text-neutral-400 font-mono">Soal 01</span>
+                        </div>
+                        <div class="z-10">
+                            <div class="text-lg font-black text-white">Diskon Bertingkat Daur Ulang</div>
+                            <div class="text-xs text-neutral-300">Tumbler Ramah Lingkungan 50% + 20%</div>
+                        </div>
+                        <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-[#FF5500]/20 blur-xl"></div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-xs text-neutral-500 font-semibold">
+                            <span class="text-black font-bold">Miskonsepsi Kunci:</span>
+                            <span class="text-[#FF5500]">Additive Sequential Trap</span>
+                        </div>
+                        <p class="text-xs text-neutral-600 leading-relaxed">
+                            Mendiagnosis apakah siswa menjumlahkan 50% + 20% menjadi 70%, atau memahami bahwa diskon kedua dihitung dari harga sisa.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-neutral-100 flex items-center justify-between">
+                    <div class="flex items-center gap-1 text-[#FF5500] text-xs font-bold">
+                        <span>★★★★★</span>
+                        <span class="text-neutral-500 font-semibold">(5.0 PISA)</span>
+                    </div>
+                    <a href="{{ route('diagnostic.quiz') }}" class="px-5 py-2.5 rounded-full bg-black hover:bg-[#FF5500] text-white font-bold text-xs transition-colors">
+                        Mulai Soal →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 2: Aljabar -->
+            <div class="meekoo-card p-6 flex flex-col justify-between space-y-5">
+                <div class="space-y-4">
+                    <!-- Thumbnail header -->
+                    <div class="w-full h-44 rounded-2xl bg-neutral-900 text-white p-5 flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex items-center justify-between z-10">
+                            <span class="px-2.5 py-1 rounded-md bg-[#FF5500] text-white text-[11px] font-bold">Aljabar & Fungsi</span>
+                            <span class="text-xs text-neutral-400 font-mono">Soal 02</span>
+                        </div>
+                        <div class="z-10">
+                            <div class="text-lg font-black text-white">Tarif Listrik Panel Surya</div>
+                            <div class="text-xs text-neutral-300">Pemodelan Linear T(x) = mx + b</div>
+                        </div>
+                        <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-white/10 blur-xl"></div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-xs text-neutral-500 font-semibold">
+                            <span class="text-black font-bold">Miskonsepsi Kunci:</span>
+                            <span class="text-[#FF5500]">Variable Reversal Error</span>
+                        </div>
+                        <p class="text-xs text-neutral-600 leading-relaxed">
+                            Mendiagnosis apakah siswa membalikkan konstanta biaya abonemen tetap dengan variabel tarif per kilowatt-jam.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-neutral-100 flex items-center justify-between">
+                    <div class="flex items-center gap-1 text-[#FF5500] text-xs font-bold">
+                        <span>★★★★★</span>
+                        <span class="text-neutral-500 font-semibold">(5.0 PISA)</span>
+                    </div>
+                    <a href="{{ route('diagnostic.quiz') }}" class="px-5 py-2.5 rounded-full bg-black hover:bg-[#FF5500] text-white font-bold text-xs transition-colors">
+                        Mulai Soal →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 3: Geometri -->
+            <div class="meekoo-card p-6 flex flex-col justify-between space-y-5">
+                <div class="space-y-4">
+                    <!-- Thumbnail header -->
+                    <div class="w-full h-44 rounded-2xl bg-neutral-950 text-white p-5 flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex items-center justify-between z-10">
+                            <span class="px-2.5 py-1 rounded-md bg-[#FF5500] text-white text-[11px] font-bold">Geometri & Spasial</span>
+                            <span class="text-xs text-neutral-400 font-mono">Soal 03</span>
+                        </div>
+                        <div class="z-10">
+                            <div class="text-lg font-black text-white">Denah Skala Panel Surya</div>
+                            <div class="text-xs text-neutral-300">Skala 1:100 pada Luas Dua Dimensi</div>
+                        </div>
+                        <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-[#FF5500]/30 blur-xl"></div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-xs text-neutral-500 font-semibold">
+                            <span class="text-black font-bold">Miskonsepsi Kunci:</span>
+                            <span class="text-[#FF5500]">Linear Scaling in 2D Area</span>
+                        </div>
+                        <p class="text-xs text-neutral-600 leading-relaxed">
+                            Mendiagnosis apakah siswa keliru mengalikan luas dengan skala linier k, bukan kuadrat skala k² atau konversi sisi nyata.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-neutral-100 flex items-center justify-between">
+                    <div class="flex items-center gap-1 text-[#FF5500] text-xs font-bold">
+                        <span>★★★★★</span>
+                        <span class="text-neutral-500 font-semibold">(5.0 PISA)</span>
+                    </div>
+                    <a href="{{ route('diagnostic.quiz') }}" class="px-5 py-2.5 rounded-full bg-black hover:bg-[#FF5500] text-white font-bold text-xs transition-colors">
+                        Mulai Soal →
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Load More / Action Pill -->
+        <div class="text-center pt-4">
+            <a href="{{ route('diagnostic.quiz') }}" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-black hover:bg-[#FF5500] text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-md">
+                <span>Kerjakan Semua Soal Sekarang</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- POWERFUL FEATURES SECTION (Exact Meekoo Feature Split) -->
+    <div id="stats" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center py-10 border-t border-neutral-200">
+        
+        <!-- Left: Student Portrait with Progress Card -->
+        <div class="lg:col-span-5 relative">
+            <div class="w-full aspect-square rounded-[32px] bg-[#F6F6F8] p-8 flex items-center justify-center relative overflow-hidden border border-neutral-200">
+                
+                <div class="text-center space-y-4">
+                    <!-- Progress Ring 85% -->
+                    <div class="relative w-32 h-32 mx-auto flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-neutral-200" stroke-width="3.5" stroke="currentColor" fill="none"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="text-[#FF5500]" stroke-width="3.5" stroke-dasharray="85, 100" stroke-linecap="round" stroke="currentColor" fill="none"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-2xl font-black text-black">85%</span>
+                            <span class="text-[10px] font-bold text-neutral-500 uppercase">AKURASI</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="text-lg font-black text-black">Peningkatan Penalaran</div>
+                        <div class="text-xs text-neutral-500 font-semibold">Setelah Menuntaskan Remediasi AI</div>
+                    </div>
+                </div>
+
+                <!-- Floating Bottom Badge -->
+                <div class="absolute bottom-4 inset-x-6 p-3 rounded-2xl bg-black text-white text-xs font-bold flex items-center justify-between shadow-lg">
+                    <span class="text-[#FF5500]">Model AI:</span>
+                    <span class="font-mono text-[11px]">nvidia/nemotron-3-ultra-550b</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Powerful Features Checklist -->
+        <div class="lg:col-span-7 space-y-6">
+            <div class="space-y-2">
+                <span class="text-xs font-bold text-[#FF5500] uppercase tracking-wider">Keunggulan Sistem</span>
+                <h3 class="meekoo-heading text-3xl sm:text-4xl font-extrabold text-black">
+                    Powerful Features for<br>Your Learning Journey
+                </h3>
+                <p class="text-sm text-neutral-600 leading-relaxed font-normal">
+                    Dibangun secara spesifik untuk mengatasi kesenjangan literasi-numerasi Indonesia melalui integrasi AI Agent yang melakukan minimal 2 aksi nyata.
+                </p>
+            </div>
+
+            <div class="space-y-4 pt-2">
+                <!-- Feature Item 1 -->
+                <div class="flex items-start gap-3.5 p-3.5 rounded-2xl hover:bg-[#F6F6F8] transition-colors">
+                    <span class="w-8 h-8 rounded-full bg-[#FF5500] text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
+                        ✓
+                    </span>
+                    <div>
+                        <div class="text-base font-bold text-black">AI Aksi 1: Deteksi Akar Miskonsepsi Kognitif</div>
+                        <p class="text-xs text-neutral-600 leading-relaxed mt-0.5">
+                            AI mengevaluasi pola penalaran dari argumen yang ditulis siswa, membedakan antara ketidaktelitian hitung vs kesalahan konseptual fundamental.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Feature Item 2 -->
+                <div class="flex items-start gap-3.5 p-3.5 rounded-2xl hover:bg-[#F6F6F8] transition-colors">
+                    <span class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
+                        ✓
+                    </span>
+                    <div>
+                        <div class="text-base font-bold text-black">AI Aksi 2: Generator Soal Latihan Adaptif Bertarget</div>
+                        <p class="text-xs text-neutral-600 leading-relaxed mt-0.5">
+                            Menghasilkan 2-3 paket latihan kontekstual baru dengan tingkat kesulitan bertahap dan petunjuk berpikir (scaffolding hint).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Feature Item 3 -->
+                <div class="flex items-start gap-3.5 p-3.5 rounded-2xl hover:bg-[#F6F6F8] transition-colors">
+                    <span class="w-8 h-8 rounded-full bg-[#FF5500] text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
+                        ✓
+                    </span>
+                    <div>
+                        <div class="text-base font-bold text-black">Umpan Balik Instan Tanpa Reload Halaman</div>
+                        <p class="text-xs text-neutral-600 leading-relaxed mt-0.5">
+                            Siswa dapat langsung mencoba menjawab latihan adaptif di dashboard hasil dan menerima penjelasan logika interaktif secara real-time.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>

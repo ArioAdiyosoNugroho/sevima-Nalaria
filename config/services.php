@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'openrouter' => [
+        'key' => env('OPENROUTER_API_KEY'),
+        'model' => env('OPENROUTER_MODEL', 'nvidia/nemotron-3-ultra-550b-a55b:free'),
+        'site_url' => env('OPENROUTER_SITE_URL', 'http://127.0.0.1:8000'),
+        'site_name' => env('OPENROUTER_SITE_NAME', 'Nalaria'),
+    ],
+
 ];

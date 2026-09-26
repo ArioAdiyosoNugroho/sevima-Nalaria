@@ -4,136 +4,209 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Nalaria — AI Diagnostik Numerasi Adaptif | Hackathon SEMESTA 8')</title>
+    <title>@yield('title', 'Nalaria — Shape Your Future with Adaptive AI Numeracy')</title>
     
-    <!-- Google Fonts: Plus Jakarta Sans -->
+    <!-- Google Fonts: Plus Jakarta Sans for exact Meekoo geometric bold typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         :root {
             --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
-            --color-bg: #F8FAFC;
-            --color-surface: #FFFFFF;
-            --color-text-main: #0F172A;
-            --color-text-muted: #64748B;
-            --color-primary: #7C3AED;
-            --color-primary-dark: #1E1548;
-            --color-primary-light: #EDE9FE;
-            --color-border: #E2E8F0;
-            --radius-md: 12px;
-            --radius-lg: 18px;
-            --radius-xl: 24px;
+            /* 3-Color Strict Palette: Orange, Black, White */
+            --color-primary: #FF5500;
+            --color-primary-hover: #E04B00;
+            --color-black: #0A0A0A;
+            --color-card-dark: #121212;
+            --color-white: #FFFFFF;
+            --color-surface: #F6F6F8;
+            --color-border: #E8E8EC;
+            --color-text-main: #0A0A0A;
+            --color-text-muted: #6B7280;
         }
 
         body {
             font-family: var(--font-sans);
-            background-color: var(--color-bg);
+            background-color: #FFFFFF;
             color: var(--color-text-main);
             -webkit-font-smoothing: antialiased;
         }
 
-        .bento-card {
+        .meekoo-heading {
+            font-family: var(--font-sans);
+            letter-spacing: -0.035em;
+            font-weight: 800;
+        }
+
+        .meekoo-pill-btn {
+            background-color: #0A0A0A;
+            color: #FFFFFF;
+            border-radius: 9999px;
+            font-weight: 700;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .meekoo-pill-btn:hover {
+            background-color: #FF5500;
+            color: #FFFFFF;
+            transform: translateY(-1px);
+        }
+
+        .meekoo-arrow-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 9999px;
+            background-color: #0A0A0A;
+            color: #FFFFFF;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .meekoo-arrow-circle:hover {
+            background-color: #FF5500;
+            transform: rotate(45deg);
+        }
+
+        .meekoo-stat-strip {
+            background-color: #F6F6F8;
+            border-radius: 28px;
+        }
+
+        .meekoo-badge-orange {
+            background-color: #FF5500;
+            color: #FFFFFF;
+            border-radius: 9999px;
+        }
+
+        .meekoo-card {
             background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: var(--radius-lg);
+            border: 1px solid #ECECEF;
+            border-radius: 24px;
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .bento-card:hover {
-            border-color: #CBD5E1;
-            box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06);
-        }
-
-        .hero-banner {
-            background: linear-gradient(135deg, #1E1548 0%, #2D1B69 50%, #4C1D95 100%);
-            border-radius: var(--radius-xl);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-pattern {
-            position: absolute;
-            inset: 0;
-            opacity: 0.12;
-            background-image: radial-gradient(#FFFFFF 1.5px, transparent 1.5px);
-            background-size: 24px 24px;
+        .meekoo-card:hover {
+            border-color: #FF5500;
+            box-shadow: 0 16px 36px -12px rgba(10, 10, 10, 0.08);
+            transform: translateY(-2px);
         }
     </style>
     @stack('styles')
 </head>
-<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-purple-100 selection:text-purple-900">
+<body class="min-h-screen flex flex-col bg-white text-black selection:bg-orange-500 selection:text-white">
 
-    <!-- Top Navigation Bar (SOSH Inspired) -->
-    <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-200/80">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-            <!-- Brand Logo -->
+    <!-- Top Navigation Bar (Exact Meekoo Header) -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-neutral-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-22 flex items-center justify-between">
+            <!-- Brand Logo (Meekoo Drop / Flame Style in Orange & Black) -->
             <a href="{{ route('diagnostic.landing') }}" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 rounded-xl bg-purple-700 text-white flex items-center justify-center font-bold shadow-md shadow-purple-500/20 group-hover:scale-105 transition-transform">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                        <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
-                        <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
-                        <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
-                        <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                <div class="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+                    <!-- Stylized Flame/Droplet Icon in Orange -->
+                    <svg class="w-5 h-5 text-[#FF5500]" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C8.5 7 5 10.5 5 15a7 7 0 0 0 14 0c0-4.5-3.5-8-7-13zm0 18a5 5 0 0 1-5-5c0-3 2.5-5.5 5-9 2.5 3.5 5 6 5 9a5 5 0 0 1-5 5z"/>
+                        <circle cx="12" cy="16" r="2.5" fill="#FF5500"/>
                     </svg>
                 </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl font-extrabold tracking-tight text-slate-900">NALARIA</span>
-                        <span class="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">AI Agent</span>
-                    </div>
-                    <p class="text-xs text-slate-500 font-medium hidden sm:block">Diagnostik Numerasi Adaptif — Hackathon SEMESTA 8</p>
+                <div class="flex items-center">
+                    <span class="text-2xl font-black tracking-tight text-black">Nalaria</span>
+                    <span class="w-2 h-2 rounded-full bg-[#FF5500] ml-0.5"></span>
                 </div>
             </a>
 
-            <!-- Navigation Links & Action Button -->
-            <div class="flex items-center gap-4">
-                <div class="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Tema: Sustainable Future with AI</span>
-                </div>
+            <!-- Center Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-neutral-700">
+                <a href="{{ route('diagnostic.landing') }}" class="hover:text-[#FF5500] transition-colors {{ request()->routeIs('diagnostic.landing') ? 'text-[#FF5500] font-bold' : '' }}">
+                    About Us
+                </a>
+                <a href="{{ route('diagnostic.quiz') }}" class="hover:text-[#FF5500] transition-colors {{ request()->routeIs('diagnostic.quiz') ? 'text-[#FF5500] font-bold' : '' }}">
+                    Asesmen AI
+                </a>
+                <a href="{{ route('diagnostic.landing') }}#features" class="hover:text-[#FF5500] transition-colors">
+                    Fitur & AI Agent
+                </a>
+                <a href="{{ route('diagnostic.landing') }}#stats" class="hover:text-[#FF5500] transition-colors">
+                    Metodologi PISA
+                </a>
+                <a href="https://github.com/ArioAdiyosoNugroho/sevima-Nalaria" target="_blank" class="hover:text-[#FF5500] transition-colors">
+                    GitHub Repo
+                </a>
+            </nav>
 
-                <a href="{{ route('diagnostic.quiz') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-sm font-semibold shadow-sm shadow-purple-700/30 transition-all hover:shadow-md active:scale-95">
-                    <span>Mulai Asesmen</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
-                    </svg>
+            <!-- Right Action (Meekoo Pill + Arrow Circle) -->
+            <div class="flex items-center gap-2">
+                <a href="{{ route('diagnostic.quiz') }}" class="inline-flex items-center">
+                    <span class="px-6 py-3 rounded-full bg-black hover:bg-[#FF5500] text-white text-sm font-bold transition-all shadow-sm">
+                        Mulai Asesmen
+                    </span>
+                    <span class="w-11 h-11 -ml-2 rounded-full bg-black hover:bg-[#FF5500] text-white flex items-center justify-center transition-all border-2 border-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+                        </svg>
+                    </span>
                 </a>
             </div>
         </div>
     </header>
 
-    <!-- Flash Alerts -->
+    <!-- Flash Alert -->
     @if(session('success'))
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center justify-between shadow-sm">
+            <div class="p-4 rounded-2xl bg-black text-white text-sm font-semibold flex items-center justify-between border-l-4 border-[#FF5500] shadow-md">
                 <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
+                    <span class="w-6 h-6 rounded-full bg-[#FF5500] text-white flex items-center justify-center font-bold text-xs">✓</span>
                     <span>{{ session('success') }}</span>
                 </div>
             </div>
         </div>
     @endif
 
-    <!-- Main Content Container -->
+    <!-- Main Content -->
     <main class="flex-1">
         @yield('content')
     </main>
 
-    <!-- Minimal Modern Footer -->
-    <footer class="bg-white border-t border-slate-200 py-8 mt-16 text-slate-500 text-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-                <span class="font-bold text-slate-800">NALARIA AI</span>
-                <span>• Solusi Diagnostik Kognitif Penalaran Numerasi</span>
+    <!-- Footer (Black & White Clean Editorial) -->
+    <footer class="bg-black text-white pt-16 pb-12 border-t border-neutral-900 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-10 border-b border-neutral-800">
+                <div class="space-y-3 max-w-md">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-black">
+                            <svg class="w-5 h-5 text-[#FF5500]" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C8.5 7 5 10.5 5 15a7 7 0 0 0 14 0c0-4.5-3.5-8-7-13zm0 18a5 5 0 0 1-5-5c0-3 2.5-5.5 5-9 2.5 3.5 5 6 5 9a5 5 0 0 1-5 5z"/>
+                            </svg>
+                        </div>
+                        <span class="text-2xl font-black tracking-tight text-white">Nalaria</span>
+                    </div>
+                    <p class="text-xs text-neutral-400 leading-relaxed">
+                        AI Diagnostik Literasi-Numerasi Kontekstual Indonesia. Powered by <strong>Nvidia Nemotron (OpenRouter)</strong> & Laravel 13 untuk Hackathon SEMESTA 8 by SEVIMA.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="text-xs text-neutral-400 font-semibold mr-2">Tech Stack & AI Model:</span>
+                    <span class="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-xs font-mono text-[#FF5500]">nvidia/nemotron-3-ultra-550b-a55b:free</span>
+                    <span class="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-xs font-mono text-white">OpenRouter API</span>
+                    <span class="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-xs font-mono text-white">Laravel 13</span>
+                </div>
             </div>
-            <div class="text-xs text-slate-400">
-                Hackathon SEMESTA 8 by SEVIMA © 2026. Built with Laravel 13 & AI Cognitive Profiling.
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500">
+                <div>
+                    © 2026 Nalaria. Built for Hackathon SEMESTA 8. Theme: Empowering Youth for a Sustainable Future: Build with AI.
+                </div>
+                <div class="flex items-center gap-6">
+                    <a href="{{ route('diagnostic.quiz') }}" class="hover:text-white transition-colors">Asesmen Kuis</a>
+                    <a href="https://github.com/ArioAdiyosoNugroho/sevima-Nalaria" target="_blank" class="hover:text-white transition-colors">GitHub Repository</a>
+                </div>
             </div>
         </div>
     </footer>

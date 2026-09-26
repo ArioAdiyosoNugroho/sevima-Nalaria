@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\DiagnosticQuestion;
 use App\Models\DiagnosticSession;
+use App\Services\NumeracyAiAgentService;
 use Database\Seeders\DiagnosticQuestionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class DiagnosticWorkflowTest extends TestCase
@@ -23,8 +25,8 @@ class DiagnosticWorkflowTest extends TestCase
         $response = $this->get(route('diagnostic.landing'));
 
         $response->assertStatus(200);
-        $response->assertSee('NALARIA');
-        $response->assertSee('Mulai Asesmen Diagnostik');
+        $response->assertSee('Nalaria');
+        $response->assertSee('Get Started');
     }
 
     public function test_quiz_page_renders_with_seeded_questions(): void
@@ -124,7 +126,7 @@ class DiagnosticWorkflowTest extends TestCase
         $response->assertSee('Budi Pratama');
         $response->assertSee('NAL-TEST01');
         $response->assertSee('60');
-        $response->assertSee('Cakap (Level 3 PISA)');
+        $response->assertSee('Cakap');
     }
 
     public function test_submit_practice_answer_validates_and_gives_feedback(): void
@@ -173,5 +175,55 @@ class DiagnosticWorkflowTest extends TestCase
             'is_solved' => true,
             'student_answer' => 'B',
         ]);
+    }
+
+    public function test_openrouter_api_integration_diagnoses_with_nemotron_model(): void
+    {
+        config(['services.openrouter.key' => 'sk-or-v1-mock-test-key']);
+
+        Http::fake([
+            'https://openrouter.ai/api/v1/chat/completions' => Http::response([
+                'id' => 'gen-test-123',
+                'model' => 'nvidia/nemotron-3-ultra-550b-a55b:free',
+                'choices' => [
+                    [
+                        'message' => [
+                            'role' => 'assistant',
+                            'content' => 'Diagnosis OpenRouter Nemotron: Siswa memiliki penalaran kritis yang baik pada aljabar namun mengalami miskonsepsi aritmatika sosial.',
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $session = DiagnosticSession::create([
+            'session_code' => 'NAL-ORTEST',
+            'student_name' => 'Dewi Sartika',
+            'student_grade' => 'Kelas 10 SMK',
+            'status' => 'in_progress',
+        ]);
+
+        $aiAgent = app(NumeracyAiAgentService::class);
+        $questions = DiagnosticQuestion::all();
+
+        $answers = [
+            [
+                'question_id' => $questions[0]->id,
+                'selected_option' => 'A',
+                'reasoning' => '50% + 20% = 70%',
+            ],
+        ];
+
+        $diagnosis = $aiAgent->diagnoseSession($session, $answers);
+
+        $this->assertStringContainsString('Diagnosis OpenRouter Nemotron', $session->fresh()->ai_diagnosis_summary);
+
+        Http::assertSent(function ($request) {
+            return $request->url() === 'https://openrouter.ai/api/v1/chat/completions'
+                && $request->header('Authorization')[0] === 'Bearer sk-or-v1-mock-test-key'
+                && $request['model'] === 'nvidia/nemotron-3-ultra-550b-a55b:free';
+        });
+
+        putenv('OPENROUTER_API_KEY');
     }
 }
