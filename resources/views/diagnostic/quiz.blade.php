@@ -140,12 +140,12 @@
                 </div>
             </div>
 
-            <button type="submit" id="submitBtn" class="group inline-flex items-center self-stretch sm:self-auto">
-                <span class="px-8 py-3.5 rounded-full bg-[#FF5500] group-hover:bg-white group-hover:text-black text-white text-sm font-extrabold uppercase tracking-wider transition-all shadow-md">
+            <button type="submit" id="submitBtn" class="group inline-flex items-center self-stretch sm:self-auto active:scale-95 transition-transform duration-200 cursor-pointer">
+                <span class="px-8 py-3.5 rounded-full bg-[#FF5500] group-hover:bg-black text-white text-sm font-extrabold uppercase tracking-wider transition-colors duration-200 shadow-md">
                     Submit & Analisis AI
                 </span>
-                <span class="w-12 h-12 -ml-2 rounded-full bg-[#FF5500] group-hover:bg-white group-hover:text-black text-white flex items-center justify-center transition-all border-2 border-black">
-                    <svg class="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <span class="rounded-full bg-[#FF5500] group-hover:bg-black text-white flex items-center justify-center transition-all duration-200 border-2 border-white shrink-0 -ml-3 group-hover:rotate-45" style="width: 52px; height: 52px; min-width: 52px; min-height: 52px;">
+                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
                     </svg>
                 </span>

@@ -28,11 +28,11 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <a href="{{ route('diagnostic.quiz') }}" class="inline-flex items-center">
-                <span class="px-6 py-3 rounded-full bg-[#FF5500] hover:bg-black text-white text-xs sm:text-sm font-extrabold transition-all shadow-lg shadow-orange-500/20">
+            <a href="{{ route('diagnostic.quiz') }}" class="group inline-flex items-center active:scale-95 transition-transform duration-200">
+                <span class="px-6 py-3 rounded-full bg-[#FF5500] group-hover:bg-black text-white text-xs sm:text-sm font-extrabold transition-colors duration-200 shadow-lg shadow-orange-500/20">
                     + Ambil Asesmen Baru
                 </span>
-                <span class="w-11 h-11 -ml-3 rounded-full bg-black text-white flex items-center justify-center transition-all border-2 border-white">
+                <span class="rounded-full bg-black text-white flex items-center justify-center transition-all duration-200 border-2 border-white shrink-0 -ml-3 group-hover:rotate-45" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px;">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
                     </svg>

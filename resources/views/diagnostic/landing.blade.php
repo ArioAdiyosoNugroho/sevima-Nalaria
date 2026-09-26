@@ -29,12 +29,12 @@
 
             <!-- CTA Button (Meekoo Pill + Arrow Circle) -->
             <div class="pt-2 flex items-center gap-3">
-                <a href="{{ route('diagnostic.quiz') }}" class="group inline-flex items-center">
-                    <span class="px-8 py-4 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-sm font-extrabold tracking-wider uppercase transition-all shadow-md">
+                <a href="{{ route('diagnostic.quiz') }}" class="group inline-flex items-center active:scale-95 transition-transform duration-200">
+                    <span class="px-8 py-4 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-sm sm:text-base font-extrabold tracking-wider uppercase transition-colors duration-200 shadow-lg">
                         Get Started
                     </span>
-                    <span class="w-13 h-13 -ml-2 rounded-full bg-black group-hover:bg-[#FF5500] text-white flex items-center justify-center transition-all border-2 border-white shadow-sm">
-                        <svg class="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <span class="rounded-full bg-black group-hover:bg-[#FF5500] text-white flex items-center justify-center transition-all duration-200 border-[3px] border-white shadow-md shrink-0 -ml-3 group-hover:rotate-45" style="width: 58px; height: 58px; min-width: 58px; min-height: 58px;">
+                        <svg class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
                         </svg>
                     </span>

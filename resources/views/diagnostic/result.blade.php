@@ -31,11 +31,11 @@
                 </svg>
                 <span>Cetak PDF</span>
             </button>
-            <a href="{{ route('diagnostic.quiz') }}" class="group inline-flex items-center">
-                <span class="px-6 py-2.5 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-xs font-bold transition-all shadow-sm">
+            <a href="{{ route('diagnostic.quiz') }}" class="group inline-flex items-center active:scale-95 transition-transform duration-200">
+                <span class="px-6 py-2.5 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-xs font-bold transition-colors duration-200 shadow-sm">
                     Asesmen Baru
                 </span>
-                <span class="w-9 h-9 -ml-1 rounded-full bg-black group-hover:bg-[#FF5500] text-white flex items-center justify-center transition-all border border-white">
+                <span class="rounded-full bg-black group-hover:bg-[#FF5500] text-white flex items-center justify-center transition-all duration-200 border-2 border-white shrink-0 -ml-2 group-hover:rotate-45" style="width: 42px; height: 42px; min-width: 42px; min-height: 42px;">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
                     </svg>
