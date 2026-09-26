@@ -127,6 +127,15 @@
             text-decoration: none;
         }
 
+        .brand-header svg {
+            width: 28px;
+            height: 28px;
+            max-width: 28px;
+            max-height: 28px;
+            flex-shrink: 0;
+            display: inline-block;
+        }
+
         .brand-title {
             font-size: 22px;
             font-weight: 800;
@@ -294,7 +303,7 @@
                 
                 <!-- Brand Logo & Name -->
                 <a href="{{ route('diagnostic.landing') }}" class="brand-header">
-                    <x-logo class="w-6 h-6" fill="#FF5500" />
+                    <x-logo style="width: 28px; height: 28px;" fill="#FF5500" />
                     <span class="brand-title">Nalaria</span>
                 </a>        
 

@@ -146,15 +146,21 @@
                         <div class="text-[11px] font-black uppercase tracking-wider text-black bg-white/90 inline-block px-2.5 py-0.5 rounded-md">
                             Akar Miskonsepsi Utama Terdeteksi
                         </div>
-                        <p class="text-sm font-bold leading-snug">
-                            {{ $session->primary_misconception }}
-                        </p>
+                        <div class="text-sm font-bold leading-snug">
+                            {!! Str::inlineMarkdown($session->primary_misconception) !!}
+                        </div>
                     </div>
                 @endif
 
                 <!-- AI Full Narrative in Clean Surface -->
-                <div class="text-sm text-neutral-800 leading-relaxed whitespace-pre-line bg-[#F6F6F8] p-6 rounded-2xl border border-neutral-200">
-                    {{ $session->ai_diagnosis_summary }}
+                <div class="ai-diagnosis-content text-sm text-neutral-800 leading-relaxed bg-[#F6F6F8] p-6 rounded-2xl border border-neutral-200">
+                    {!! Str::markdown($session->ai_diagnosis_summary ?? '', [
+                        'html_input' => 'strip',
+                        'allow_unsafe_links' => false,
+                        'renderer' => [
+                            'soft_break' => "<br>\n",
+                        ],
+                    ]) !!}
                 </div>
             </div>
 
@@ -195,7 +201,7 @@
 
                             @if($resp->detected_misconception)
                                 <div class="text-xs text-black font-semibold bg-white p-3 rounded-xl border border-neutral-200">
-                                    <strong class="text-[#FF5500]">Pola Miskonsepsi:</strong> {{ $resp->detected_misconception }}
+                                    <strong class="text-[#FF5500]">Pola Miskonsepsi:</strong> {!! Str::inlineMarkdown($resp->detected_misconception) !!}
                                 </div>
                             @endif
                         </div>
@@ -252,9 +258,9 @@
                     <div class="text-[10px] font-black uppercase tracking-wider text-[#FF5500]">
                         Rencana Aksi Belajar
                     </div>
-                    <p class="text-neutral-300 leading-relaxed font-normal">
-                        {{ $session->ai_remediation_plan }}
-                    </p>
+                    <div class="text-neutral-300 leading-relaxed font-normal">
+                        {!! Str::inlineMarkdown($session->ai_remediation_plan) !!}
+                    </div>
                 </div>
             </div>
 
@@ -316,13 +322,13 @@
                         </div>
 
                         <!-- Scenario Box -->
-                        <p class="text-xs text-neutral-700 leading-relaxed bg-[#F6F6F8] p-3.5 rounded-xl border border-neutral-200">
-                            {{ $item->context_scenario }}
-                        </p>
+                        <div class="text-xs text-neutral-700 leading-relaxed bg-[#F6F6F8] p-3.5 rounded-xl border border-neutral-200">
+                            {!! Str::inlineMarkdown($item->context_scenario) !!}
+                        </div>
 
                         <!-- Question Prompt -->
                         <div class="text-xs font-black text-black">
-                            {{ $item->question_text }}
+                            {!! Str::inlineMarkdown($item->question_text) !!}
                         </div>
 
                         <!-- Options Form -->
@@ -349,7 +355,7 @@
                                 <span>Buka Petunjuk Bernalar (Scaffolding Hint)</span>
                             </button>
                             <div id="hint_{{ $item->id }}" class="hidden mt-2 p-3.5 rounded-xl bg-[#F6F6F8] border border-neutral-300 text-xs text-black leading-relaxed">
-                                <strong>Petunjuk Langkah:</strong> {{ $item->scaffolding_hint }}
+                                <strong>Petunjuk Langkah:</strong> {!! Str::inlineMarkdown($item->scaffolding_hint) !!}
                             </div>
                         </div>
 
@@ -366,6 +372,21 @@
 
 @push('scripts')
 <script>
+    function formatMarkdown(text) {
+        if (!text) return '';
+        let escaped = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold text-black">$1</strong>');
+        escaped = escaped.replace(/__(.*?)__/g, '<strong class="font-extrabold text-black">$1</strong>');
+        escaped = escaped.replace(/\n\n+/g, '</p><p class="mt-2">');
+        escaped = escaped.replace(/\n/g, '<br>');
+        return `<p>${escaped}</p>`;
+    }
+
     function toggleHint(id) {
         const el = document.getElementById('hint_' + id);
         el.classList.toggle('hidden');
@@ -395,10 +416,10 @@
 
             if (data.is_correct) {
                 feedbackEl.classList.add('bg-black', 'text-white', 'border', 'border-black');
-                feedbackEl.innerHTML = `<div class="font-black text-[#FF5500] flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-[#FF5500]"></i><span>Jawabanmu Tepat!</span></div><div class="mt-1 text-neutral-300">${data.message}</div><div class="mt-2 pt-2 border-t border-neutral-800 text-neutral-200">${data.conceptual_explanation}</div>`;
+                feedbackEl.innerHTML = `<div class="font-black text-[#FF5500] flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-[#FF5500]"></i><span>Jawabanmu Tepat!</span></div><div class="mt-1 text-neutral-300">${data.message}</div><div class="mt-2 pt-2 border-t border-neutral-800 text-neutral-200">${formatMarkdown(data.conceptual_explanation)}</div>`;
             } else {
                 feedbackEl.classList.add('bg-orange-50', 'text-black', 'border', 'border-[#FF5500]');
-                feedbackEl.innerHTML = `<div class="font-black text-[#FF5500] flex items-center gap-1.5"><i data-lucide="x" class="w-4 h-4 text-[#FF5500]"></i><span>Belum Tepat (Kunci: ${data.correct_answer})</span></div><div class="mt-1 text-neutral-700">${data.message}</div><div class="mt-2 pt-2 border-t border-orange-200 text-neutral-900">${data.conceptual_explanation}</div>`;
+                feedbackEl.innerHTML = `<div class="font-black text-[#FF5500] flex items-center gap-1.5"><i data-lucide="x" class="w-4 h-4 text-[#FF5500]"></i><span>Belum Tepat (Kunci: ${data.correct_answer})</span></div><div class="mt-1 text-neutral-700">${data.message}</div><div class="mt-2 pt-2 border-t border-orange-200 text-neutral-900">${formatMarkdown(data.conceptual_explanation)}</div>`;
             }
             if (window.renderLucide) window.renderLucide();
         } catch (err) {

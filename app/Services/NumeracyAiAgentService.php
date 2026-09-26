@@ -9,6 +9,9 @@ use App\Models\DiagnosticQuestion;
 use App\Models\DiagnosticSession;
 use App\Models\Recommendation;
 use App\Models\StudentResponse;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Pool;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -46,6 +49,52 @@ class NumeracyAiAgentService
             'campuran' => 'Literasi & Numerasi',
             default => 'Numerasi',
         };
+    }
+
+    /**
+     * Menjamin struktur array opsi konsisten: [['key' => 'A', 'text' => '...'], ...]
+     *
+     * @return array<int, array{key: string, text: string}>
+     */
+    public static function normalizeOptions(mixed $rawOptions): array
+    {
+        if (! is_array($rawOptions)) {
+            return [];
+        }
+
+        $normalized = [];
+        $defaultKeys = ['A', 'B', 'C', 'D', 'E'];
+        $i = 0;
+
+        foreach ($rawOptions as $k => $opt) {
+            $key = $defaultKeys[$i] ?? chr(65 + $i);
+            $text = '';
+
+            if (is_array($opt)) {
+                $key = strtoupper(trim((string) ($opt['key'] ?? $key)));
+                $text = trim((string) ($opt['text'] ?? $opt['value'] ?? ''));
+            } elseif (is_string($opt)) {
+                if (is_string($k) && strlen($k) === 1 && ctype_alpha($k)) {
+                    $key = strtoupper($k);
+                    $text = trim($opt);
+                } elseif (preg_match('/^([A-E])[\.\)]\s*(.*)$/i', trim($opt), $matches)) {
+                    $key = strtoupper($matches[1]);
+                    $text = trim($matches[2]);
+                } else {
+                    $text = trim($opt);
+                }
+            }
+
+            if ($text !== '') {
+                $normalized[] = [
+                    'key' => $key,
+                    'text' => $text,
+                ];
+                $i++;
+            }
+        }
+
+        return $normalized;
     }
 
     /**
@@ -541,6 +590,128 @@ class NumeracyAiAgentService
     }
 
     /**
+     * Mengirim seluruh prompt ke OpenRouter secara paralel dan mengembalikan konten mentah
+     * per indeks prompt. Butir yang gagal bernilai null agar pemanggil bisa memakai fallback.
+     *
+     * @param  array<int, array{system: string, user: string}>  $requestSpecs
+     * @return array<int, string|null>
+     */
+    protected function dispatchOpenRouterPooled(array $requestSpecs): array
+    {
+        if ($requestSpecs === []) {
+            return [];
+        }
+
+        try {
+            // Request WAJIB dibangun lewat $pool (bukan closure atas facade Http) agar mewarisi
+            // handler & stub dari factory, sehingga tetap bisa di-fake saat pengujian.
+            $responses = Http::pool(function (Pool $pool) use ($requestSpecs) {
+                $requests = [];
+
+                foreach ($requestSpecs as $spec) {
+                    $requests[] = $pool
+                        ->timeout($this->openRouterTimeoutSeconds())
+                        ->withHeaders($this->openRouterHeaders())
+                        ->post($this->openRouterEndpoint(), $this->openRouterPayload($spec['system'], $spec['user']));
+                }
+
+                return $requests;
+            });
+        } catch (\Throwable $e) {
+            Log::warning('OpenRouter batch generation failed: '.$e->getMessage());
+
+            return array_fill(0, count($requestSpecs), null);
+        }
+
+        $contents = [];
+
+        foreach ($responses as $index => $response) {
+            $contents[$index] = $this->extractOpenRouterContent($response);
+        }
+
+        ksort($contents);
+
+        return $contents;
+    }
+
+    protected function openRouterEndpoint(): string
+    {
+        return 'https://openrouter.ai/api/v1/chat/completions';
+    }
+
+    /**
+     * Timeout per request OpenRouter API (default 30 detik untuk memberikan ruang proses LLM berkualitas tinggi).
+     */
+    protected function openRouterTimeoutSeconds(): int
+    {
+        return (int) (config('services.openrouter.timeout') ?: env('OPENROUTER_TIMEOUT', 60));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function openRouterHeaders(): array
+    {
+        $apiKey = config('services.openrouter.key') ?: env('OPENROUTER_API_KEY');
+        $siteUrl = config('services.openrouter.site_url') ?: env('OPENROUTER_SITE_URL', 'http://127.0.0.1:8000');
+        $siteName = config('services.openrouter.site_name') ?: env('OPENROUTER_SITE_NAME', 'Nalaria');
+
+        return [
+            'Authorization' => 'Bearer '.$apiKey,
+            'HTTP-Referer' => $siteUrl,
+            'X-Title' => $siteName,
+            'X-OpenRouter-Title' => $siteName,
+            'Content-Type' => 'application/json',
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function openRouterPayload(string $systemPrompt, string $userPrompt): array
+    {
+        $model = config('services.openrouter.model') ?: env('OPENROUTER_MODEL', 'inclusionai/ling-3.0-flash-fin:free');
+
+        return [
+            'model' => $model,
+            'messages' => [
+                ['role' => 'system', 'content' => $systemPrompt],
+                ['role' => 'user', 'content' => $userPrompt],
+            ],
+            'temperature' => 0.7,
+        ];
+    }
+
+    /**
+     * Mengekstrak konten teks dari respons OpenRouter, atau null bila gagal.
+     *
+     * Parameter dibiarkan mixed karena Http::pool() mengembalikan exception pada
+     * request yang ditolak, bukan objek Response.
+     */
+    protected function extractOpenRouterContent(mixed $response): ?string
+    {
+        if ($response instanceof ConnectionException) {
+            Log::warning('OpenRouter API call failed: '.$response->getMessage());
+
+            return null;
+        }
+
+        if (! $response instanceof Response) {
+            return null;
+        }
+
+        if (! $response->successful()) {
+            Log::warning('OpenRouter API returned error: '.$response->status().' - '.$response->body());
+
+            return null;
+        }
+
+        $content = $response->json('choices.0.message.content');
+
+        return is_string($content) && $content !== '' ? trim($content) : null;
+    }
+
+    /**
      * Memanggil OpenRouter API dengan model pilihan (default: nvidia/nemotron-3-ultra-550b-a55b:free)
      */
     protected function callOpenRouter(string $systemPrompt, string $userPrompt): ?string
@@ -550,36 +721,12 @@ class NumeracyAiAgentService
             return null;
         }
 
-        $model = config('services.openrouter.model') ?: env('OPENROUTER_MODEL', 'nvidia/nemotron-3-ultra-550b-a55b:free');
-        $siteUrl = config('services.openrouter.site_url') ?: env('OPENROUTER_SITE_URL', 'http://127.0.0.1:8000');
-        $siteName = config('services.openrouter.site_name') ?: env('OPENROUTER_SITE_NAME', 'Nalaria');
-
         try {
-            $response = Http::timeout(10)
-                ->withHeaders([
-                    'Authorization' => 'Bearer '.$apiKey,
-                    'HTTP-Referer' => $siteUrl,
-                    'X-OpenRouter-Title' => $siteName,
-                    'Content-Type' => 'application/json',
-                ])
-                ->post('https://openrouter.ai/api/v1/chat/completions', [
-                    'model' => $model,
-                    'messages' => [
-                        ['role' => 'system', 'content' => $systemPrompt],
-                        ['role' => 'user', 'content' => $userPrompt],
-                    ],
-                    'temperature' => 0.7,
-                ]);
+            $response = Http::timeout($this->openRouterTimeoutSeconds())
+                ->withHeaders($this->openRouterHeaders())
+                ->post($this->openRouterEndpoint(), $this->openRouterPayload($systemPrompt, $userPrompt));
 
-            if ($response->successful()) {
-                $json = $response->json();
-                $content = $json['choices'][0]['message']['content'] ?? null;
-                if ($content) {
-                    return trim($content);
-                }
-            } else {
-                Log::warning('OpenRouter API returned error: '.$response->status().' - '.$response->body());
-            }
+            return $this->extractOpenRouterContent($response);
         } catch (\Throwable $e) {
             Log::warning('OpenRouter API call failed: '.$e->getMessage());
         }
@@ -655,6 +802,7 @@ class NumeracyAiAgentService
      *     competency: string,
      *     total_questions: int,
      *     ai_model: string,
+     *     ai_generated_count: int,
      *     questions: array<int, array>
      * }
      */
@@ -664,6 +812,8 @@ class NumeracyAiAgentService
         int $count = 3,
         ?string $topicContext = null
     ): array {
+        @set_time_limit(120);
+
         $count = max(1, min(8, $count));
 
         $normalizedDomain = match (strtolower(trim($domain))) {
@@ -706,24 +856,27 @@ class NumeracyAiAgentService
 
         $generatedQuestions = [];
         $apiKey = config('services.openrouter.key') ?: env('OPENROUTER_API_KEY');
-        $modelName = config('services.openrouter.model') ?: env('OPENROUTER_MODEL', 'nvidia/nemotron-3-ultra-550b-a55b:free');
-        $usedAiModel = ! empty($apiKey) ? $modelName : 'Nalaria AI Adaptive Generator Engine';
+        $modelName = config('services.openrouter.model') ?: env('OPENROUTER_MODEL', 'inclusionai/ling-3.0-flash-fin:free');
+        $fallbackEngineName = 'Nalaria AI Adaptive Generator Engine';
 
         // Coba generate via OpenRouter jika API Key tersedia
         if (! empty($apiKey)) {
+            $difficultyGuidance = match ($difficulty) {
+                'Menantang' => 'Level 4-5 PISA (HOTS): Skenario multivariabel / teks analitis kompleks, penalaran kritis langkah ganda.',
+                'Mudah' => 'Level 2 PISA: Narasi langsung, angka bulat bersahabat / teks fakta eksplisit, konsep dasar tanpa jebakan rumit.',
+                default => 'Level 3 PISA: Penalaran terstruktur, aplikasi konsep kontekstual dengan 2 tahapan berpikir sistematis.',
+            };
+
+            $systemPrompt = 'Kamu adalah Pakar Desain Soal Literasi dan Numerasi Kontekstual Indonesia berstandar PISA dan Asesmen Nasional (AKM). '
+                .'Hasilkan 1 butir soal pilihan ganda kontekstual bertema keberlanjutan masa depan dalam format JSON valid.';
+
+            // Susun seluruh prompt dulu, lalu kirim SEKALIGUS (paralel) lewat Http::pool()
+            $requestSpecs = [];
+
             for ($i = 0; $i < $count; $i++) {
                 $itemDomain = ($normalizedDomain === 'campuran') ? $domainRotation[$i % count($domainRotation)] : $normalizedDomain;
                 $itemCategory = self::mapDomainToCategory($itemDomain);
                 $itemCompetency = self::mapDomainToCompetency($itemDomain);
-
-                $systemPrompt = 'Kamu adalah Pakar Desain Soal Literasi dan Numerasi Kontekstual Indonesia berstandar PISA dan Asesmen Nasional (AKM). '
-                    .'Hasilkan 1 butir soal pilihan ganda kontekstual bertema keberlanjutan masa depan dalam format JSON valid.';
-
-                $difficultyGuidance = match ($difficulty) {
-                    'Menantang' => 'Level 4-5 PISA (HOTS): Skenario multivariabel / teks analitis kompleks, penalaran kritis langkah ganda.',
-                    'Mudah' => 'Level 2 PISA: Narasi langsung, angka bulat bersahabat / teks fakta eksplisit, konsep dasar tanpa jebakan rumit.',
-                    default => 'Level 3 PISA: Penalaran terstruktur, aplikasi konsep kontekstual dengan 2 tahapan berpikir sistematis.',
-                };
 
                 $competencyGuidance = ($itemCompetency === 'Literasi')
                     ? 'Fokus pada Literasi Membaca Teks Informasi Sains/Lingkungan (kemampuan menemukan informasi tersirat, inferensi logis, dan evaluasi argumen berbasis data narasi).'
@@ -750,37 +903,67 @@ class NumeracyAiAgentService
                     ."  \"conceptual_explanation\": \"... pembahasan langkah demi langkah dan konsep yang benar ...\"\n"
                     .'}';
 
-                $raw = $this->callOpenRouter($systemPrompt, $userPrompt);
+                $requestSpecs[] = [
+                    'system' => $systemPrompt,
+                    'user' => $userPrompt,
+                    'domain' => $itemDomain,
+                    'category' => $itemCategory,
+                    'competency' => $itemCompetency,
+                ];
+            }
+
+            $rawContents = $this->dispatchOpenRouterPooled($requestSpecs);
+
+            $generatedQuestions = [];
+
+            foreach ($requestSpecs as $index => $spec) {
+                $number = $index + 1;
+                $itemCategory = $spec['category'];
+                $itemDomain = $spec['domain'];
+                $itemCompetency = $spec['competency'];
+                $raw = $rawContents[$index] ?? null;
+
                 if (! empty($raw)) {
                     $cleanJson = preg_replace('/^```(?:json)?\s*|\s*```$/i', '', trim($raw));
                     $data = json_decode($cleanJson, true);
                     if (is_array($data) && ! empty($data['question_text']) && ! empty($data['options']) && ! empty($data['correct_answer'])) {
-                        $generatedQuestions[] = [
-                            'number' => $i + 1,
-                            'competency' => $itemCompetency,
-                            'domain' => $itemDomain,
-                            'domain_label' => $itemCategory,
-                            'difficulty' => $difficulty,
-                            'title' => $data['title'] ?? 'Soal #'.($i + 1).": {$itemCategory}",
-                            'context_scenario' => $data['context_scenario'] ?? '',
-                            'question_text' => $data['question_text'],
-                            'options' => $data['options'],
-                            'correct_answer' => strtoupper($data['correct_answer']),
-                            'scaffolding_hint' => $data['scaffolding_hint'] ?? '',
-                            'conceptual_explanation' => $data['conceptual_explanation'] ?? '',
-                            'ai_model' => $modelName,
-                        ];
+                        $normalizedOptions = self::normalizeOptions($data['options']);
 
-                        continue;
+                        if (! empty($normalizedOptions)) {
+                            $generatedQuestions[] = [
+                                'number' => $number,
+                                'competency' => $itemCompetency,
+                                'domain' => $itemDomain,
+                                'domain_label' => $itemCategory,
+                                'difficulty' => $difficulty,
+                                'title' => $data['title'] ?? 'Soal #'.$number.": {$itemCategory}",
+                                'context_scenario' => $data['context_scenario'] ?? '',
+                                'question_text' => $data['question_text'],
+                                'options' => $normalizedOptions,
+                                'correct_answer' => strtoupper((string) $data['correct_answer']),
+                                'scaffolding_hint' => $data['scaffolding_hint'] ?? '',
+                                'conceptual_explanation' => $data['conceptual_explanation'] ?? '',
+                                'ai_model' => $modelName,
+                            ];
+
+                            continue;
+                        }
                     }
                 }
 
-                // Fallback jika API gagal untuk butir soal ini
-                $fallbackItem = $this->getFallbackItem($itemDomain, $difficulty, $i + 1);
-                $generatedQuestions[] = $fallbackItem;
+                // Fallback jika API gagal atau balasan tidak valid untuk butir soal ini
+                $generatedQuestions[] = $this->getFallbackItem($itemDomain, $difficulty, $number);
             }
 
             if (count($generatedQuestions) === $count) {
+                // Laporkan model AI hanya bila benar-benar ada butir yang/generated dari API.
+                // Jika seluruh butir jatuh ke bank lokal (mis. kuota habis / 429), jangan
+                // berbohong bahwa model AI yang dipakai.
+                $aiGeneratedCount = count(array_filter(
+                    $generatedQuestions,
+                    fn (array $question): bool => ($question['ai_model'] ?? null) === $modelName
+                ));
+
                 return [
                     'package_title' => 'Paket Asesmen '.($normalizedDomain === 'campuran' ? 'Terpadu Literasi-Numerasi' : $categoryLabel)." ({$count} Soal)",
                     'difficulty' => $difficulty,
@@ -788,7 +971,8 @@ class NumeracyAiAgentService
                     'domain_label' => $categoryLabel,
                     'competency' => $competencyLabel,
                     'total_questions' => count($generatedQuestions),
-                    'ai_model' => $usedAiModel,
+                    'ai_model' => $aiGeneratedCount > 0 ? $modelName : $fallbackEngineName,
+                    'ai_generated_count' => $aiGeneratedCount,
                     'questions' => $generatedQuestions,
                 ];
             }
@@ -858,6 +1042,7 @@ class NumeracyAiAgentService
             'competency' => $competencyLabel,
             'total_questions' => count($questions),
             'ai_model' => 'Nalaria AI Adaptive Generator Engine',
+            'ai_generated_count' => 0,
             'questions' => $questions,
         ];
     }

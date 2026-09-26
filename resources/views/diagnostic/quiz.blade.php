@@ -93,12 +93,12 @@
                             <span class="w-2 h-2 rounded-full bg-[#FF5500]"></span>
                             <span>Konteks Studi Kasus: {{ $q->title }}</span>
                         </div>
-                        <p class="font-normal">{{ $q->context_scenario }}</p>
+                        <p class="font-normal">{!! Str::inlineMarkdown($q->context_scenario) !!}</p>
                     </div>
 
                     <!-- Question Text -->
                     <div class="text-base font-extrabold text-black">
-                        {{ $q->question_text }}
+                        {!! Str::inlineMarkdown($q->question_text) !!}
                     </div>
 
                     <!-- Options Grid -->
@@ -109,7 +109,7 @@
                                     class="mt-1 w-4 h-4 text-[#FF5500] focus:ring-[#FF5500] border-neutral-400">
                                 <div class="text-sm text-neutral-800 leading-snug">
                                     <span class="font-black text-black mr-2">{{ $opt['key'] }}.</span>
-                                    <span>{{ $opt['text'] }}</span>
+                                    <span>{!! Str::inlineMarkdown($opt['text']) !!}</span>
                                 </div>
                             </label>
                         @endforeach

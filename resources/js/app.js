@@ -1,15 +1,22 @@
 import Alpine from 'alpinejs';
 import { createIcons, icons } from 'lucide';
 
+const safeCreateIcons = (options) => {
+    try {
+        return createIcons(options && options.icons ? options : { icons });
+    } catch (e) {
+        console.warn('Lucide createIcons warning:', e);
+    }
+};
+
 window.Alpine = Alpine;
-window.lucide = { createIcons, icons };
+window.lucide = {
+    createIcons: safeCreateIcons,
+    icons,
+};
 
 const renderLucide = () => {
-    try {
-        createIcons({ icons });
-    } catch (e) {
-        console.error('Lucide createIcons error:', e);
-    }
+    safeCreateIcons();
 };
 
 window.renderLucide = renderLucide;

@@ -104,6 +104,55 @@
             transform: translateY(-2px);
         }
 
+        /* AI Markdown Typography Formatting */
+        .ai-diagnosis-content p,
+        .ai-markdown-content p {
+            margin-bottom: 0.875rem;
+        }
+        .ai-diagnosis-content p:last-child,
+        .ai-markdown-content p:last-child {
+            margin-bottom: 0;
+        }
+        .ai-diagnosis-content strong,
+        .ai-diagnosis-content b,
+        .ai-markdown-content strong,
+        .ai-markdown-content b {
+            font-weight: 800;
+            color: #0A0A0A;
+        }
+        .ai-diagnosis-content h1,
+        .ai-diagnosis-content h2,
+        .ai-diagnosis-content h3,
+        .ai-diagnosis-content h4,
+        .ai-markdown-content h1,
+        .ai-markdown-content h2,
+        .ai-markdown-content h3,
+        .ai-markdown-content h4 {
+            font-weight: 800;
+            color: #0A0A0A;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .ai-diagnosis-content ul,
+        .ai-diagnosis-content ol,
+        .ai-markdown-content ul,
+        .ai-markdown-content ol {
+            margin-left: 1.25rem;
+            margin-bottom: 0.875rem;
+        }
+        .ai-diagnosis-content ul,
+        .ai-markdown-content ul {
+            list-style-type: disc;
+        }
+        .ai-diagnosis-content ol,
+        .ai-markdown-content ol {
+            list-style-type: decimal;
+        }
+        .ai-diagnosis-content li,
+        .ai-markdown-content li {
+            margin-bottom: 0.25rem;
+        }
+
         /* Glassmorphism Dynamic Navbar Scrolled State */
         .navbar-scrolled {
             background-color: rgba(255, 255, 255, 0.98) !important;
@@ -432,13 +481,13 @@
                         <span class="text-2xl font-black tracking-tight text-white">Nalaria</span>
                     </div>
                     <p class="text-xs text-neutral-400 leading-relaxed">
-                        AI Diagnostik Literasi-Numerasi Kontekstual Indonesia. Powered by <strong>Nvidia Nemotron (OpenRouter)</strong> & Laravel 13 untuk Hackathon SEMESTA 8 by SEVIMA.
+                        AI Diagnostik Literasi-Numerasi Kontekstual Indonesia. Powered by <strong>OpenRouter LLM</strong> & Laravel 13 untuk Hackathon SEMESTA 8 by SEVIMA.
                     </p>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">
                     <span class="text-xs text-neutral-400 font-semibold mr-2">Tech Stack & AI Model:</span>
-                    <span class="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-xs font-mono text-[#FF5500]">nvidia/nemotron-3-ultra-550b-a55b:free</span>
+                    <span class="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-xs font-mono text-[#FF5500]">{{ config('services.openrouter.model') }}</span>
                     <span class="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-xs font-mono text-white">OpenRouter API</span>
                     <span class="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-xs font-mono text-white">Laravel 13</span>
                 </div>

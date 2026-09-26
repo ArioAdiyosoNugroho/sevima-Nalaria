@@ -8,7 +8,7 @@
      LOTTIE AI LOADING OVERLAY
      Muncul saat AI sedang generate paket soal
 ═══════════════════════════════════════════════════ --}}
-<div id="aiLoadingOverlay">
+<div id="aiLoadingOverlay" style="display: none; position: fixed; inset: 0; z-index: 999999;" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/85 backdrop-blur-md p-4">
 
     {{-- Glassmorphism Card --}}
     <div id="overlayCard">
@@ -16,15 +16,16 @@
         {{-- Glow Orb --}}
         <div class="overlay-glow"></div>
 
-        {{-- Lottie Animation --}}
-        <dotlottie-player
-            src="https://lottie.host/1fdb347e-78b2-4c87-9dce-d6190a7159fa/lC6PHZqOv2.lottie"
-            background="transparent"
-            speed="1"
-            style="width: 200px; height: 200px;"
-            loop
-            autoplay
-        ></dotlottie-player>
+        {{-- High-tech Animated AI Core (Pure CSS/SVG - Guaranteed to Render 100% Offline & Online) --}}
+        <div class="relative w-28 h-28 flex items-center justify-center my-1">
+            <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-[#FF5500] to-amber-400 blur-xl opacity-60 animate-pulse"></div>
+            <div class="absolute inset-1 rounded-full border-2 border-dashed border-[#FF5500]/70 animate-spin" style="animation-duration: 9s;"></div>
+            <div class="relative w-16 h-16 rounded-full bg-black/95 border border-white/20 flex items-center justify-center shadow-2xl">
+                <svg class="w-8 h-8 text-[#FF5500] animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+            </div>
+        </div>
 
         {{-- Badge AI --}}
         <div class="overlay-badge">
@@ -35,50 +36,70 @@
         {{-- Title --}}
         <div class="overlay-title-wrap">
             <h3 id="overlayTitle">Memproses Paket Soal AI</h3>
-            <p id="overlaySubtitle">NVIDIA Nemotron LLM sedang merancang soal PISA...</p>
+            <p id="overlaySubtitle">Model AI sedang merancang butir soal AKM & PISA...</p>
         </div>
 
-        {{-- Rotating Status --}}
+        {{-- Progress Bar & Percentage Section --}}
+        <div class="w-full space-y-2.5 pt-1">
+            <div class="flex items-center justify-between text-xs font-bold text-white/90">
+                <span id="overlayPhase" class="truncate pr-2 text-white/80">Inisialisasi sistem...</span>
+                <span id="overlayPercent" class="font-mono text-base font-black text-[#FF5500] shrink-0">0%</span>
+            </div>
+
+            {{-- Progress Bar Track --}}
+            <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/10">
+                <div id="overlayProgressBar" class="h-full rounded-full bg-gradient-to-r from-[#FF5500] via-[#FF8800] to-[#FFAA00] transition-all duration-300 shadow-sm" style="width: 5%"></div>
+            </div>
+
+            {{-- Heartbeat & Timer --}}
+            <div class="flex items-center justify-between text-[11px] pt-0.5">
+                <span id="overlayHeartbeat" class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Proses AI Berjalan Normal</span>
+                </span>
+                <span class="text-white/50 font-mono" id="overlayTimerWrap">Waktu: <span id="overlayTimerText" class="text-white font-bold">0 detik</span></span>
+            </div>
+        </div>
+
+        {{-- Rotating Status Description --}}
         <div class="overlay-status-row">
             <span class="overlay-spinner"></span>
-            <span id="overlayStatusText" class="overlay-status-text">Menginisialisasi generator...</span>
-        </div>
-
-        {{-- Progress Dots --}}
-        <div class="overlay-dots">
-            <span style="animation-delay:0ms"></span>
-            <span style="animation-delay:160ms"></span>
-            <span style="animation-delay:320ms"></span>
+            <span id="overlayStatusText" class="overlay-status-text">Menginisialisasi generator AI...</span>
         </div>
 
         {{-- Count Text --}}
-        <p id="overlayCountText" class="overlay-count-text">Mempersiapkan soal...</p>
+        <p id="overlayCountText" class="overlay-count-text">Mempersiapkan butir soal adaptif...</p>
+
+        {{-- Cancel / Close Button --}}
+        <button type="button" id="cancelOverlayBtn"
+            class="px-5 py-2 rounded-full border border-white/20 hover:border-white/50 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-xs font-bold transition-all duration-200 cursor-pointer">
+            ✕ Batal & Tutup
+        </button>
     </div>
 </div>
 
 <style>
     /* ── Base Overlay ── */
-    /* NOTE: menggunakan opacity+visibility bukan display:none
-       karena display tidak bisa di-CSS-transition */
     #aiLoadingOverlay {
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        display: flex;
+        display: none;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 999999 !important;
         align-items: center;
         justify-content: center;
-        background: rgba(0,0,0,0.82);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transition: opacity 0.35s ease, visibility 0.35s ease;
+        background: rgba(0,0,0,0.85) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
     }
     #aiLoadingOverlay.active {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: all;
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 
     /* ── Card ── */
@@ -87,8 +108,8 @@
         background: rgba(255,255,255,0.08);
         border: 1px solid rgba(255,255,255,0.18);
         border-radius: 28px;
-        padding: 2.5rem;
-        max-width: 360px;
+        padding: 2.25rem 2rem;
+        max-width: 440px;
         width: calc(100% - 2rem);
         margin: 0 1rem;
         display: flex;
@@ -243,7 +264,7 @@
                 Generator Soal Literasi & Numerasi
             </h1>
             <p class="text-xs sm:text-sm text-neutral-600 leading-relaxed font-normal">
-                Hasilkan paket soal kontekstual berstandar AKM & PISA secara instan — pilih <strong>1 hingga 8 butir soal</strong> dalam mode Numerasi, Literasi, atau Terpadu Literasi-Numerasi. Ditenagai oleh <strong>NVIDIA Nemotron LLM</strong> via OpenRouter.
+                Hasilkan paket soal kontekstual berstandar AKM & PISA secara instan — pilih <strong>1 hingga 8 butir soal</strong> dalam mode Numerasi, Literasi, atau Terpadu Literasi-Numerasi. Ditenagai oleh <strong>OpenRouter LLM</strong>.
             </p>
         </div>
     </div>
@@ -472,16 +493,16 @@
                             <x-lucide name="book-open" class="w-4 h-4 text-[#FF5500]" />
                             <span>Skenario Kontekstual:</span>
                         </div>
-                        <p id="qScenario" class="text-xs sm:text-sm text-neutral-700 leading-relaxed font-medium">
-                            {{ $initialPackage['questions'][0]['context_scenario'] ?? '' }}
-                        </p>
+                        <div id="qScenario" class="ai-markdown-content text-xs sm:text-sm text-neutral-700 leading-relaxed font-medium">
+                            {!! Str::markdown($initialPackage['questions'][0]['context_scenario'] ?? '', ['html_input' => 'strip', 'allow_unsafe_links' => false, 'renderer' => ['soft_break' => "<br>\n"]]) !!}
+                        </div>
                     </div>
 
                     <div class="pt-1">
                         <p class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Pertanyaan:</p>
-                        <p id="qText" class="text-sm sm:text-base font-extrabold text-black leading-relaxed">
-                            {{ $initialPackage['questions'][0]['question_text'] ?? '' }}
-                        </p>
+                        <div id="qText" class="ai-markdown-content text-sm sm:text-base font-extrabold text-black leading-relaxed">
+                            {!! Str::inlineMarkdown($initialPackage['questions'][0]['question_text'] ?? '') !!}
+                        </div>
                     </div>
                 </div>
 
@@ -532,7 +553,7 @@
                         <span id="hintChevron" class="text-sm font-bold transition-transform duration-200">↓</span>
                     </button>
                     <div id="hintContent" class="hidden p-4 sm:p-5 rounded-2xl bg-[#FFFBF8] border border-orange-200/80 text-xs sm:text-sm text-neutral-800 leading-relaxed font-medium">
-                        <p id="qHint"></p>
+                        <div id="qHint" class="ai-markdown-content"></div>
                     </div>
                 </div>
 
@@ -551,7 +572,7 @@
                             <span>Kunci Jawaban:</span>
                             <span id="qCorrectKey" class="px-2.5 py-0.5 rounded-full bg-black text-white font-mono font-bold"></span>
                         </div>
-                        <p id="qExplanation"></p>
+                        <div id="qExplanation" class="ai-markdown-content"></div>
                     </div>
                 </div>
 
@@ -597,6 +618,37 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // ─────────────── MARKDOWN HELPER ───────────────
+    function formatMarkdown(text) {
+        if (!text) return '';
+        let escaped = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold text-black">$1</strong>');
+        escaped = escaped.replace(/__(.*?)__/g, '<strong class="font-extrabold text-black">$1</strong>');
+        escaped = escaped.replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+        escaped = escaped.replace(/^\s*[-*]\s+(.*)$/gm, '<li class="ml-4 list-disc">$1</li>');
+        escaped = escaped.replace(/\n\n+/g, '</p><p class="mt-2.5">');
+        escaped = escaped.replace(/\n/g, '<br>');
+        return `<p>${escaped}</p>`;
+    }
+
+    function formatInlineMarkdown(text) {
+        if (!text) return '';
+        let escaped = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold text-black">$1</strong>');
+        escaped = escaped.replace(/__(.*?)__/g, '<strong class="font-extrabold text-black">$1</strong>');
+        return escaped;
+    }
+
     // ─────────────── STATE ───────────────
     let currentPackage = @json($initialPackage);
     let currentQuestionIndex = 0;
@@ -662,10 +714,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─────────────── HELPERS ───────────────
 
     function renderLucideIcons() {
-        if (window.lucide && typeof window.lucide.createIcons === 'function') {
-            window.lucide.createIcons();
-        } else if (window.renderLucide) {
-            window.renderLucide();
+        try {
+            if (typeof window.renderLucide === 'function') {
+                window.renderLucide();
+            } else if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons(window.lucide.icons ? { icons: window.lucide.icons } : undefined);
+            }
+        } catch (e) {
+            console.warn('Lucide icon render warning:', e);
         }
     }
 
@@ -739,10 +795,10 @@ document.addEventListener('DOMContentLoaded', function () {
         qDomainBadge.textContent = q.domain_label || '';
         qCompetencyBadge.textContent = q.competency || 'Numerasi';
         qTitle.textContent = q.title || '';
-        qScenario.textContent = q.context_scenario || '';
-        qText.textContent = q.question_text || '';
-        qHint.textContent = q.scaffolding_hint || '';
-        qExplanation.textContent = q.conceptual_explanation || '';
+        qScenario.innerHTML = formatMarkdown(q.context_scenario || '');
+        qText.innerHTML = formatMarkdown(q.question_text || '');
+        qHint.innerHTML = formatMarkdown(q.scaffolding_hint || '');
+        qExplanation.innerHTML = formatMarkdown(q.conceptual_explanation || '');
         qCorrectKey.textContent = q.correct_answer || '';
 
         // Status badge
@@ -760,17 +816,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Re-render options
         optionsContainer.innerHTML = '';
-        (q.options || []).forEach(opt => {
+        const rawOptions = Array.isArray(q.options)
+            ? q.options
+            : (q.options && typeof q.options === 'object' ? Object.values(q.options) : []);
+
+        rawOptions.forEach(opt => {
+            const optKey = (opt && opt.key) ? opt.key : '';
+            const optText = (opt && opt.text) ? opt.text : (typeof opt === 'string' ? opt : '');
             const label = document.createElement('label');
             let rowClass = 'option-row flex items-start gap-3.5 p-3.5 sm:p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ';
             let keyClass = 'opt-key w-7 h-7 rounded-full text-xs font-black flex items-center justify-center shrink-0 border ';
 
             if (ans !== undefined) {
                 // Show result state
-                if (opt.key === q.correct_answer) {
+                if (optKey === q.correct_answer) {
                     rowClass += 'border-emerald-400 bg-emerald-50';
                     keyClass += 'bg-emerald-500 text-white border-emerald-500';
-                } else if (ans.selectedKey === opt.key) {
+                } else if (ans.selectedKey === optKey) {
                     rowClass += 'border-red-400 bg-red-50';
                     keyClass += 'bg-red-500 text-white border-red-500';
                 } else {
@@ -784,9 +846,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             label.className = rowClass;
             label.innerHTML = `
-                <input type="radio" name="practice_answer" value="${opt.key}" class="sr-only" ${ans?.selectedKey === opt.key ? 'checked' : ''}>
-                <span class="${keyClass}">${opt.key}</span>
-                <span class="opt-text text-xs sm:text-sm font-semibold text-neutral-800 leading-snug pt-0.5">${opt.text}</span>
+                <input type="radio" name="practice_answer" value="${optKey}" class="sr-only" ${ans?.selectedKey === optKey ? 'checked' : ''}>
+                <span class="${keyClass}">${optKey}</span>
+                <span class="opt-text text-xs sm:text-sm font-semibold text-neutral-800 leading-snug pt-0.5">${formatInlineMarkdown(optText)}</span>
             `;
             optionsContainer.appendChild(label);
         });
@@ -1036,57 +1098,182 @@ document.addEventListener('DOMContentLoaded', function () {
         form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     });
 
-    // ─────────────── LOADING OVERLAY ───────────────
+    // ─────────────── LOADING OVERLAY & LIVE PROGRESS SYSTEM ───────────────
 
     const aiLoadingOverlay  = document.getElementById('aiLoadingOverlay');
     const overlayTitle      = document.getElementById('overlayTitle');
     const overlaySubtitle   = document.getElementById('overlaySubtitle');
+    const overlayPhase      = document.getElementById('overlayPhase');
+    const overlayPercent    = document.getElementById('overlayPercent');
+    const overlayProgressBar= document.getElementById('overlayProgressBar');
+    const overlayHeartbeat  = document.getElementById('overlayHeartbeat');
     const overlayStatusText = document.getElementById('overlayStatusText');
     const overlayCountText  = document.getElementById('overlayCountText');
+    const overlayTimerText  = document.getElementById('overlayTimerText');
+    const cancelOverlayBtn  = document.getElementById('cancelOverlayBtn');
 
-    const statusMessages = [
-        'Menginisialisasi generator AI...',
-        'Mengirim prompt ke NVIDIA Nemotron LLM...',
-        'Merancang skenario kontekstual PISA...',
-        'Menyusun butir soal & pilihan jawaban...',
-        'Memvalidasi struktur soal literasi-numerasi...',
-        'Menambahkan petunjuk scaffolding bernalar...',
-        'Menyusun pembahasan konsep...',
-        'Memfinalisasi paket soal adaptif...',
+    const progressMilestones = [
+        { time: 0,  minP: 5,  maxP: 18, phase: '1/5 • Inisialisasi API', text: 'Menghubungkan ke OpenRouter LLM engine...' },
+        { time: 3,  minP: 18, maxP: 42, phase: '2/5 • Merancang Konsep', text: 'Menyusun stimulus konteks keberlanjutan standar PISA...' },
+        { time: 7,  minP: 42, maxP: 68, phase: '3/5 • Menyusun Soal', text: 'Merumuskan pertanyaan penalaran kritis & opsi jawaban A-D...' },
+        { time: 13, minP: 68, maxP: 86, phase: '4/5 • Scaffolding & Kunci', text: 'Memvalidasi pembahasan konsep & petunjuk bernalar...' },
+        { time: 19, minP: 86, maxP: 96, phase: '5/5 • Finalisasi JSON', text: 'Memverifikasi paket soal agar siap dikerjakan...' },
     ];
 
-    let statusInterval = null;
-    let statusIndex = 0;
+    let progressTimer = null;
+    let elapsedMs = 0;
+    let currentPercent = 5;
+    let activeController = null;
+    let isGenerating = false;
 
-    function showLoadingOverlay(count) {
-        const domainCard = document.querySelector('.domain-card input[type="radio"]:checked');
-        const domainLabel = domainCard ? domainCard.closest('.domain-card').querySelector('span.text-xs')?.textContent : 'Terpadu';
-        const diffCard = document.querySelector('.difficulty-card input[type="radio"]:checked');
-        const diffLabel = diffCard ? diffCard.closest('.difficulty-card').querySelector('div.text-xs')?.textContent : 'Sedang';
+    function resetProgressUI() {
+        elapsedMs = 0;
+        currentPercent = 5;
+        if (overlayPercent) {
+            overlayPercent.textContent = '5%';
+            overlayPercent.className = 'font-mono text-base font-black text-[#FF5500] shrink-0';
+        }
+        if (overlayProgressBar) {
+            overlayProgressBar.style.width = '5%';
+            overlayProgressBar.className = 'h-full rounded-full bg-gradient-to-r from-[#FF5500] via-[#FF8800] to-[#FFAA00] transition-all duration-300 shadow-sm';
+        }
+        if (overlayHeartbeat) {
+            overlayHeartbeat.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Proses AI Berjalan Normal</span>';
+        }
+        if (overlayTimerText) overlayTimerText.textContent = '0 detik';
+        if (overlayPhase) overlayPhase.textContent = progressMilestones[0].phase;
+        if (overlayStatusText) {
+            overlayStatusText.style.color = '';
+            overlayStatusText.textContent = progressMilestones[0].text;
+        }
+    }
 
-        overlayTitle.textContent = `Membuat ${count} Soal ${domainLabel || 'AI'}`;
-        overlaySubtitle.textContent = `Tingkat kesulitan: ${diffLabel || 'Sedang'} • Berstandar AKM & PISA`;
-        overlayCountText.textContent = `${count} butir soal sedang disiapkan, harap tunggu...`;
+    function showLoadingOverlay(count, controller) {
+        activeController = controller;
+        isGenerating = true;
 
-        statusIndex = 0;
-        overlayStatusText.textContent = statusMessages[0];
-        statusInterval = setInterval(() => {
-            statusIndex = (statusIndex + 1) % statusMessages.length;
-            overlayStatusText.style.opacity = '0';
-            setTimeout(() => {
-                overlayStatusText.textContent = statusMessages[statusIndex];
-                overlayStatusText.style.opacity = '1';
-            }, 200);
-        }, 1800);
-
-        aiLoadingOverlay.classList.add('active');
+        // Force overlay visible IMMEDIATELY
+        if (aiLoadingOverlay) {
+            aiLoadingOverlay.style.display = 'flex';
+            aiLoadingOverlay.classList.remove('hidden');
+            aiLoadingOverlay.classList.add('active');
+        }
         document.body.style.overflow = 'hidden';
+
+        try {
+            const domainCard = document.querySelector('.domain-card input[type="radio"]:checked');
+            const domainLabel = domainCard ? domainCard.closest('.domain-card')?.querySelector('span.text-xs')?.textContent : 'Terpadu';
+            const diffCard = document.querySelector('.difficulty-card input[type="radio"]:checked');
+            const diffLabel = diffCard ? diffCard.closest('.difficulty-card')?.querySelector('div.text-xs')?.textContent : 'Sedang';
+
+            if (overlayTitle) overlayTitle.textContent = `Membuat ${count} Butir Soal ${domainLabel || 'AI'}`;
+            if (overlaySubtitle) overlaySubtitle.textContent = `Tingkat kesulitan: ${diffLabel || 'Sedang'} • Berstandar AKM & PISA`;
+            if (overlayCountText) overlayCountText.textContent = `${count} butir soal adaptif sedang diproses, harap tunggu...`;
+        } catch (e) {
+            console.warn('Error reading form labels:', e);
+        }
+
+        resetProgressUI();
+        clearInterval(progressTimer);
+
+        progressTimer = setInterval(() => {
+            if (!isGenerating) return;
+            elapsedMs += 100;
+            const elapsedSec = Math.floor(elapsedMs / 1000);
+
+            // Tentukan milestone berdasarkan detik berjalan
+            let activeMilestone = progressMilestones[0];
+            for (let i = progressMilestones.length - 1; i >= 0; i--) {
+                if (elapsedSec >= progressMilestones[i].time) {
+                    activeMilestone = progressMilestones[i];
+                    break;
+                }
+            }
+
+            if (overlayPhase) overlayPhase.textContent = activeMilestone.phase;
+            if (overlayStatusText && overlayStatusText.style.color === '') {
+                overlayStatusText.textContent = activeMilestone.text;
+            }
+
+            // Interpolasi persentase secara perlahan menuju maxP stage
+            if (currentPercent < activeMilestone.maxP) {
+                const delta = (activeMilestone.maxP - currentPercent) * 0.05;
+                currentPercent = Math.min(activeMilestone.maxP, currentPercent + Math.max(0.12, delta));
+            } else if (currentPercent < 97 && elapsedSec > 20) {
+                // Di atas 20 detik, naik perlahan sampai max 97% agar terasa tidak berhenti
+                currentPercent = Math.min(97, currentPercent + 0.05);
+            }
+
+            const rounded = Math.round(currentPercent);
+            if (overlayPercent) overlayPercent.textContent = `${rounded}%`;
+            if (overlayProgressBar) overlayProgressBar.style.width = `${rounded}%`;
+            if (overlayTimerText) overlayTimerText.textContent = `${elapsedSec} detik`;
+        }, 100);
+    }
+
+    function setSuccessProgress() {
+        clearInterval(progressTimer);
+        isGenerating = false;
+        currentPercent = 100;
+
+        if (overlayPhase) overlayPhase.textContent = 'Selesai 100%!';
+        if (overlayPercent) {
+            overlayPercent.textContent = '100%';
+            overlayPercent.className = 'font-mono text-base font-black text-emerald-400 shrink-0';
+        }
+        if (overlayProgressBar) {
+            overlayProgressBar.style.width = '100%';
+            overlayProgressBar.className = 'h-full rounded-full bg-emerald-500 transition-all duration-300 shadow-md shadow-emerald-500/50';
+        }
+        if (overlayHeartbeat) {
+            overlayHeartbeat.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-400 font-bold">Paket Soal Selesai</span>';
+        }
+        if (overlayStatusText) {
+            overlayStatusText.style.color = '#4ade80';
+            overlayStatusText.textContent = '✓ Seluruh butir soal berhasil dirancang AI!';
+        }
+    }
+
+    function setErrorProgress(message) {
+        clearInterval(progressTimer);
+        isGenerating = false;
+
+        if (overlayPhase) overlayPhase.textContent = 'Proses Terhenti';
+        if (overlayPercent) {
+            overlayPercent.textContent = 'Gagal';
+            overlayPercent.className = 'font-mono text-xs font-black text-red-400 shrink-0';
+        }
+        if (overlayProgressBar) {
+            overlayProgressBar.className = 'h-full rounded-full bg-red-500 transition-all duration-300 shadow-md shadow-red-500/50';
+        }
+        if (overlayHeartbeat) {
+            overlayHeartbeat.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-400"></span><span class="text-red-400 font-bold">Terjadi Kesalahan</span>';
+        }
+        if (overlayStatusText) {
+            overlayStatusText.style.color = '#f87171';
+            overlayStatusText.textContent = message;
+        }
     }
 
     function hideLoadingOverlay() {
-        clearInterval(statusInterval);
-        aiLoadingOverlay.classList.remove('active');
+        clearInterval(progressTimer);
+        isGenerating = false;
+        activeController = null;
+        if (aiLoadingOverlay) {
+            aiLoadingOverlay.style.display = 'none';
+            aiLoadingOverlay.classList.add('hidden');
+            aiLoadingOverlay.classList.remove('active');
+        }
         document.body.style.overflow = '';
+    }
+
+    if (cancelOverlayBtn) {
+        cancelOverlayBtn.addEventListener('click', function () {
+            if (activeController) {
+                activeController.abort('dibatalkan');
+            }
+            hideLoadingOverlay();
+        });
     }
 
     // ─────────────── FORM SUBMIT (AJAX) ───────────────
@@ -1095,23 +1282,22 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
 
         const selectedCount = parseInt(countRange.value, 10);
-
-        // Button loading state
-        generateBtn.disabled = true;
-        btnText.textContent = `Generating ${selectedCount} Soal AI...`;
-        btnIcon.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-white"></i>';
-        renderLucideIcons();
-
-        // Show full-screen Lottie loading overlay
-        showLoadingOverlay(selectedCount);
-
-        const formData = new FormData(form);
-
-        // Client-side timeout: abort setelah 60 detik (max 8 soal × 10s server timeout)
-        const controller = new AbortController();
-        const clientTimeout = setTimeout(() => controller.abort(), 60000);
+        let controller = null;
+        let clientTimeout = null;
 
         try {
+            // 1. Show full-screen loading overlay FIRST
+            controller = new AbortController();
+            clientTimeout = setTimeout(() => controller.abort('timeout'), 90000);
+            showLoadingOverlay(selectedCount, controller);
+
+            // 2. Set button loading state (inline SVG spinner to avoid any Lucide dependency)
+            generateBtn.disabled = true;
+            btnText.textContent = `Memproses ${selectedCount} Soal AI...`;
+            btnIcon.innerHTML = '<svg class="w-4 h-4 animate-spin text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+
+            const formData = new FormData(form);
+
             const response = await fetch(form.action, {
                 method: 'POST',
                 body: formData,
@@ -1119,50 +1305,59 @@ document.addEventListener('DOMContentLoaded', function () {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
             });
 
-            clearTimeout(clientTimeout);
+            if (clientTimeout) clearTimeout(clientTimeout);
 
-            if (!response.ok) throw new Error('Server error ' + response.status);
+            if (!response.ok) {
+                const errJson = await response.json().catch(() => null);
+                const errMsg = errJson?.message || ('Server error ' + response.status);
+                throw new Error(errMsg);
+            }
 
             const resData = await response.json();
             if (resData.success && resData.package && resData.package.questions?.length > 0) {
-                // Brief success flash before hiding
-                overlayStatusText.style.color = '#4ade80';
-                overlayStatusText.textContent = '✓ Paket soal berhasil dibuat!';
-                await new Promise(r => setTimeout(r, 700));
+                setSuccessProgress();
+                await new Promise(r => setTimeout(r, 600));
 
                 hideLoadingOverlay();
                 loadPackage(resData.package);
 
                 // Scroll to question card on mobile
                 if (window.innerWidth < 1024) {
-                    document.getElementById('packageInfoBar').scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('packageInfoBar')?.scrollIntoView({ behavior: 'smooth' });
                 }
             } else {
+                setErrorProgress('Gagal mendapatkan paket soal AI dari server.');
+                await new Promise(r => setTimeout(r, 1200));
                 hideLoadingOverlay();
-                alert('Gagal mendapatkan paket soal. Coba lagi beberapa saat.');
+                alert('Gagal mendapatkan paket soal AI. Silakan coba kembali.');
             }
         } catch (err) {
-            clearTimeout(clientTimeout);
-            hideLoadingOverlay();
+            if (clientTimeout) clearTimeout(clientTimeout);
             if (err.name === 'AbortError') {
-                alert('Permintaan terlalu lama. Sistem sedang menggunakan bank soal lokal sebagai gantinya.');
-                // Reload dengan fallback
-                window.location.reload();
+                if (controller?.signal?.reason === 'dibatalkan') {
+                    hideLoadingOverlay();
+                } else {
+                    setErrorProgress('Waktu proses melebihi 90 detik.');
+                    await new Promise(r => setTimeout(r, 1000));
+                    hideLoadingOverlay();
+                    alert('Permintaan memakan waktu lebih dari 90 detik. Silakan coba kurangi jumlah butir soal.');
+                }
             } else {
-                console.error(err);
-                // Fallback: POST biasa (server pakai fallback bank)
-                form.submit();
+                console.error('Generator error:', err);
+                setErrorProgress(err.message || 'Koneksi ke AI bermasalah');
+                await new Promise(r => setTimeout(r, 1200));
+                hideLoadingOverlay();
+                alert('Terjadi kendala saat memproses soal: ' + (err.message || 'Koneksi bermasalah') + '. Silakan coba lagi.');
             }
         } finally {
-            overlayStatusText.style.color = '';
+            if (clientTimeout) clearTimeout(clientTimeout);
             generateBtn.disabled = false;
             btnText.textContent = 'Generate Paket Soal AI';
-            btnIcon.innerHTML = '<i data-lucide="zap" class="w-4 h-4 text-white"></i>';
-            renderLucideIcons();
+            btnIcon.innerHTML = '<svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>';
         }
     });
 

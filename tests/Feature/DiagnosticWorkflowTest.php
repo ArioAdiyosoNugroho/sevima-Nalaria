@@ -426,9 +426,9 @@ class DiagnosticWorkflowTest extends TestCase
         $response = $this->get(route('diagnostic.generator'));
 
         $response->assertStatus(200);
-        $response->assertSee('Generator Soal Numerasi Adaptif');
-        $response->assertSee('Konfigurasi Soal AI');
-        $response->assertSee('Generate Soal AI Sekarang');
+        $response->assertSee('Generator Soal Literasi & Numerasi', false);
+        $response->assertSee('Konfigurasi Paket Soal');
+        $response->assertSee('Generate Paket Soal AI');
         $response->assertSee('Aritmatika Sosial');
     }
 
@@ -471,5 +471,156 @@ class DiagnosticWorkflowTest extends TestCase
 
         $this->assertEquals('aljabar', $response->json('question.domain'));
         $this->assertEquals('Menantang', $response->json('question.difficulty'));
+    }
+
+    public function test_generator_api_dispatches_every_question_and_keeps_each_answer_with_its_own_prompt(): void
+    {
+        config(['services.openrouter.key' => 'test-key']);
+
+        // Balasan AI menandai nomor butir & domain yang diminta, agar misalignment
+        // antara prompt dan hasil (akibat pemetaan indeks) terdeteksi.
+        Http::fake(function ($request) {
+            $prompt = $request['messages'][1]['content'];
+            preg_match('/Butir Soal Ke-(\d+)/', $prompt, $numberMatch);
+            preg_match('/- Domain: [^(]+\(([a-z_]+)\)/', $prompt, $domainMatch);
+            $number = $numberMatch[1] ?? '?';
+            $domain = $domainMatch[1] ?? '?';
+
+            return Http::response([
+                'choices' => [[
+                    'message' => [
+                        'content' => json_encode([
+                            'title' => "Butir #{$number} domain {$domain}",
+                            'context_scenario' => 'Stimulus kontekstual.',
+                            'question_text' => "Pertanyaan untuk {$domain} nomor {$number}?",
+                            'options' => [
+                                ['key' => 'A', 'text' => 'Pilihan A'],
+                                ['key' => 'B', 'text' => 'Pilihan B'],
+                                ['key' => 'C', 'text' => 'Pilihan C'],
+                                ['key' => 'D', 'text' => 'Pilihan D'],
+                            ],
+                            'correct_answer' => 'B',
+                            'scaffolding_hint' => 'Petunjuk bernalar.',
+                            'conceptual_explanation' => 'Pembahasan langkah demi langkah.',
+                        ]),
+                    ],
+                ]],
+            ], 200);
+        });
+
+        $expectedRotation = [
+            'literasi_informasi',
+            'aritmatika_sosial',
+            'aljabar',
+            'geometri',
+            'data_ketidakpastian',
+            'literasi_informasi',
+            'aritmatika_sosial',
+            'geometri',
+        ];
+
+        $response = $this->postJson(route('diagnostic.generator.generate'), [
+            'domain' => 'campuran',
+            'difficulty' => 'Sedang',
+            'count' => 8,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('success', true);
+
+        $questions = $response->json('package.questions');
+        $this->assertCount(8, $questions);
+
+        // Setiap hasil harus menempel pada prompt domain-nya sendiri, tidak tertukar.
+        foreach ($questions as $index => $question) {
+            $this->assertSame($expectedRotation[$index], $question['domain']);
+            $this->assertSame(
+                'Butir #'.($index + 1).' domain '.$expectedRotation[$index],
+                $question['title']
+            );
+        }
+
+        // Satu request OpenRouter per butir soal, dikirim sekaligus (paralel).
+        Http::assertSentCount(8);
+    }
+
+    public function test_generator_api_falls_back_to_local_bank_when_openrouter_is_rate_limited(): void
+    {
+        config(['services.openrouter.key' => 'test-key']);
+
+        Http::fake([
+            'https://openrouter.ai/api/v1/chat/completions' => Http::response([
+                'error' => ['message' => 'Rate limit exceeded: free-models-per-day'],
+            ], 429),
+        ]);
+
+        $response = $this->postJson(route('diagnostic.generator.generate'), [
+            'domain' => 'geometri',
+            'difficulty' => 'Menantang',
+            'count' => 4,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('success', true);
+        $this->assertCount(4, $response->json('package.questions'));
+
+        foreach ($response->json('package.questions') as $question) {
+            $this->assertSame('geometri', $question['domain']);
+            $this->assertNotEmpty($question['question_text']);
+            $this->assertNotEmpty($question['options']);
+        }
+    }
+
+    public function test_generator_api_falls_back_to_local_bank_when_openrouter_returns_unparsable_json(): void
+    {
+        config(['services.openrouter.key' => 'test-key']);
+
+        Http::fake([
+            'https://openrouter.ai/api/v1/chat/completions' => Http::response([
+                'choices' => [[
+                    'message' => ['content' => 'Maaf, saya tidak bisa menjawab dalam format JSON.'],
+                ]],
+            ], 200),
+        ]);
+
+        $response = $this->postJson(route('diagnostic.generator.generate'), [
+            'domain' => 'aljabar',
+            'difficulty' => 'Mudah',
+            'count' => 2,
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertCount(2, $response->json('package.questions'));
+
+        foreach ($response->json('package.questions') as $question) {
+            $this->assertSame('aljabar', $question['domain']);
+        }
+    }
+
+    public function test_result_page_renders_markdown_bold_tags_for_ai_diagnosis(): void
+    {
+        $session = DiagnosticSession::create([
+            'session_code' => 'NAL-BOLDTEST',
+            'student_name' => 'Ario Adiyoso',
+            'student_grade' => 'Kelas 10 SMK (RPL / Vokasi)',
+            'score' => 80,
+            'total_questions' => 5,
+            'correct_count' => 4,
+            'mastery_level' => 'Cakap (Level 3 PISA)',
+            'primary_misconception' => 'Miskonsepsi **Diskon Bertingkat**',
+            'ai_diagnosis_summary' => "**Paragraf 1 — Analisis Pola Penalaran dan Miskonsepsi**\n\nSiswa cenderung menjumlahkan diskon secara linier.",
+            'ai_remediation_plan' => 'Lakukan latihan **persentase majemuk** bertahap.',
+            'status' => 'completed',
+            'time_spent_seconds' => 120,
+        ]);
+
+        $response = $this->actingAs($this->user)->get(route('diagnostic.result', ['code' => 'NAL-BOLDTEST']));
+
+        $response->assertStatus(200);
+        // Memastikan tag bold <strong> dirender dan bukan simbol literal **
+        $response->assertSee('<strong>Paragraf 1 — Analisis Pola Penalaran dan Miskonsepsi</strong>', false);
+        $response->assertSee('<strong>Diskon Bertingkat</strong>', false);
+        $response->assertSee('<strong>persentase majemuk</strong>', false);
+        $response->assertDontSee('**Paragraf 1 — Analisis Pola Penalaran dan Miskonsepsi**');
     }
 }
