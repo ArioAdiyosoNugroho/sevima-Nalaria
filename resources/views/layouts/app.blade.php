@@ -194,7 +194,7 @@
                     Asesmen AI
                 </a>
                 <a href="{{ route('diagnostic.generator') }}" class="nav-pill-link px-3.5 py-2.5 rounded-full {{ request()->routeIs('diagnostic.generator*') ? 'bg-[#FFF3EB] text-[#FF5500] shadow-sm font-extrabold' : 'hover:text-black hover:bg-neutral-100' }} flex items-center gap-1.5">
-                    <span class="text-[#FF5500]">⚡</span>
+                    <x-lucide name="zap" class="w-3.5 h-3.5 text-[#FF5500]" />
                     <span>Generator Soal AI</span>
                 </a>
                 @auth
@@ -202,12 +202,6 @@
                     Riwayat Tes Saya
                 </a>
                 @endauth
-                <a href="{{ route('diagnostic.landing') }}#features" class="nav-pill-link px-3.5 py-2.5 rounded-full hover:text-black hover:bg-neutral-100">
-                    Fitur & AI Agent
-                </a>
-                <a href="{{ route('diagnostic.landing') }}#stats" class="nav-pill-link px-3.5 py-2.5 rounded-full hover:text-black hover:bg-neutral-100">
-                    Metodologi PISA
-                </a>
             </nav>
 
             <!-- Right Actions (Auth & Smooth Meekoo Pill, Perfectly Aligned) -->
@@ -235,22 +229,22 @@
                                 <p class="text-[11px] text-neutral-500 truncate">{{ Auth::user()->email }}</p>
                             </div>
                             <a href="{{ route('diagnostic.history') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-neutral-700 hover:text-[#FF5500] hover:bg-orange-50 transition-colors">
-                                <span>📊</span>
+                                <x-lucide name="bar-chart-3" class="w-4 h-4 text-[#FF5500]" />
                                 <span>Riwayat Tes Saya</span>
                             </a>
                             <a href="{{ route('diagnostic.generator') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-neutral-700 hover:text-[#FF5500] hover:bg-orange-50 transition-colors">
-                                <span>⚡</span>
+                                <x-lucide name="zap" class="w-4 h-4 text-[#FF5500]" />
                                 <span>Generator Soal AI</span>
                             </a>
                             <a href="{{ route('diagnostic.quiz') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-neutral-700 hover:text-black hover:bg-neutral-100 transition-colors">
-                                <span>🎯</span>
+                                <x-lucide name="sparkles" class="w-4 h-4 text-neutral-600" />
                                 <span>Mulai Asesmen AI</span>
                             </a>
                             <div class="my-1.5 border-t border-neutral-100"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-neutral-500 hover:text-[#FF5500] hover:bg-neutral-100 transition-colors cursor-pointer text-left">
-                                    <span>🚪</span>
+                                    <x-lucide name="log-out" class="w-4 h-4 text-neutral-400" />
                                     <span>Keluar (Logout)</span>
                                 </button>
                             </form>
@@ -323,8 +317,8 @@
                             <span class="text-[10px] font-black uppercase tracking-wider text-[#FF5500] block">Platform Belajar Nalaria</span>
                             <p class="text-xs font-extrabold text-neutral-900">Asesmen Literasi & Numerasi Adaptif AI</p>
                         </div>
-                        <span class="w-8 h-8 rounded-full bg-[#FF5500] text-white flex items-center justify-center text-xs font-black shrink-0">
-                            ✨
+                        <span class="w-8 h-8 rounded-full bg-[#FF5500] text-white flex items-center justify-center shrink-0">
+                            <x-lucide name="sparkles" class="w-4 h-4 text-white" />
                         </span>
                     </div>
                 @endauth
@@ -338,7 +332,7 @@
 
                     <a href="{{ route('diagnostic.landing') }}" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all {{ request()->routeIs('diagnostic.landing') ? 'bg-[#FFF3EB] text-[#FF5500] font-extrabold shadow-sm' : 'text-neutral-700 hover:text-black hover:bg-neutral-100' }}">
                         <div class="flex items-center gap-3">
-                            <span class="text-base">🏠</span>
+                            <x-lucide name="home" class="w-4 h-4 text-neutral-500" />
                             <span>About Us</span>
                         </div>
                         <span class="text-xs text-neutral-400">→</span>
@@ -346,7 +340,7 @@
 
                     <a href="{{ route('diagnostic.quiz') }}" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all {{ request()->routeIs('diagnostic.quiz') ? 'bg-[#FFF3EB] text-[#FF5500] font-extrabold shadow-sm' : 'text-neutral-700 hover:text-black hover:bg-neutral-100' }}">
                         <div class="flex items-center gap-3">
-                            <span class="text-base">⚡</span>
+                            <x-lucide name="zap" class="w-4 h-4 text-[#FF5500]" />
                             <span>Asesmen AI</span>
                         </div>
                         <span class="px-2.5 py-0.5 rounded-full bg-[#FF5500] text-white text-[10px] font-black">Mulai</span>
@@ -354,7 +348,7 @@
 
                     <a href="{{ route('diagnostic.generator') }}" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all {{ request()->routeIs('diagnostic.generator*') ? 'bg-[#FFF3EB] text-[#FF5500] font-extrabold shadow-sm' : 'text-neutral-700 hover:text-black hover:bg-neutral-100' }}">
                         <div class="flex items-center gap-3">
-                            <span class="text-base">✨</span>
+                            <x-lucide name="wand-2" class="w-4 h-4 text-[#FF5500]" />
                             <span>Generator Soal AI</span>
                         </div>
                         <span class="px-2.5 py-0.5 rounded-full bg-orange-100 text-[#FF5500] text-[10px] font-black">AI Agent</span>
@@ -363,36 +357,12 @@
                     @auth
                     <a href="{{ route('diagnostic.history') }}" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all {{ request()->routeIs('diagnostic.history') ? 'bg-[#FFF3EB] text-[#FF5500] font-extrabold shadow-sm' : 'text-neutral-700 hover:text-black hover:bg-neutral-100' }}">
                         <div class="flex items-center gap-3">
-                            <span class="text-base">📊</span>
+                            <x-lucide name="bar-chart-3" class="w-4 h-4 text-neutral-500" />
                             <span>Riwayat Tes Saya</span>
                         </div>
                         <span class="text-xs text-neutral-400">→</span>
                     </a>
                     @endauth
-
-                    <a href="{{ route('diagnostic.landing') }}#features" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold text-neutral-700 hover:text-black hover:bg-neutral-100 transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">💡</span>
-                            <span>Fitur & AI Agent</span>
-                        </div>
-                        <span class="text-xs text-neutral-400">#</span>
-                    </a>
-
-                    <a href="{{ route('diagnostic.landing') }}#stats" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold text-neutral-700 hover:text-black hover:bg-neutral-100 transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">📐</span>
-                            <span>Metodologi PISA</span>
-                        </div>
-                        <span class="text-xs text-neutral-400">#</span>
-                    </a>
-
-                    <a href="https://github.com/ArioAdiyosoNugroho/sevima-Nalaria" target="_blank" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold text-neutral-700 hover:text-black hover:bg-neutral-100 transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="text-base">🐙</span>
-                            <span>GitHub Repository</span>
-                        </div>
-                        <span class="text-xs text-neutral-400">↗</span>
-                    </a>
                 </div>
 
                 <!-- 3. Bottom Actions & Auth -->
@@ -405,7 +375,8 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="w-full py-2.5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold text-center cursor-pointer transition-colors flex items-center justify-center gap-2">
-                                <span>🚪 Keluar dari Akun</span>
+                                <x-lucide name="log-out" class="w-4 h-4 text-neutral-500" />
+                                <span>Keluar dari Akun</span>
                             </button>
                         </form>
                     @else
@@ -433,7 +404,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
             <div class="p-4 rounded-2xl bg-black text-white text-sm font-semibold flex items-center justify-between border-l-4 border-[#FF5500] shadow-md animate-fade-in">
                 <div class="flex items-center gap-3">
-                    <span class="w-6 h-6 rounded-full bg-[#FF5500] text-white flex items-center justify-center font-bold text-xs">✓</span>
+                    <span class="w-6 h-6 rounded-full bg-[#FF5500] text-white flex items-center justify-center font-bold text-xs">
+                        <x-lucide name="check" class="w-3.5 h-3.5 text-white" stroke-width="3" />
+                    </span>
                     <span>{{ session('success') }}</span>
                 </div>
             </div>

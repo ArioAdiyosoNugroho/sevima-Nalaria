@@ -107,17 +107,19 @@
                 <div class="space-y-3.5">
                     @php
                         $categories = [
-                            ['name' => 'Aritmatika Sosial', 'desc' => 'Rasio, bunga, diskon & efisiensi biaya', 'icon' => '🏷️'],
-                            ['name' => 'Aljabar', 'desc' => 'Persamaan linear, pemodelan tarif & laju perubahan', 'icon' => '📈'],
-                            ['name' => 'Geometri Spasial', 'desc' => 'Volume, luas permukaan & orientasi ruang', 'icon' => '📐'],
-                            ['name' => 'Data & Statistik', 'desc' => 'Interpretasi tabel, diagram & estimasi peluang', 'icon' => '📊'],
+                            ['name' => 'Aritmatika Sosial', 'desc' => 'Rasio, bunga, diskon & efisiensi biaya', 'icon' => 'tag'],
+                            ['name' => 'Aljabar', 'desc' => 'Persamaan linear, pemodelan tarif & laju perubahan', 'icon' => 'trending-up'],
+                            ['name' => 'Geometri Spasial', 'desc' => 'Volume, luas permukaan & orientasi ruang', 'icon' => 'box'],
+                            ['name' => 'Data & Statistik', 'desc' => 'Interpretasi tabel, diagram & estimasi peluang', 'icon' => 'bar-chart-2'],
                         ];
                     @endphp
 
                     @foreach($categories as $cat)
                         <div class="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200/70 flex items-center justify-between hover:border-[#FF5500] transition-colors">
                             <div class="flex items-center gap-3">
-                                <span class="text-lg">{{ $cat['icon'] }}</span>
+                                <span class="w-9 h-9 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0">
+                                    <x-lucide :name="$cat['icon']" class="w-4 h-4 text-[#FF5500]" />
+                                </span>
                                 <div>
                                     <h4 class="text-xs font-bold text-black">{{ $cat['name'] }}</h4>
                                     <p class="text-[11px] text-neutral-500">{{ $cat['desc'] }}</p>
@@ -147,7 +149,7 @@
             <!-- Empty State -->
             <div class="bg-neutral-50 border-2 border-dashed border-neutral-200 rounded-[32px] p-12 text-center">
                 <div class="w-16 h-16 rounded-full bg-orange-100 text-[#FF5500] flex items-center justify-center mx-auto mb-4 font-bold text-2xl">
-                    📝
+                    <x-lucide name="clipboard-pen-line" class="w-7 h-7 text-[#FF5500]" />
                 </div>
                 <h3 class="text-lg font-extrabold text-black mb-1">Belum Ada Sesi Asesmen</h3>
                 <p class="text-xs text-neutral-500 max-w-md mx-auto mb-6">
@@ -174,8 +176,9 @@
                                     <span class="px-3 py-1 rounded-full bg-neutral-100 font-mono text-xs font-bold text-neutral-800">
                                         {{ $sess->session_code }}
                                     </span>
-                                    <span class="text-xs font-semibold text-neutral-500">
-                                        📅 {{ $dateFormatted }}
+                                    <span class="text-xs font-semibold text-neutral-500 flex items-center gap-1.5">
+                                        <x-lucide name="calendar" class="w-3.5 h-3.5 text-neutral-400" />
+                                        <span>{{ $dateFormatted }}</span>
                                     </span>
                                     <span class="px-2.5 py-0.5 rounded-full bg-orange-50 text-[11px] font-bold text-[#FF5500] border border-orange-100">
                                         {{ $sess->student_grade }}

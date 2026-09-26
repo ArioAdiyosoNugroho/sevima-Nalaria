@@ -184,8 +184,14 @@
                 </div>
 
                 <div class="pt-4 border-t border-neutral-100 flex items-center justify-between">
-                    <div class="flex items-center gap-1 text-[#FF5500] text-xs font-bold">
-                        <span>★★★★★</span>
+                    <div class="flex items-center gap-1.5 text-xs font-bold">
+                        <div class="flex items-center gap-0.5 text-[#FF5500]">
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                        </div>
                         <span class="text-neutral-500 font-semibold">(5.0 PISA)</span>
                     </div>
                     <a href="{{ route('diagnostic.quiz') }}" class="px-5 py-2.5 rounded-full bg-black hover:bg-[#FF5500] text-white font-bold text-xs transition-colors">
@@ -222,8 +228,14 @@
                 </div>
 
                 <div class="pt-4 border-t border-neutral-100 flex items-center justify-between">
-                    <div class="flex items-center gap-1 text-[#FF5500] text-xs font-bold">
-                        <span>★★★★★</span>
+                    <div class="flex items-center gap-1.5 text-xs font-bold">
+                        <div class="flex items-center gap-0.5 text-[#FF5500]">
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                        </div>
                         <span class="text-neutral-500 font-semibold">(5.0 PISA)</span>
                     </div>
                     <a href="{{ route('diagnostic.quiz') }}" class="px-5 py-2.5 rounded-full bg-black hover:bg-[#FF5500] text-white font-bold text-xs transition-colors">
@@ -260,8 +272,14 @@
                 </div>
 
                 <div class="pt-4 border-t border-neutral-100 flex items-center justify-between">
-                    <div class="flex items-center gap-1 text-[#FF5500] text-xs font-bold">
-                        <span>★★★★★</span>
+                    <div class="flex items-center gap-1.5 text-xs font-bold">
+                        <div class="flex items-center gap-0.5 text-[#FF5500]">
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                            <x-lucide name="star" class="w-3.5 h-3.5 fill-[#FF5500] text-[#FF5500]" />
+                        </div>
                         <span class="text-neutral-500 font-semibold">(5.0 PISA)</span>
                     </div>
                     <a href="{{ route('diagnostic.quiz') }}" class="px-5 py-2.5 rounded-full bg-black hover:bg-[#FF5500] text-white font-bold text-xs transition-colors">
@@ -329,7 +347,7 @@
                 <!-- Feature Item 1 -->
                 <div class="flex items-start gap-3.5 p-3.5 rounded-2xl hover:bg-[#F6F6F8] transition-colors">
                     <span class="w-8 h-8 rounded-full bg-[#FF5500] text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
-                        ✓
+                        <x-lucide name="check" class="w-4 h-4 text-white" stroke-width="3" />
                     </span>
                     <div>
                         <div class="text-base font-bold text-black">AI Aksi 1: Deteksi Akar Miskonsepsi Kognitif</div>
@@ -342,7 +360,7 @@
                 <!-- Feature Item 2 -->
                 <div class="flex items-start gap-3.5 p-3.5 rounded-2xl hover:bg-[#F6F6F8] transition-colors">
                     <span class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
-                        ✓
+                        <x-lucide name="check" class="w-4 h-4 text-white" stroke-width="3" />
                     </span>
                     <div>
                         <div class="text-base font-bold text-black">AI Aksi 2: Generator Soal Latihan Adaptif Bertarget</div>
@@ -355,7 +373,7 @@
                 <!-- Feature Item 3 -->
                 <div class="flex items-start gap-3.5 p-3.5 rounded-2xl hover:bg-[#F6F6F8] transition-colors">
                     <span class="w-8 h-8 rounded-full bg-[#FF5500] text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
-                        ✓
+                        <x-lucide name="check" class="w-4 h-4 text-white" stroke-width="3" />
                     </span>
                     <div>
                         <div class="text-base font-bold text-black">Umpan Balik Instan Tanpa Reload Halaman</div>

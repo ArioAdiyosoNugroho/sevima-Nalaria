@@ -175,12 +175,14 @@
                                     Soal #{{ $idx + 1 }}: {{ $resp->diagnosticQuestion->title }}
                                 </span>
                                 @if($resp->is_correct)
-                                    <span class="px-3 py-1 rounded-full bg-black text-white font-bold">
-                                        ✓ Benar (Opsi {{ $resp->selected_option }})
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black text-white font-bold">
+                                        <x-lucide name="check" class="w-3.5 h-3.5 text-white" stroke-width="3" />
+                                        <span>Benar (Opsi {{ $resp->selected_option }})</span>
                                     </span>
                                 @else
-                                    <span class="px-3 py-1 rounded-full bg-[#FF5500] text-white font-bold">
-                                        ✕ Salah (Dipilih: {{ $resp->selected_option }} • Kunci: {{ $resp->diagnosticQuestion->correct_answer }})
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF5500] text-white font-bold">
+                                        <x-lucide name="x" class="w-3.5 h-3.5 text-white" stroke-width="3" />
+                                        <span>Salah (Dipilih: {{ $resp->selected_option }} • Kunci: {{ $resp->diagnosticQuestion->correct_answer }})</span>
                                     </span>
                                 @endif
                             </div>
@@ -342,8 +344,9 @@
 
                         <!-- Scaffolding Hint Toggle -->
                         <div class="pt-2">
-                            <button type="button" onclick="toggleHint({{ $item->id }})" class="text-[11px] font-extrabold text-[#FF5500] hover:text-black flex items-center gap-1 transition-colors">
-                                <span>💡 Buka Petunjuk Bernalar (Scaffolding Hint)</span>
+                            <button type="button" onclick="toggleHint({{ $item->id }})" class="text-[11px] font-extrabold text-[#FF5500] hover:text-black flex items-center gap-1.5 transition-colors">
+                                <x-lucide name="lightbulb" class="w-3.5 h-3.5 text-[#FF5500]" />
+                                <span>Buka Petunjuk Bernalar (Scaffolding Hint)</span>
                             </button>
                             <div id="hint_{{ $item->id }}" class="hidden mt-2 p-3.5 rounded-xl bg-[#F6F6F8] border border-neutral-300 text-xs text-black leading-relaxed">
                                 <strong>Petunjuk Langkah:</strong> {{ $item->scaffolding_hint }}
@@ -392,11 +395,12 @@
 
             if (data.is_correct) {
                 feedbackEl.classList.add('bg-black', 'text-white', 'border', 'border-black');
-                feedbackEl.innerHTML = `<div class="font-black text-[#FF5500]">✓ Jawabanmu Tepat!</div><div class="mt-1 text-neutral-300">${data.message}</div><div class="mt-2 pt-2 border-t border-neutral-800 text-neutral-200">${data.conceptual_explanation}</div>`;
+                feedbackEl.innerHTML = `<div class="font-black text-[#FF5500] flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-[#FF5500]"></i><span>Jawabanmu Tepat!</span></div><div class="mt-1 text-neutral-300">${data.message}</div><div class="mt-2 pt-2 border-t border-neutral-800 text-neutral-200">${data.conceptual_explanation}</div>`;
             } else {
                 feedbackEl.classList.add('bg-orange-50', 'text-black', 'border', 'border-[#FF5500]');
-                feedbackEl.innerHTML = `<div class="font-black text-[#FF5500]">✕ Belum Tepat (Kunci: ${data.correct_answer})</div><div class="mt-1 text-neutral-700">${data.message}</div><div class="mt-2 pt-2 border-t border-orange-200 text-neutral-900">${data.conceptual_explanation}</div>`;
+                feedbackEl.innerHTML = `<div class="font-black text-[#FF5500] flex items-center gap-1.5"><i data-lucide="x" class="w-4 h-4 text-[#FF5500]"></i><span>Belum Tepat (Kunci: ${data.correct_answer})</span></div><div class="mt-1 text-neutral-700">${data.message}</div><div class="mt-2 pt-2 border-t border-orange-200 text-neutral-900">${data.conceptual_explanation}</div>`;
             }
+            if (window.renderLucide) window.renderLucide();
         } catch (err) {
             console.error(err);
         }

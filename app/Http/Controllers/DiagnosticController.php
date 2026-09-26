@@ -179,53 +179,60 @@ class DiagnosticController extends Controller
     }
 
     /**
-     * Halaman Dedicated Generator Soal Adaptif AI On-Demand
+     * Halaman Dedicated Generator Soal Adaptif AI On-Demand (Literasi & Numerasi)
      */
     public function generator(Request $request, NumeracyAiAgentService $aiAgent)
     {
-        $domain = $request->query('domain', 'aritmatika_sosial');
+        $domain = $request->query('domain', 'campuran');
         $difficulty = $request->query('difficulty', 'Sedang');
+        $count = (int) $request->query('count', 3);
         $context = $request->query('context');
 
-        // Generate default initial question so the page loads with an immediate interactive sample
-        $initialQuestion = $aiAgent->generateOnDemandQuestion($domain, $difficulty, $context);
+        // Generate default initial package so the page loads with a complete interactive package
+        $initialPackage = $aiAgent->generateOnDemandPackage($domain, $difficulty, $count, $context);
 
         return view('diagnostic.generator', [
-            'initialQuestion' => $initialQuestion,
+            'initialPackage' => $initialPackage,
+            'initialQuestion' => $initialPackage['questions'][0] ?? null,
             'selectedDomain' => $domain,
             'selectedDifficulty' => $difficulty,
+            'selectedCount' => $count,
             'selectedContext' => $context,
         ]);
     }
 
     /**
-     * Endpoint API / Form untuk Men-generate Soal Baru Secara Instan
+     * Endpoint API / Form untuk Men-generate Paket Soal Baru Secara Instan
      */
     public function generateQuestion(Request $request, NumeracyAiAgentService $aiAgent)
     {
         $request->validate([
-            'domain' => 'nullable|string|in:aljabar,geometri,data_ketidakpastian,aritmatika_sosial',
+            'domain' => 'nullable|string|in:campuran,literasi,literasi_informasi,aljabar,geometri,data_ketidakpastian,aritmatika_sosial',
             'difficulty' => 'nullable|string|in:Mudah,Sedang,Menantang',
+            'count' => 'nullable|integer|min:1|max:8',
             'context' => 'nullable|string|max:200',
         ]);
 
-        $domain = $request->input('domain', 'aritmatika_sosial');
+        $domain = $request->input('domain', 'campuran');
         $difficulty = $request->input('difficulty', 'Sedang');
+        $count = (int) $request->input('count', 3);
         $context = $request->input('context');
 
-        $question = $aiAgent->generateOnDemandQuestion($domain, $difficulty, $context);
+        $package = $aiAgent->generateOnDemandPackage($domain, $difficulty, $count, $context);
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'question' => $question,
+                'package' => $package,
+                'question' => $package['questions'][0] ?? null,
             ]);
         }
 
         return redirect()->route('diagnostic.generator', [
             'domain' => $domain,
             'difficulty' => $difficulty,
+            'count' => $count,
             'context' => $context,
-        ])->with('success', 'Soal numerasi adaptif berhasil di-generate!');
+        ])->with('success', 'Paket soal adaptif literasi-numerasi berhasil di-generate!');
     }
 }
