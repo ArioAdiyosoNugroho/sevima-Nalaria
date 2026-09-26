@@ -177,4 +177,55 @@ class DiagnosticController extends Controller
                 : 'Jawabanmu belum tepat. Simak penjelasan konsep di bawah untuk memahami langkah penalaran yang benar.',
         ]);
     }
+
+    /**
+     * Halaman Dedicated Generator Soal Adaptif AI On-Demand
+     */
+    public function generator(Request $request, NumeracyAiAgentService $aiAgent)
+    {
+        $domain = $request->query('domain', 'aritmatika_sosial');
+        $difficulty = $request->query('difficulty', 'Sedang');
+        $context = $request->query('context');
+
+        // Generate default initial question so the page loads with an immediate interactive sample
+        $initialQuestion = $aiAgent->generateOnDemandQuestion($domain, $difficulty, $context);
+
+        return view('diagnostic.generator', [
+            'initialQuestion' => $initialQuestion,
+            'selectedDomain' => $domain,
+            'selectedDifficulty' => $difficulty,
+            'selectedContext' => $context,
+        ]);
+    }
+
+    /**
+     * Endpoint API / Form untuk Men-generate Soal Baru Secara Instan
+     */
+    public function generateQuestion(Request $request, NumeracyAiAgentService $aiAgent)
+    {
+        $request->validate([
+            'domain' => 'nullable|string|in:aljabar,geometri,data_ketidakpastian,aritmatika_sosial',
+            'difficulty' => 'nullable|string|in:Mudah,Sedang,Menantang',
+            'context' => 'nullable|string|max:200',
+        ]);
+
+        $domain = $request->input('domain', 'aritmatika_sosial');
+        $difficulty = $request->input('difficulty', 'Sedang');
+        $context = $request->input('context');
+
+        $question = $aiAgent->generateOnDemandQuestion($domain, $difficulty, $context);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'question' => $question,
+            ]);
+        }
+
+        return redirect()->route('diagnostic.generator', [
+            'domain' => $domain,
+            'difficulty' => $difficulty,
+            'context' => $context,
+        ])->with('success', 'Soal numerasi adaptif berhasil di-generate!');
+    }
 }

@@ -129,9 +129,9 @@
         </div>
 
         <!-- Sticky Floating Bottom Submit Bar (Meekoo Pill + Arrow Circle) -->
-        <div class="sticky bottom-6 z-30 p-5 rounded-3xl bg-black text-white shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-neutral-800">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-[#FF5500] text-white flex items-center justify-center font-black text-sm">
+        <div class="sticky bottom-4 sm:bottom-6 z-30 p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-black text-white shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-neutral-800">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <div class="w-10 h-10 rounded-full bg-[#FF5500] text-white flex items-center justify-center font-black text-sm shrink-0">
                     <span id="answeredCount">0</span>/{{ count($questions) }}
                 </div>
                 <div>
@@ -140,11 +140,11 @@
                 </div>
             </div>
 
-            <button type="submit" id="submitBtn" class="group inline-flex items-center self-stretch sm:self-auto active:scale-95 transition-transform duration-200 cursor-pointer">
-                <span class="px-8 py-3.5 rounded-full bg-[#FF5500] group-hover:bg-black text-white text-sm font-extrabold uppercase tracking-wider transition-colors duration-200 shadow-md">
+            <button type="submit" id="submitBtn" class="group inline-flex items-center justify-center w-full sm:w-auto active:scale-95 transition-transform duration-200 cursor-pointer">
+                <span class="flex-1 sm:flex-initial text-center px-6 sm:px-8 py-3.5 rounded-full bg-[#FF5500] group-hover:bg-black text-white text-xs sm:text-sm font-extrabold uppercase tracking-wider transition-colors duration-200 shadow-md">
                     Submit & Analisis AI
                 </span>
-                <span class="rounded-full bg-[#FF5500] group-hover:bg-black text-white flex items-center justify-center transition-all duration-200 border-2 border-white shrink-0 -ml-3 group-hover:rotate-45" style="width: 52px; height: 52px; min-width: 52px; min-height: 52px;">
+                <span class="rounded-full bg-[#FF5500] group-hover:bg-black text-white flex items-center justify-center transition-all duration-200 border-2 border-white shrink-0 -ml-3 group-hover:rotate-45" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px;">
                     <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
                     </svg>

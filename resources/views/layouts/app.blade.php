@@ -106,13 +106,27 @@
 
         /* Glassmorphism Dynamic Navbar Scrolled State */
         .navbar-scrolled {
-            background-color: rgba(255, 255, 255, 0.96) !important;
+            background-color: rgba(255, 255, 255, 0.98) !important;
             backdrop-filter: blur(16px) !important;
             -webkit-backdrop-filter: blur(16px) !important;
             border-bottom-color: rgba(230, 230, 235, 0.9) !important;
             box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.06) !important;
-            padding-top: 12px !important;
-            padding-bottom: 12px !important;
+        }
+
+        /* Mobile Drawer Slide Down Animation */
+        #mobile-menu-drawer:not(.hidden) {
+            animation: mobileDrawerSlide 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes mobileDrawerSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Responsive Desktop vs Mobile Navigation Guarantee */
@@ -121,6 +135,9 @@
                 display: none !important;
             }
             #mobile-menu-drawer {
+                display: none !important;
+            }
+            #mobile-menu-backdrop {
                 display: none !important;
             }
             .nav-desktop-menu {
@@ -151,54 +168,58 @@
     </style>
     @stack('styles')
 </head>
-<body class="min-h-screen flex flex-col bg-white text-black selection:bg-[#FF5500] selection:text-white">
+<body class="min-h-screen flex flex-col bg-white text-black selection:bg-[#FF5500] selection:text-white overflow-x-hidden">
 
     <!-- Top Navigation Bar (Enhanced Smooth Meekoo Header with Generous Breathing Room) -->
-    <header id="main-navbar" class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-neutral-100/90 transition-all duration-300 py-4 sm:py-5">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[56px] sm:min-h-[64px] flex items-center justify-between gap-6">
+    <header id="main-navbar" class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-100/90 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4.5 flex items-center justify-between gap-3 sm:gap-6">
             
             <!-- Brand Logo (User Custom Logo) -->
-            <a href="{{ route('diagnostic.landing') }}" class="flex items-center gap-3.5 shrink-0 group active:scale-95 transition-transform duration-200">
-                <div class="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                    <x-logo class="w-10 h-10 sm:w-11 sm:h-11" fill="#FF5500" />
+            <a href="{{ route('diagnostic.landing') }}" class="flex items-center gap-2.5 sm:gap-3.5 shrink-0 group active:scale-95 transition-transform duration-200">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                    <x-logo class="w-9 h-9 sm:w-11 sm:h-11" fill="#FF5500" />
                 </div>
                 <div class="flex items-center">
-                    <span class="text-2xl sm:text-3xl font-black tracking-tight text-black">Nalaria</span>
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#FF5500] ml-1 group-hover:scale-125 transition-transform duration-200"></span>
+                    <span class="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-black">Nalaria</span>
+                    <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#FF5500] ml-1 group-hover:scale-125 transition-transform duration-200"></span>
                 </div>
             </a>
 
-            <!-- Center Navigation Links (Visible ONLY on Desktop, Perfectly Centered) -->
-            <nav class="nav-desktop-menu hidden lg:flex items-center gap-1.5 text-xs font-bold text-neutral-600">
-                <a href="{{ route('diagnostic.landing') }}" class="nav-pill-link px-4 py-2.5 rounded-full {{ request()->routeIs('diagnostic.landing') ? 'bg-[#FFF3EB] text-[#FF5500] shadow-sm font-extrabold' : 'hover:text-black hover:bg-neutral-100' }}">
+            <!-- Center Navigation Links (Visible ONLY on Desktop >= 1024px, Perfectly Centered) -->
+            <nav class="nav-desktop-menu hidden lg:flex items-center gap-1 text-xs font-bold text-neutral-600">
+                <a href="{{ route('diagnostic.landing') }}" class="nav-pill-link px-3.5 py-2.5 rounded-full {{ request()->routeIs('diagnostic.landing') ? 'bg-[#FFF3EB] text-[#FF5500] shadow-sm font-extrabold' : 'hover:text-black hover:bg-neutral-100' }}">
                     About Us
                 </a>
-                <a href="{{ route('diagnostic.quiz') }}" class="nav-pill-link px-4 py-2.5 rounded-full {{ request()->routeIs('diagnostic.quiz') ? 'bg-[#FFF3EB] text-[#FF5500] shadow-sm font-extrabold' : 'hover:text-black hover:bg-neutral-100' }}">
+                <a href="{{ route('diagnostic.quiz') }}" class="nav-pill-link px-3.5 py-2.5 rounded-full {{ request()->routeIs('diagnostic.quiz') ? 'bg-[#FFF3EB] text-[#FF5500] shadow-sm font-extrabold' : 'hover:text-black hover:bg-neutral-100' }}">
                     Asesmen AI
                 </a>
+                <a href="{{ route('diagnostic.generator') }}" class="nav-pill-link px-3.5 py-2.5 rounded-full {{ request()->routeIs('diagnostic.generator*') ? 'bg-[#FFF3EB] text-[#FF5500] shadow-sm font-extrabold' : 'hover:text-black hover:bg-neutral-100' }} flex items-center gap-1.5">
+                    <span class="text-[#FF5500]">⚡</span>
+                    <span>Generator Soal AI</span>
+                </a>
                 @auth
-                <a href="{{ route('diagnostic.history') }}" class="nav-pill-link px-4 py-2.5 rounded-full {{ request()->routeIs('diagnostic.history') ? 'bg-[#FFF3EB] text-[#FF5500] shadow-sm font-extrabold' : 'hover:text-black hover:bg-neutral-100' }}">
+                <a href="{{ route('diagnostic.history') }}" class="nav-pill-link px-3.5 py-2.5 rounded-full {{ request()->routeIs('diagnostic.history') ? 'bg-[#FFF3EB] text-[#FF5500] shadow-sm font-extrabold' : 'hover:text-black hover:bg-neutral-100' }}">
                     Riwayat Tes Saya
                 </a>
                 @endauth
-                <a href="{{ route('diagnostic.landing') }}#features" class="nav-pill-link px-4 py-2.5 rounded-full hover:text-black hover:bg-neutral-100">
+                <a href="{{ route('diagnostic.landing') }}#features" class="nav-pill-link px-3.5 py-2.5 rounded-full hover:text-black hover:bg-neutral-100">
                     Fitur & AI Agent
                 </a>
-                <a href="{{ route('diagnostic.landing') }}#stats" class="nav-pill-link px-4 py-2.5 rounded-full hover:text-black hover:bg-neutral-100">
+                <a href="{{ route('diagnostic.landing') }}#stats" class="nav-pill-link px-3.5 py-2.5 rounded-full hover:text-black hover:bg-neutral-100">
                     Metodologi PISA
                 </a>
             </nav>
 
             <!-- Right Actions (Auth & Smooth Meekoo Pill, Perfectly Aligned) -->
-            <div class="flex items-center gap-3 shrink-0">
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 @auth
-                    <!-- Interactive Profile Pill with Dropdown -->
-                    <div class="relative" id="user-menu-wrapper">
-                        <button id="user-menu-btn" type="button" class="flex items-center gap-2.5 px-4 py-2 rounded-full bg-neutral-100 hover:bg-neutral-200 border border-neutral-200/80 transition-all duration-200 cursor-pointer active:scale-95" aria-expanded="false">
+                    <!-- Interactive Profile Pill with Dropdown (Visible on sm and up) -->
+                    <div class="relative hidden sm:block" id="user-menu-wrapper">
+                        <button id="user-menu-btn" type="button" class="flex items-center gap-2.5 px-3.5 sm:px-4 py-2 rounded-full bg-neutral-100 hover:bg-neutral-200 border border-neutral-200/80 transition-all duration-200 cursor-pointer active:scale-95" aria-expanded="false">
                             <span class="w-6 h-6 rounded-full bg-black text-white text-[11px] font-black flex items-center justify-center border border-[#FF5500]">
                                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                             </span>
-                            <span class="text-xs font-bold text-neutral-800 max-w-[120px] truncate">
+                            <span class="text-xs font-bold text-neutral-800 max-w-[100px] sm:max-w-[120px] truncate">
                                 {{ Auth::user()->name }}
                             </span>
                             <svg id="user-menu-chevron" class="w-3.5 h-3.5 text-neutral-500 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -217,6 +238,10 @@
                                 <span>📊</span>
                                 <span>Riwayat Tes Saya</span>
                             </a>
+                            <a href="{{ route('diagnostic.generator') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-neutral-700 hover:text-[#FF5500] hover:bg-orange-50 transition-colors">
+                                <span>⚡</span>
+                                <span>Generator Soal AI</span>
+                            </a>
                             <a href="{{ route('diagnostic.quiz') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-neutral-700 hover:text-black hover:bg-neutral-100 transition-colors">
                                 <span>🎯</span>
                                 <span>Mulai Asesmen AI</span>
@@ -232,22 +257,22 @@
                         </div>
                     </div>
 
-                    <!-- Meekoo CTA Pill Button -->
+                    <!-- Meekoo CTA Pill Button (Hidden on extra-small mobile) -->
                     <a href="{{ route('diagnostic.quiz') }}" class="hidden sm:inline-flex items-center group active:scale-95 transition-transform duration-200">
-                        <span class="px-5 py-2.5 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-xs font-bold transition-colors duration-200 shadow-sm">
+                        <span class="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-xs font-bold transition-colors duration-200 shadow-sm">
                             Mulai Asesmen
                         </span>
-                        <span class="rounded-full bg-black group-hover:bg-[#FF5500] text-white flex items-center justify-center transition-all duration-200 border-2 border-white group-hover:rotate-45 shrink-0 -ml-2" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px;">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <span class="rounded-full bg-black group-hover:bg-[#FF5500] text-white flex items-center justify-center transition-all duration-200 border-2 border-white group-hover:rotate-45 shrink-0 -ml-2" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px;">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
                             </svg>
                         </span>
                     </a>
                 @else
-                    <a href="{{ route('login') }}" class="nav-pill-link text-xs font-bold text-neutral-700 hover:text-[#FF5500] px-4 py-2.5 rounded-full hover:bg-neutral-100 transition-all duration-200">
+                    <a href="{{ route('login') }}" class="hidden sm:inline-flex nav-pill-link text-xs font-bold text-neutral-700 hover:text-[#FF5500] px-4 py-2.5 rounded-full hover:bg-neutral-100 transition-all duration-200">
                         Masuk
                     </a>
-                    <a href="{{ route('register') }}" class="inline-flex items-center group active:scale-95 transition-transform duration-200">
+                    <a href="{{ route('register') }}" class="hidden sm:inline-flex items-center group active:scale-95 transition-transform duration-200">
                         <span class="px-5 py-2.5 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-xs font-bold transition-colors duration-200 shadow-sm">
                             Daftar Siswa
                         </span>
@@ -260,7 +285,7 @@
                 @endauth
 
                 <!-- Mobile Hamburger Toggle Button (STRICTLY HIDDEN on desktop via lg:hidden and scoped CSS) -->
-                <button id="mobile-menu-btn" type="button" class="lg:hidden flex items-center justify-center w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors cursor-pointer active:scale-90" aria-label="Menu Navigasi">
+                <button id="mobile-menu-btn" type="button" class="lg:hidden flex items-center justify-center w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors cursor-pointer active:scale-90" aria-label="Menu Navigasi" aria-expanded="false">
                     <svg id="hamburger-icon" class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
@@ -272,56 +297,136 @@
         </div>
 
         <!-- Mobile Responsive Navigation Drawer (STRICTLY HIDDEN on desktop via lg:hidden and scoped CSS) -->
-        <div id="mobile-menu-drawer" class="hidden lg:hidden border-b border-neutral-200 bg-white/95 backdrop-blur-xl px-4 pt-3 pb-6 transition-all duration-300">
-            <div class="flex flex-col space-y-1.5">
-                <a href="{{ route('diagnostic.landing') }}" class="px-4 py-2.5 rounded-2xl text-xs font-bold transition-colors {{ request()->routeIs('diagnostic.landing') ? 'bg-orange-50 text-[#FF5500]' : 'text-neutral-700 hover:bg-neutral-100' }}">
-                    About Us
-                </a>
-                <a href="{{ route('diagnostic.quiz') }}" class="px-4 py-2.5 rounded-2xl text-xs font-bold transition-colors {{ request()->routeIs('diagnostic.quiz') ? 'bg-orange-50 text-[#FF5500]' : 'text-neutral-700 hover:bg-neutral-100' }}">
-                    Asesmen AI
-                </a>
+        <!-- Content Navigation ditata lebih ke bawah dengan kartu info, section header, dan padding optimal -->
+        <div id="mobile-menu-drawer" class="hidden lg:hidden border-t border-neutral-200/80 bg-white/98 backdrop-blur-2xl px-4 sm:px-6 pt-5 pb-8 transition-all duration-300 shadow-2xl max-h-[calc(100vh-75px)] overflow-y-auto">
+            <div class="max-w-lg mx-auto flex flex-col space-y-4">
+                
+                <!-- 1. Top Card: Profile (if logged in) or Welcome Banner (if guest) -->
                 @auth
-                <a href="{{ route('diagnostic.history') }}" class="px-4 py-2.5 rounded-2xl text-xs font-bold transition-colors {{ request()->routeIs('diagnostic.history') ? 'bg-orange-50 text-[#FF5500]' : 'text-neutral-700 hover:bg-neutral-100' }}">
-                    Riwayat Tes Saya
-                </a>
-                @endauth
-                <a href="{{ route('diagnostic.landing') }}#features" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-neutral-700 hover:bg-neutral-100 transition-colors">
-                    Fitur & AI Agent
-                </a>
-                <a href="{{ route('diagnostic.landing') }}#stats" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-neutral-700 hover:bg-neutral-100 transition-colors">
-                    Metodologi PISA
-                </a>
-                <a href="https://github.com/ArioAdiyosoNugroho/sevima-Nalaria" target="_blank" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-neutral-700 hover:bg-neutral-100 transition-colors flex items-center justify-between">
-                    <span>GitHub Repository</span>
-                    <span class="text-[10px] text-neutral-400">↗</span>
-                </a>
-
-                <div class="pt-3 border-t border-neutral-100 mt-2 flex flex-col gap-2">
-                    @auth
-                        <div class="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-neutral-50 text-xs font-semibold">
-                            <span class="text-neutral-700 font-bold">👤 {{ Auth::user()->name }}</span>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="font-extrabold text-[#FF5500] hover:underline cursor-pointer">Keluar</button>
-                            </form>
+                    <div class="p-4 rounded-2xl bg-neutral-50 border border-neutral-200/90 flex items-center justify-between gap-3 shadow-sm">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="w-10 h-10 rounded-full bg-black text-white text-xs font-black flex items-center justify-center border-2 border-[#FF5500] shrink-0">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            </span>
+                            <div class="min-w-0">
+                                <div class="text-xs font-black text-black truncate">{{ Auth::user()->name }}</div>
+                                <div class="text-[11px] text-neutral-500 truncate">{{ Auth::user()->email }}</div>
+                            </div>
                         </div>
-                        <a href="{{ route('diagnostic.quiz') }}" class="w-full py-3 rounded-full bg-[#FF5500] text-white text-xs font-extrabold text-center shadow-lg shadow-orange-500/20 active:scale-95 transition-transform">
-                            Mulai Asesmen Sekarang →
+                        <span class="px-2.5 py-1 rounded-full bg-orange-100 text-[#FF5500] text-[10px] font-black shrink-0 uppercase">
+                            Siswa
+                        </span>
+                    </div>
+                @else
+                    <div class="p-4 rounded-2xl bg-gradient-to-r from-orange-50 to-[#FFF3EB] border border-orange-200/70 flex items-center justify-between gap-3 shadow-sm">
+                        <div class="space-y-0.5">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-[#FF5500] block">Platform Belajar Nalaria</span>
+                            <p class="text-xs font-extrabold text-neutral-900">Asesmen Literasi & Numerasi Adaptif AI</p>
+                        </div>
+                        <span class="w-8 h-8 rounded-full bg-[#FF5500] text-white flex items-center justify-center text-xs font-black shrink-0">
+                            ✨
+                        </span>
+                    </div>
+                @endauth
+
+                <!-- 2. Section Header & Navigation Links Group (Posisi konten lebih ke bawah) -->
+                <div class="space-y-1.5 pt-1">
+                    <div class="flex items-center justify-between px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-neutral-400 border-b border-neutral-100 mb-2">
+                        <span>Menu Navigasi</span>
+                        <span>Nalaria AI</span>
+                    </div>
+
+                    <a href="{{ route('diagnostic.landing') }}" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all {{ request()->routeIs('diagnostic.landing') ? 'bg-[#FFF3EB] text-[#FF5500] font-extrabold shadow-sm' : 'text-neutral-700 hover:text-black hover:bg-neutral-100' }}">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">🏠</span>
+                            <span>About Us</span>
+                        </div>
+                        <span class="text-xs text-neutral-400">→</span>
+                    </a>
+
+                    <a href="{{ route('diagnostic.quiz') }}" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all {{ request()->routeIs('diagnostic.quiz') ? 'bg-[#FFF3EB] text-[#FF5500] font-extrabold shadow-sm' : 'text-neutral-700 hover:text-black hover:bg-neutral-100' }}">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">⚡</span>
+                            <span>Asesmen AI</span>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full bg-[#FF5500] text-white text-[10px] font-black">Mulai</span>
+                    </a>
+
+                    <a href="{{ route('diagnostic.generator') }}" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all {{ request()->routeIs('diagnostic.generator*') ? 'bg-[#FFF3EB] text-[#FF5500] font-extrabold shadow-sm' : 'text-neutral-700 hover:text-black hover:bg-neutral-100' }}">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">✨</span>
+                            <span>Generator Soal AI</span>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full bg-orange-100 text-[#FF5500] text-[10px] font-black">AI Agent</span>
+                    </a>
+
+                    @auth
+                    <a href="{{ route('diagnostic.history') }}" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all {{ request()->routeIs('diagnostic.history') ? 'bg-[#FFF3EB] text-[#FF5500] font-extrabold shadow-sm' : 'text-neutral-700 hover:text-black hover:bg-neutral-100' }}">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">📊</span>
+                            <span>Riwayat Tes Saya</span>
+                        </div>
+                        <span class="text-xs text-neutral-400">→</span>
+                    </a>
+                    @endauth
+
+                    <a href="{{ route('diagnostic.landing') }}#features" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold text-neutral-700 hover:text-black hover:bg-neutral-100 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">💡</span>
+                            <span>Fitur & AI Agent</span>
+                        </div>
+                        <span class="text-xs text-neutral-400">#</span>
+                    </a>
+
+                    <a href="{{ route('diagnostic.landing') }}#stats" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold text-neutral-700 hover:text-black hover:bg-neutral-100 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">📐</span>
+                            <span>Metodologi PISA</span>
+                        </div>
+                        <span class="text-xs text-neutral-400">#</span>
+                    </a>
+
+                    <a href="https://github.com/ArioAdiyosoNugroho/sevima-Nalaria" target="_blank" class="flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold text-neutral-700 hover:text-black hover:bg-neutral-100 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="text-base">🐙</span>
+                            <span>GitHub Repository</span>
+                        </div>
+                        <span class="text-xs text-neutral-400">↗</span>
+                    </a>
+                </div>
+
+                <!-- 3. Bottom Actions & Auth -->
+                <div class="pt-4 border-t border-neutral-100 flex flex-col gap-2.5">
+                    @auth
+                        <a href="{{ route('diagnostic.quiz') }}" class="w-full py-3.5 rounded-full bg-[#FF5500] text-white text-xs font-black text-center shadow-lg shadow-orange-500/20 active:scale-95 transition-transform flex items-center justify-center gap-2">
+                            <span>Mulai Asesmen AI Sekarang</span>
+                            <span>→</span>
                         </a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="w-full py-2.5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold text-center cursor-pointer transition-colors flex items-center justify-center gap-2">
+                                <span>🚪 Keluar dari Akun</span>
+                            </button>
+                        </form>
                     @else
-                        <div class="grid grid-cols-2 gap-2">
-                            <a href="{{ route('login') }}" class="w-full py-2.5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-black text-xs font-bold text-center active:scale-95 transition-transform">
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <a href="{{ route('login') }}" class="w-full py-3 rounded-full bg-neutral-100 hover:bg-neutral-200 text-black text-xs font-bold text-center active:scale-95 transition-transform">
                                 Masuk
                             </a>
-                            <a href="{{ route('register') }}" class="w-full py-2.5 rounded-full bg-[#FF5500] text-white text-xs font-bold text-center active:scale-95 transition-transform shadow-md shadow-orange-500/20">
-                                Daftar Siswa
+                            <a href="{{ route('register') }}" class="w-full py-3 rounded-full bg-[#FF5500] text-white text-xs font-bold text-center active:scale-95 transition-transform shadow-md shadow-orange-500/20 flex items-center justify-center gap-1.5">
+                                <span>Daftar Siswa</span>
+                                <span>→</span>
                             </a>
                         </div>
                     @endauth
                 </div>
+
             </div>
         </div>
     </header>
+
+    <!-- Mobile Menu Backdrop Overlay -->
+    <div id="mobile-menu-backdrop" class="hidden lg:hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-40 transition-opacity duration-300"></div>
 
     <!-- Flash Alert -->
     @if(session('success'))
@@ -419,33 +524,64 @@
                 });
             }
 
-            // Mobile menu drawer toggle
+            // Mobile menu drawer & backdrop toggle
             const mobileBtn = document.getElementById('mobile-menu-btn');
             const mobileDrawer = document.getElementById('mobile-menu-drawer');
+            const mobileBackdrop = document.getElementById('mobile-menu-backdrop');
             const hamburgerIcon = document.getElementById('hamburger-icon');
             const closeIcon = document.getElementById('close-icon');
+
+            function openMobileDrawer() {
+                if (!mobileDrawer) return;
+                mobileDrawer.classList.remove('hidden');
+                if (mobileBackdrop) mobileBackdrop.classList.remove('hidden');
+                if (hamburgerIcon) hamburgerIcon.classList.add('hidden');
+                if (closeIcon) closeIcon.classList.remove('hidden');
+                if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'true');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMobileDrawer() {
+                if (!mobileDrawer) return;
+                mobileDrawer.classList.add('hidden');
+                if (mobileBackdrop) mobileBackdrop.classList.add('hidden');
+                if (hamburgerIcon) hamburgerIcon.classList.remove('hidden');
+                if (closeIcon) closeIcon.classList.add('hidden');
+                if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            }
 
             if (mobileBtn && mobileDrawer) {
                 mobileBtn.addEventListener('click', function () {
                     const isClosed = mobileDrawer.classList.contains('hidden');
                     if (isClosed) {
-                        mobileDrawer.classList.remove('hidden');
-                        if (hamburgerIcon) hamburgerIcon.classList.add('hidden');
-                        if (closeIcon) closeIcon.classList.remove('hidden');
+                        openMobileDrawer();
                     } else {
-                        mobileDrawer.classList.add('hidden');
-                        if (hamburgerIcon) hamburgerIcon.classList.remove('hidden');
-                        if (closeIcon) closeIcon.classList.add('hidden');
+                        closeMobileDrawer();
                     }
                 });
 
+                if (mobileBackdrop) {
+                    mobileBackdrop.addEventListener('click', closeMobileDrawer);
+                }
+
                 // Auto-close mobile drawer when any link is clicked
                 mobileDrawer.querySelectorAll('a').forEach(function (link) {
-                    link.addEventListener('click', function () {
-                        mobileDrawer.classList.add('hidden');
-                        if (hamburgerIcon) hamburgerIcon.classList.remove('hidden');
-                        if (closeIcon) closeIcon.classList.add('hidden');
-                    });
+                    link.addEventListener('click', closeMobileDrawer);
+                });
+
+                // Auto-close when pressing Escape key
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && !mobileDrawer.classList.contains('hidden')) {
+                        closeMobileDrawer();
+                    }
+                });
+
+                // Auto-close on resize to desktop (>= 1024px)
+                window.addEventListener('resize', function () {
+                    if (window.innerWidth >= 1024 && !mobileDrawer.classList.contains('hidden')) {
+                        closeMobileDrawer();
+                    }
                 });
             }
         });

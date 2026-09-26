@@ -6,33 +6,33 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
 
     <!-- Top Identity & Actions Bar (Meekoo Style) -->
-    <div class="meekoo-card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-full bg-black text-white font-black text-xl flex items-center justify-center border-2 border-[#FF5500] shadow-md">
+    <div class="meekoo-card p-5 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-6">
+        <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-black text-white font-black text-lg sm:text-xl flex items-center justify-center border-2 border-[#FF5500] shadow-md shrink-0">
                 {{ substr($session->student_name, 0, 1) }}
             </div>
-            <div class="space-y-1">
-                <div class="flex items-center gap-3">
-                    <h1 class="meekoo-heading text-2xl font-extrabold text-black">{{ $session->student_name }}</h1>
-                    <span class="px-3 py-1 rounded-full bg-[#FF5500] text-white text-xs font-mono font-bold">
+            <div class="space-y-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <h1 class="meekoo-heading text-xl sm:text-2xl font-extrabold text-black truncate">{{ $session->student_name }}</h1>
+                    <span class="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-[#FF5500] text-white text-[11px] sm:text-xs font-mono font-bold">
                         {{ $session->session_code }}
                     </span>
                 </div>
-                <p class="text-xs text-neutral-500 font-semibold">
+                <p class="text-[11px] sm:text-xs text-neutral-500 font-semibold">
                     {{ $session->student_grade ?? 'Siswa' }} • Diselesaikan pada {{ $session->created_at->format('d M Y, H:i') }} WIB • Waktu: {{ gmdate('i:s', $session->time_spent_seconds) }}
                 </p>
             </div>
         </div>
 
-        <div class="flex items-center gap-3">
-            <button onclick="window.print()" class="px-5 py-2.5 rounded-full bg-[#F4F4F6] hover:bg-neutral-200 text-black text-xs font-bold transition-all flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+            <button onclick="window.print()" class="flex-1 sm:flex-initial justify-center px-4 sm:px-5 py-2.5 rounded-full bg-[#F4F4F6] hover:bg-neutral-200 text-black text-xs font-bold transition-all flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.673-2.074-1.27-2.946m12.008 2.946c.24-1.076.673-2.074 1.27-2.946M3.66 8.358C4.54 6.77 5.86 5.48 7.43 4.63m13.01 3.728c-.88-1.588-2.2-2.878-3.77-3.728M12 21a9 9 0 100-18 9 9 0 000 18z"/>
                 </svg>
                 <span>Cetak PDF</span>
             </button>
-            <a href="{{ route('diagnostic.quiz') }}" class="group inline-flex items-center active:scale-95 transition-transform duration-200">
-                <span class="px-6 py-2.5 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-xs font-bold transition-colors duration-200 shadow-sm">
+            <a href="{{ route('diagnostic.quiz') }}" class="group inline-flex items-center justify-center flex-1 sm:flex-initial active:scale-95 transition-transform duration-200">
+                <span class="flex-1 sm:flex-none text-center px-5 sm:px-6 py-2.5 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-xs font-bold transition-colors duration-200 shadow-sm">
                     Asesmen Baru
                 </span>
                 <span class="rounded-full bg-black group-hover:bg-[#FF5500] text-white flex items-center justify-center transition-all duration-200 border-2 border-white shrink-0 -ml-2 group-hover:rotate-45" style="width: 42px; height: 42px; min-width: 42px; min-height: 42px;">
@@ -72,13 +72,14 @@
     @endif
 
     <!-- METRICS STRIP (Exact Meekoo 4-Stat Strip with Dots in Orange/Black/White) -->
-    <div class="meekoo-stat-strip p-8 sm:p-10 border border-neutral-200">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 items-center text-center">
+    <!-- METRICS STRIP (Exact Meekoo 4-Stat Strip with Dots in Orange/Black/White) -->
+    <div class="meekoo-stat-strip p-6 sm:p-10 border border-neutral-200">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 items-center text-center">
             
             <!-- Stat 1: Skor Numerasi -->
             <div class="space-y-1">
-                <div class="text-4xl sm:text-5xl font-black tracking-tight text-black">
-                    {{ $session->score }}<span class="text-xl text-[#FF5500] font-bold">/100</span>
+                <div class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-black">
+                    {{ $session->score }}<span class="text-lg sm:text-xl text-[#FF5500] font-bold">/100</span>
                 </div>
                 <div class="text-xs sm:text-sm font-semibold text-neutral-500">Skor Penalaran Numerasi</div>
             </div>
@@ -86,8 +87,8 @@
             <!-- Stat 2: Akurasi -->
             <div class="space-y-1 relative">
                 <span class="hidden md:block absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-black"></span>
-                <div class="text-4xl sm:text-5xl font-black tracking-tight text-black">
-                    {{ $session->correct_count }}<span class="text-xl text-neutral-400 font-bold">/{{ $session->total_questions }}</span>
+                <div class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-black">
+                    {{ $session->correct_count }}<span class="text-lg sm:text-xl text-neutral-400 font-bold">/{{ $session->total_questions }}</span>
                 </div>
                 <div class="text-xs sm:text-sm font-semibold text-neutral-500">Akurasi Soal Benar</div>
             </div>
@@ -104,7 +105,7 @@
             <!-- Stat 4: AI Agent Actions -->
             <div class="space-y-1 relative">
                 <span class="hidden md:block absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-black"></span>
-                <div class="text-4xl sm:text-5xl font-black tracking-tight text-black">
+                <div class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-black">
                     2 Aksi
                 </div>
                 <div class="text-xs sm:text-sm font-semibold text-neutral-500">AI Agent (Nemotron-3)</div>

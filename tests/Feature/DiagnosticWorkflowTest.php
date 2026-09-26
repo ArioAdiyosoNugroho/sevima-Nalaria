@@ -420,4 +420,56 @@ class DiagnosticWorkflowTest extends TestCase
             'difficulty_level' => 'Mudah',
         ]);
     }
+
+    public function test_generator_page_renders_successfully(): void
+    {
+        $response = $this->get(route('diagnostic.generator'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Generator Soal Numerasi Adaptif');
+        $response->assertSee('Konfigurasi Soal AI');
+        $response->assertSee('Generate Soal AI Sekarang');
+        $response->assertSee('Aritmatika Sosial');
+    }
+
+    public function test_navbar_contains_generator_soal_ai_link(): void
+    {
+        $response = $this->get(route('diagnostic.landing'));
+
+        $response->assertStatus(200);
+        $response->assertSee(route('diagnostic.generator'));
+        $response->assertSee('Generator Soal AI');
+    }
+
+    public function test_generator_api_returns_json_on_ajax_request(): void
+    {
+        $payload = [
+            'domain' => 'aljabar',
+            'difficulty' => 'Menantang',
+            'context' => 'Penghematan Panel Surya Sekolah',
+        ];
+
+        $response = $this->postJson(route('diagnostic.generator.generate'), $payload);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'success',
+            'question' => [
+                'domain',
+                'domain_label',
+                'difficulty',
+                'title',
+                'context_scenario',
+                'question_text',
+                'options',
+                'correct_answer',
+                'scaffolding_hint',
+                'conceptual_explanation',
+                'ai_model',
+            ],
+        ]);
+
+        $this->assertEquals('aljabar', $response->json('question.domain'));
+        $this->assertEquals('Menantang', $response->json('question.difficulty'));
+    }
 }

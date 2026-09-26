@@ -626,4 +626,308 @@ class NumeracyAiAgentService
             ."{$weaknessSummary}{$misconceptionList}\n\n"
             .'Siswa cenderung menyelesaikan persoalan dengan intuisi aritmatika langsung atau prosedur hafalan linier tanpa memvalidasi keterikatan antar variabel situasi kontekstual. Rekomendasi tindakan: Siswa disarankan mempelajari materi remediasi bertarget dan mengerjakan paket latihan scaffolding adaptif di bawah ini untuk memperkuat fondasi penalaran matematis.';
     }
+
+    /**
+     * Menghasilkan 1 butir soal adaptif secara interaktif/on-demand berdasarkan domain, tingkat kesulitan, dan konteks tema
+     *
+     * @return array{
+     *     domain: string,
+     *     domain_label: string,
+     *     difficulty: string,
+     *     title: string,
+     *     context_scenario: string,
+     *     question_text: string,
+     *     options: array<int, array{key: string, text: string}>,
+     *     correct_answer: string,
+     *     scaffolding_hint: string,
+     *     conceptual_explanation: string,
+     *     ai_model: string
+     * }
+     */
+    public function generateOnDemandQuestion(
+        string $domain = 'aritmatika_sosial',
+        string $difficulty = 'Sedang',
+        ?string $topicContext = null
+    ): array {
+        $normalizedDomain = match (strtolower(trim($domain))) {
+            'aljabar' => 'aljabar',
+            'geometri', 'geometri_spasial' => 'geometri',
+            'data_ketidakpastian', 'statistika', 'data & statistik' => 'data_ketidakpastian',
+            default => 'aritmatika_sosial',
+        };
+
+        $categoryLabel = self::mapDomainToCategory($normalizedDomain);
+
+        $allowedDifficulties = ['Mudah', 'Sedang', 'Menantang'];
+        $difficulty = in_array(ucfirst(strtolower($difficulty)), $allowedDifficulties) ? ucfirst(strtolower($difficulty)) : 'Sedang';
+
+        $defaultContexts = [
+            'aljabar' => 'Pemodelan Efisiensi Biaya Instalasi Panel Surya Sekolah',
+            'geometri' => 'Tata Ruang & Luas Efektif Taman Hidroponik Komunitas',
+            'data_ketidakpastian' => 'Analisis Tren Penurunan Emisi Karbon dan Jejak Plastik',
+            'aritmatika_sosial' => 'Skema Investasi Daur Ulang Logam & Diskon Bertingkat Pupuk Kompos',
+        ];
+
+        $topic = ! empty(trim($topicContext ?? '')) ? trim($topicContext) : ($defaultContexts[$normalizedDomain] ?? 'Keberlanjutan Lingkungan Indonesia');
+
+        // Coba generate via OpenRouter Nemotron jika API key tersedia
+        $apiKey = config('services.openrouter.key') ?: env('OPENROUTER_API_KEY');
+        if (! empty($apiKey)) {
+            $systemPrompt = 'Kamu adalah Pakar Desain Soal Numerasi Kontekstual Indonesia berstandar PISA dan AKM. '
+                .'Buatlah 1 butir soal numerasi kontekstual bertema masa depan berkelanjutan sesuai spesifikasi dalam format JSON valid.';
+
+            $difficultyGuidance = match ($difficulty) {
+                'Menantang' => 'Level 4-5 PISA (HOTS): Skenario multivariabel, konversi unit bertingkat, penalaran kritis langkah ganda.',
+                'Mudah' => 'Level 2 PISA: Narasi langsung, angka bulat bersahabat, konsep dasar tanpa jebakan kompleks.',
+                default => 'Level 3 PISA: Penalaran terstruktur, aplikasi konsep kontekstual dengan 2 tahapan perhitungan.',
+            };
+
+            $userPrompt = "Spesifikasi Soal Numerasi:\n"
+                ."- Domain: {$categoryLabel} ({$normalizedDomain})\n"
+                ."- Tingkat Kesulitan: {$difficulty} ({$difficultyGuidance})\n"
+                ."- Konteks Topik Keberlanjutan: {$topic}\n\n"
+                ."Format output WAJIB HANYA berupa JSON valid (tanpa markdown atau teks lainnya) dengan struktur:\n"
+                ."{\n"
+                ."  \"title\": \"... judul menarik ...\",\n"
+                ."  \"context_scenario\": \"... cerita latar situasi kontekstual ...\",\n"
+                ."  \"question_text\": \"... pertanyaan ...\",\n"
+                ."  \"options\": [\n"
+                ."    {\"key\": \"A\", \"text\": \"...\"},\n"
+                ."    {\"key\": \"B\", \"text\": \"...\"},\n"
+                ."    {\"key\": \"C\", \"text\": \"...\"},\n"
+                ."    {\"key\": \"D\", \"text\": \"...\"}\n"
+                ."  ],\n"
+                ."  \"correct_answer\": \"B\",\n"
+                ."  \"scaffolding_hint\": \"... petunjuk cara bernalar tanpa membocorkan jawaban ...\",\n"
+                ."  \"conceptual_explanation\": \"... penjelasan konsep dan langkah penyelesaian matematis yang benar ...\"\n"
+                .'}';
+
+            $raw = $this->callOpenRouter($systemPrompt, $userPrompt);
+            if (! empty($raw)) {
+                $cleanJson = preg_replace('/^```(?:json)?\s*|\s*```$/i', '', trim($raw));
+                $data = json_decode($cleanJson, true);
+                if (is_array($data) && ! empty($data['question_text']) && ! empty($data['options']) && ! empty($data['correct_answer'])) {
+                    $modelName = config('services.openrouter.model') ?: env('OPENROUTER_MODEL', 'nvidia/nemotron-3-ultra-550b-a55b:free');
+
+                    return [
+                        'domain' => $normalizedDomain,
+                        'domain_label' => $categoryLabel,
+                        'difficulty' => $difficulty,
+                        'title' => $data['title'] ?? "Soal Adaptif: {$categoryLabel}",
+                        'context_scenario' => $data['context_scenario'] ?? '',
+                        'question_text' => $data['question_text'],
+                        'options' => $data['options'],
+                        'correct_answer' => strtoupper($data['correct_answer']),
+                        'scaffolding_hint' => $data['scaffolding_hint'] ?? '',
+                        'conceptual_explanation' => $data['conceptual_explanation'] ?? '',
+                        'ai_model' => $modelName,
+                    ];
+                }
+            }
+        }
+
+        // Contextual Fallback Bank Generator (Cepat, Berkualitas Tinggi & 100% Reliabel)
+        return $this->getFallbackOnDemandQuestion($normalizedDomain, $categoryLabel, $difficulty, $topic);
+    }
+
+    /**
+     * Fallback Bank Soal On-Demand Kaya Konteks & Berstandar PISA
+     */
+    protected function getFallbackOnDemandQuestion(string $domain, string $categoryLabel, string $difficulty, string $topic): array
+    {
+        $bank = [
+            'aljabar' => [
+                'Mudah' => [
+                    'title' => 'Pemodelan Tabungan Sedekah Sampah Botol Plastik',
+                    'context_scenario' => 'Sebuah sekolah memulai program bank sampah. Setiap siswa yang mendaftar mendapatkan saldo awal Rp10.000. Setiap botol plastik yang disetor bernilai Rp200.',
+                    'question_text' => 'Jika seorang siswa menyetor sebanyak b botol plastik, rumus manakah yang menyatakan total saldo tabungan (T) yang ia miliki?',
+                    'options' => [
+                        ['key' => 'A', 'text' => 'T = 10.000 + 200b'],
+                        ['key' => 'B', 'text' => 'T = 10.000b + 200'],
+                        ['key' => 'C', 'text' => 'T = 10.200b'],
+                        ['key' => 'D', 'text' => 'T = 200b - 10.000'],
+                    ],
+                    'correct_answer' => 'A',
+                    'scaffolding_hint' => 'Saldo awal Rp10.000 adalah konstanta yang didapat sekali di awal, sedangkan nilai per botol Rp200 bertambah sesuai banyaknya botol b.',
+                    'conceptual_explanation' => 'Saldo awal adalah konstanta (+10.000), dan setiap botol menghasilkan Rp200 sehingga bagian variabelnya adalah 200b. Total saldo: T = 10.000 + 200b.',
+                ],
+                'Sedang' => [
+                    'title' => 'Kalkulasi Biaya Operasional Pembangkit Listrik Tenaga Surya',
+                    'context_scenario' => 'Koperasi sekolah menyewa sistem panel surya dengan biaya sewa tetap Rp150.000 per bulan ditambah biaya perawatan Rp50 per kWh listrik yang dihasilkan.',
+                    'question_text' => 'Jika dalam satu bulan sistem menghasilkan k kWh listrik dan koperasi membayar total Rp275.000, berapakah kWh listrik yang dihasilkan?',
+                    'options' => [
+                        ['key' => 'A', 'text' => '2.000 kWh'],
+                        ['key' => 'B', 'text' => '2.500 kWh'],
+                        ['key' => 'C', 'text' => '3.000 kWh'],
+                        ['key' => 'D', 'text' => '1.500 kWh'],
+                    ],
+                    'correct_answer' => 'B',
+                    'scaffolding_hint' => 'Susun persamaan: Total Biaya = 150.000 + 50k = 275.000. Kurangkan kedua ruas dengan 150.000 lalu bagi dengan 50.',
+                    'conceptual_explanation' => '50k = 275.000 - 150.000 = 125.000. Maka k = 125.000 / 50 = 2.500 kWh.',
+                ],
+                'Menantang' => [
+                    'title' => 'Titik Impas (BEP) Pengadaan Motor Listrik Operasional',
+                    'context_scenario' => 'Sebuah unit usaha sekolah mempertimbangkan beralih ke motor listrik. Biaya awal motor listrik Rp24.000.000 dengan biaya operasional Rp200/km. Motor bensin yang ada bernilai jual Rp0 dengan biaya operasional Rp800/km (bensin + servis rutin).',
+                    'question_text' => 'Berapa kilometer (x) jarak tempuh minimal agar total biaya kepemilikan motor listrik menjadi lebih hemat daripada tetap menggunakan motor bensin?',
+                    'options' => [
+                        ['key' => 'A', 'text' => '30.000 km'],
+                        ['key' => 'B', 'text' => '40.000 km'],
+                        ['key' => 'C', 'text' => '50.000 km'],
+                        ['key' => 'D', 'text' => '24.000 km'],
+                    ],
+                    'correct_answer' => 'B',
+                    'scaffolding_hint' => 'Penghematan per kilometer adalah Rp800 - Rp200 = Rp600/km. Hitung berapa km yang dibutuhkan penghematan ini untuk menutup modal Rp24.000.000.',
+                    'conceptual_explanation' => 'Persamaan impas: 24.000.000 + 200x = 800x <=> 600x = 24.000.000 <=> x = 40.000 km. Setelah 40.000 km, motor listrik lebih ekonomis.',
+                ],
+            ],
+            'geometri' => [
+                'Mudah' => [
+                    'title' => 'Pembuatan Bedeng Tanaman Sayur Organik',
+                    'context_scenario' => 'Siswa merancang bedeng kebun sekolah berbentuk persegi panjang dengan panjang 4 meter dan lebar 1,5 meter.',
+                    'question_text' => 'Berapa meter keliling papan kayu yang dibutuhkan untuk memagari sekeliling bedeng tersebut?',
+                    'options' => [
+                        ['key' => 'A', 'text' => '11 meter'],
+                        ['key' => 'B', 'text' => '6 meter'],
+                        ['key' => 'C', 'text' => '12 meter'],
+                        ['key' => 'D', 'text' => '8 meter'],
+                    ],
+                    'correct_answer' => 'A',
+                    'scaffolding_hint' => 'Keliling persegi panjang adalah 2 × (panjang + lebar).',
+                    'conceptual_explanation' => 'Keliling = 2 × (4 + 1,5) = 2 × 5,5 = 11 meter.',
+                ],
+                'Sedang' => [
+                    'title' => 'Skala Denah Pemasangan Paving Porous Penyerap Air Hujan',
+                    'context_scenario' => 'Halaman resapan air sekolah digambar pada denah berskala 1 : 200 dengan ukuran panjang 5 cm dan lebar 3 cm.',
+                    'question_text' => 'Berapakah luas permukaan tanah sebenarnya yang akan dipasangi paving porous?',
+                    'options' => [
+                        ['key' => 'A', 'text' => '30 m²'],
+                        ['key' => 'B', 'text' => '60 m²'],
+                        ['key' => 'C', 'text' => '150 m²'],
+                        ['key' => 'D', 'text' => '300 m²'],
+                    ],
+                    'correct_answer' => 'B',
+                    'scaffolding_hint' => 'Konversi masing-masing panjang dan lebar ke ukuran meter sebenarnya sebelum mengalikannya: 5 cm × 200 = ... m, dan 3 cm × 200 = ... m.',
+                    'conceptual_explanation' => 'Panjang nyata = 5 cm × 200 = 1.000 cm = 10 m. Lebar nyata = 3 cm × 200 = 600 cm = 6 m. Luas nyata = 10 m × 6 m = 60 m².',
+                ],
+                'Menantang' => [
+                    'title' => 'Kapasitas Tampung Toren Silinder Air Hujan Panenan',
+                    'context_scenario' => 'Sebuah instalasi pemanen air hujan menggunakan tangki silinder dengan diameter 2 meter dan tinggi 3 meter (gunakan perkiraan π ≈ 3,14).',
+                    'question_text' => 'Jika tangki tersebut terisi 80% saat musim hujan, berapa liter air hujan yang tersimpan?',
+                    'options' => [
+                        ['key' => 'A', 'text' => '7.536 liter'],
+                        ['key' => 'B', 'text' => '9.420 liter'],
+                        ['key' => 'C', 'text' => '30.144 liter'],
+                        ['key' => 'D', 'text' => '3.768 liter'],
+                    ],
+                    'correct_answer' => 'A',
+                    'scaffolding_hint' => 'Jari-jari tangki r = diameter/2 = 1 meter. Volume total silinder = π × r² × t. Ingat bahwa 1 m³ = 1.000 liter, lalu kalikan 80%.',
+                    'conceptual_explanation' => 'Volume silinder = 3,14 × (1 m)² × 3 m = 9,42 m³ = 9.420 liter. Terisi 80% = 0,80 × 9.420 liter = 7.536 liter.',
+                ],
+            ],
+            'data_ketidakpastian' => [
+                'Mudah' => [
+                    'title' => 'Frekuensi Pengumpulan Sampah Logam Mingguan',
+                    'context_scenario' => 'Dalam 4 minggu berturut-turut, kelas XII mengumpulkan kaleng bekas seberat: 12 kg, 15 kg, 13 kg, dan 20 kg.',
+                    'question_text' => 'Berapakah rata-rata (mean) berat kaleng bekas yang dikumpulkan per minggu?',
+                    'options' => [
+                        ['key' => 'A', 'text' => '14 kg'],
+                        ['key' => 'B', 'text' => '15 kg'],
+                        ['key' => 'C', 'text' => '16 kg'],
+                        ['key' => 'D', 'text' => '13,5 kg'],
+                    ],
+                    'correct_answer' => 'B',
+                    'scaffolding_hint' => 'Jumlahkan seluruh berat kaleng (12 + 15 + 13 + 20) lalu bagi dengan 4.',
+                    'conceptual_explanation' => 'Total = 12 + 15 + 13 + 20 = 60 kg. Rata-rata = 60 / 4 = 15 kg/minggu.',
+                ],
+                'Sedang' => [
+                    'title' => 'Rata-rata Terbobot Efisiensi Energi Dua Sayap Gedung',
+                    'context_scenario' => 'Gedung Sayap Barat (dihuni 100 siswa) menghemat rata-rata 3 kWh listrik per hari. Gedung Sayap Timur (dihuni 50 siswa) menghemat rata-rata 6 kWh listrik per hari.',
+                    'question_text' => 'Berapakah rata-rata penghematan listrik per siswa untuk gabungan kedua sayap gedung tersebut?',
+                    'options' => [
+                        ['key' => 'A', 'text' => '4,5 kWh (Rerata langsung dari 3 dan 6)'],
+                        ['key' => 'B', 'text' => '4,0 kWh (Rerata terbobot jumlah siswa)'],
+                        ['key' => 'C', 'text' => '3,5 kWh (Mendekati gedung berpopulasi besar)'],
+                        ['key' => 'D', 'text' => '5,0 kWh'],
+                    ],
+                    'correct_answer' => 'B',
+                    'scaffolding_hint' => 'Jangan hanya merata-ratakan 3 dan 6! Kalikan dulu (100 × 3) + (50 × 6), lalu bagi dengan total seluruh 150 siswa.',
+                    'conceptual_explanation' => 'Total penghematan = (100 × 3) + (50 × 6) = 300 + 300 = 600 kWh. Total siswa = 150. Rata-rata terbobot = 600 / 150 = 4 kWh per siswa.',
+                ],
+                'Menantang' => [
+                    'title' => 'Peluang dan Perkiraan Risiko Mutu Kompos Mandiri',
+                    'context_scenario' => 'Dari hasil audit 200 kantong kompos daur ulang kantin, terdapat 170 kantong lolos uji standar mutu A, 20 kantong lolos standar mutu B, dan 10 kantong gagal standar. Jika 2 kantong diambil secara acak tanpa pengembalian.',
+                    'question_text' => 'Berapakah probabilitas kedua kantong tersebut berkategori lolos uji mutu A?',
+                    'options' => [
+                        ['key' => 'A', 'text' => '72,25% (0,85 × 0,85)'],
+                        ['key' => 'B', 'text' => '72,04% (Pengambilan tanpa pengembalian: 170/200 × 169/199)'],
+                        ['key' => 'C', 'text' => '85,00%'],
+                        ['key' => 'D', 'text' => '68,00%'],
+                    ],
+                    'correct_answer' => 'B',
+                    'scaffolding_hint' => 'Pengambilan dilakukan TANPA pengembalian. Peluang pertama adalah 170/200, peluang kedua menjadi 169/199.',
+                    'conceptual_explanation' => 'Peluang pengambilan tanpa pengembalian = (170/200) × (169/199) = 0,85 × 0,84924 ≈ 0,7218 (72,04%). Pengurangan sampel mempengaruhi penyebut dan pembilang.',
+                ],
+            ],
+            'aritmatika_sosial' => [
+                'Mudah' => [
+                    'title' => 'Keuntungan Penjualan Pupuk Kascing Organik',
+                    'context_scenario' => 'Kelompok tani hidroponik memproduksi 50 kg pupuk dengan total modal Rp150.000. Seluruh pupuk habis terjual dengan harga Rp5.000 per kg.',
+                    'question_text' => 'Berapakah keuntungan bersih yang diperoleh kelompok tani tersebut?',
+                    'options' => [
+                        ['key' => 'A', 'text' => 'Rp100.000'],
+                        ['key' => 'B', 'text' => 'Rp250.000'],
+                        ['key' => 'C', 'text' => 'Rp75.000'],
+                        ['key' => 'D', 'text' => 'Rp150.000'],
+                    ],
+                    'correct_answer' => 'A',
+                    'scaffolding_hint' => 'Hitung penerimaan total (50 × Rp5.000), lalu kurangkan dengan modal Rp150.000.',
+                    'conceptual_explanation' => 'Penerimaan total = 50 × Rp5.000 = Rp250.000. Keuntungan = Rp250.000 - Rp150.000 = Rp100.000.',
+                ],
+                'Sedang' => [
+                    'title' => 'Diskon Bertingkat Panel Surya Ramah Anggaran',
+                    'context_scenario' => 'Pak Budi membeli inverter surya seharga Rp2.000.000 dengan promo: Diskon 20% + Tambahan Potongan 5% dari harga setelah diskon pertama.',
+                    'question_text' => 'Berapa total harga yang harus dibayarkan Pak Budi setelah kedua diskon diterapkan?',
+                    'options' => [
+                        ['key' => 'A', 'text' => 'Rp1.500.000 (Menganggap total diskon 25%)'],
+                        ['key' => 'B', 'text' => 'Rp1.520.000 (Diskon 20% = Rp1.600.000, lalu diskon 5% dari Rp1.600.000)'],
+                        ['key' => 'C', 'text' => 'Rp1.600.000 (Hanya menghitung diskon pertama)'],
+                        ['key' => 'D', 'text' => 'Rp1.480.000'],
+                    ],
+                    'correct_answer' => 'B',
+                    'scaffolding_hint' => 'Diskon kedua (5%) TIDAK dihitung dari Rp2.000.000, melainkan dari harga sisa setelah diskon 20%.',
+                    'conceptual_explanation' => 'Setelah diskon 20%: Rp2.000.000 × 0,80 = Rp1.600.000. Diskon 5% dari Rp1.600.000 = Rp80.000. Harga akhir = Rp1.600.000 - Rp80.000 = Rp1.520.000.',
+                ],
+                'Menantang' => [
+                    'title' => 'Perbandingan Finansial Pembelian Tunai vs Angsuran Baterai Solar',
+                    'context_scenario' => 'Sebuah unit panel surya seharga tunai Rp10.000.000 ditawarkan dengan skema cicilan: Uang muka 20%, sisa diangsur 12 bulan dengan bunga flat 1% per bulan dari sisa pokok pinjaman.',
+                    'question_text' => 'Berapakah selisih total biaya yang dibayar antara skema angsuran dibandingkan harga tunai?',
+                    'options' => [
+                        ['key' => 'A', 'text' => 'Rp960.000'],
+                        ['key' => 'B', 'text' => 'Rp1.200.000'],
+                        ['key' => 'C', 'text' => 'Rp800.000'],
+                        ['key' => 'D', 'text' => 'Rp1.000.000'],
+                    ],
+                    'correct_answer' => 'A',
+                    'scaffolding_hint' => 'Uang muka = 20% × Rp10.000.000 = Rp2.000.000. Sisa pokok yang dicicil = Rp8.000.000. Bunga flat 1% per bulan selama 12 bulan = 12% dari pokok pinjaman.',
+                    'conceptual_explanation' => 'Sisa pokok pinjaman = Rp8.000.000. Total bunga pinjaman = 12 × (1% × Rp8.000.000) = 12 × Rp80.000 = Rp960.000. Karena uang muka + pokok = Rp10.000.000, selisih total dengan harga tunai adalah total bunga yaitu Rp960.000.',
+                ],
+            ],
+        ];
+
+        $domainItem = $bank[$domain][$difficulty] ?? $bank['aritmatika_sosial']['Sedang'];
+
+        return [
+            'domain' => $domain,
+            'domain_label' => $categoryLabel,
+            'difficulty' => $difficulty,
+            'title' => $domainItem['title'],
+            'context_scenario' => $domainItem['context_scenario'],
+            'question_text' => $domainItem['question_text'],
+            'options' => $domainItem['options'],
+            'correct_answer' => $domainItem['correct_answer'],
+            'scaffolding_hint' => $domainItem['scaffolding_hint'],
+            'conceptual_explanation' => $domainItem['conceptual_explanation'],
+            'ai_model' => 'Nalaria AI Adaptive Generator Engine',
+        ];
+    }
 }

@@ -4,8 +4,10 @@ use App\Http\Controllers\DiagnosticController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-// Public Landing Page
+// Public Landing Page & AI Question Generator
 Route::get('/', [DiagnosticController::class, 'index'])->name('diagnostic.landing');
+Route::get('/generator', [DiagnosticController::class, 'generator'])->name('diagnostic.generator');
+Route::post('/generator/generate', [DiagnosticController::class, 'generateQuestion'])->name('diagnostic.generator.generate');
 
 // Protected Routes (Siswa must be logged in to take assessment and view results)
 Route::middleware('auth')->group(function () {

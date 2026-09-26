@@ -199,20 +199,20 @@
                             </div>
 
                             <!-- Right: Scores & Action -->
-                            <div class="flex flex-wrap items-center gap-4 sm:gap-6 pt-4 lg:pt-0 border-t lg:border-t-0 border-neutral-100">
-                                <div class="text-center">
+                            <div class="flex flex-wrap items-center justify-between sm:justify-start gap-4 sm:gap-6 pt-4 lg:pt-0 border-t lg:border-t-0 border-neutral-100">
+                                <div class="text-left sm:text-center">
                                     <span class="block text-[11px] font-semibold text-neutral-400">Skor Diagnostik</span>
                                     <span class="text-xl sm:text-2xl font-black text-black">{{ $sess->score }}%</span>
                                 </div>
 
-                                <div class="text-center">
+                                <div class="text-left sm:text-center">
                                     <span class="block text-[11px] font-semibold text-neutral-400">Remediasi Adaptif</span>
                                     <span class="text-sm sm:text-base font-extrabold {{ $solvedCount === $totalRecs && $totalRecs > 0 ? 'text-[#FF5500]' : 'text-neutral-800' }}">
                                         {{ $solvedCount }}/{{ $totalRecs }} Selesai
                                     </span>
                                 </div>
 
-                                <a href="{{ route('diagnostic.result', $sess->session_code) }}" class="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-black hover:bg-[#FF5500] text-white text-xs font-bold transition-all shadow-sm">
+                                <a href="{{ route('diagnostic.result', $sess->session_code) }}" class="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-5 py-3 rounded-full bg-black hover:bg-[#FF5500] text-white text-xs font-bold transition-all shadow-sm">
                                     <span>Lihat Rapor Detail</span>
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>

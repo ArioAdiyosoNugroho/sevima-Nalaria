@@ -16,25 +16,25 @@
             </div>
 
             <!-- Big Display Headline (Exact Meekoo Typography) -->
-            <h1 class="meekoo-heading text-5xl sm:text-6xl lg:text-7xl font-extrabold text-black leading-[1.08]">
+            <h1 class="meekoo-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-black leading-[1.1] sm:leading-[1.08] break-words">
                 Shape Your<br>
                 Future with the<br>
                 Right Knowledge
             </h1>
 
             <!-- Subtitle -->
-            <p class="text-base sm:text-lg text-neutral-600 max-w-xl leading-relaxed font-normal">
+            <p class="text-sm sm:text-base lg:text-lg text-neutral-600 max-w-xl leading-relaxed font-normal">
                 Bukan sekadar hafalan rumus. <strong>Nalaria AI Agent</strong> membedah akar miskonsepsi berpikir kontekstual dan menyusun paket latihan adaptif personal untuk masa depan berkelanjutan.
             </p>
 
             <!-- CTA Button (Meekoo Pill + Arrow Circle) -->
-            <div class="pt-2 flex items-center gap-3">
+            <div class="pt-2 flex flex-wrap items-center gap-3">
                 <a href="{{ route('diagnostic.quiz') }}" class="group inline-flex items-center active:scale-95 transition-transform duration-200">
-                    <span class="px-8 py-4 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-sm sm:text-base font-extrabold tracking-wider uppercase transition-colors duration-200 shadow-lg">
+                    <span class="px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-black group-hover:bg-[#FF5500] text-white text-xs sm:text-sm lg:text-base font-extrabold tracking-wider uppercase transition-colors duration-200 shadow-lg">
                         Get Started
                     </span>
-                    <span class="rounded-full bg-black group-hover:bg-[#FF5500] text-white flex items-center justify-center transition-all duration-200 border-[3px] border-white shadow-md shrink-0 -ml-3 group-hover:rotate-45" style="width: 58px; height: 58px; min-width: 58px; min-height: 58px;">
-                        <svg class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <span class="rounded-full bg-black group-hover:bg-[#FF5500] text-white flex items-center justify-center transition-all duration-200 border-[3px] border-white shadow-md shrink-0 -ml-3 group-hover:rotate-45" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px;">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
                         </svg>
                     </span>
@@ -52,7 +52,7 @@
             <!-- Background Container with soft rounded shape -->
             <div class="relative w-full aspect-[4/5] max-w-md mx-auto">
                 <!-- Inner card with rounded background, warm arch, and student -->
-                <div class="relative w-full h-full rounded-[36px] flex items-end justify-center overflow-hidden ">
+                <div class="relative w-full h-full rounded-[36px] flex items-end justify-center overflow-hidden">
                     
                     <!-- Soft Warm Arch/Semicircle behind student (like in image.png) -->
                     <div class="absolute -bottom-16 w-80 h-80 rounded-full bg-[#FFE8D6] z-0 opacity-80"></div>
@@ -63,18 +63,18 @@
                 </div>
 
                 <!-- Floating Badge 1: Top Right (Dark Pill with Student Count) -->
-                <div class="absolute top-6 right-4 sm:-right-4 z-20 px-4 py-2.5 rounded-full bg-black text-white text-xs font-bold flex items-center gap-2.5 shadow-xl border border-neutral-800">
-                    <div class="flex -space-x-2">
-                        <span class="w-6 h-6 rounded-full bg-[#FF5500] border-2 border-black flex items-center justify-center text-[10px] font-black">1</span>
-                        <span class="w-6 h-6 rounded-full bg-white text-black border-2 border-black flex items-center justify-center text-[10px] font-black">2</span>
-                        <span class="w-6 h-6 rounded-full bg-neutral-700 border-2 border-black flex items-center justify-center text-[10px] font-black">+</span>
+                <div class="absolute top-4 sm:top-6 right-2 sm:-right-4 z-20 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-black text-white text-[11px] sm:text-xs font-bold flex items-center gap-2 sm:gap-2.5 shadow-xl border border-neutral-800">
+                    <div class="flex -space-x-1.5 sm:-space-x-2">
+                        <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#FF5500] border-2 border-black flex items-center justify-center text-[9px] sm:text-[10px] font-black">1</span>
+                        <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-black border-2 border-black flex items-center justify-center text-[9px] sm:text-[10px] font-black">2</span>
+                        <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-neutral-700 border-2 border-black flex items-center justify-center text-[9px] sm:text-[10px] font-black">+</span>
                     </div>
-                    <span>More than 600,000+ students</span>
+                    <span>600k+ Siswa Terbantu</span>
                 </div>
 
                 <!-- Floating Badge 2: Middle Right (Bright Orange Pill - Best Collaboration / AI Agent) -->
-                <div class="absolute top-1/2 -right-3 sm:-right-6 z-20 px-5 py-3 rounded-2xl bg-[#FF5500] text-white text-xs font-black flex items-center gap-2.5 shadow-xl shadow-orange-600/30 border-2 border-white">
-                    <span class="w-6 h-6 rounded-full bg-white text-[#FF5500] flex items-center justify-center">
+                <div class="absolute top-1/2 right-1 sm:-right-6 z-20 px-3.5 sm:px-5 py-2 sm:py-3 rounded-2xl bg-[#FF5500] text-white text-[11px] sm:text-xs font-black flex items-center gap-2 sm:gap-2.5 shadow-xl shadow-orange-600/30 border-2 border-white">
+                    <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-[#FF5500] flex items-center justify-center">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -83,10 +83,10 @@
                 </div>
 
                 <!-- Floating Badge 3: Bottom Left (Orange Card - Exact Meekoo Price/Stats Badge) -->
-                <div class="absolute bottom-8 left-2 sm:-left-6 z-20 p-4 rounded-2xl bg-[#FF5500] text-white space-y-1.5 shadow-2xl shadow-orange-600/40 min-w-[180px] text-left border-2 border-white/90">
-                    <span class="text-[9px] font-black uppercase tracking-wider bg-black text-white px-2 py-0.5 rounded-md inline-block">AKM & PISA 2026</span>
-                    <div class="text-3xl font-black tracking-tight leading-none pt-0.5">100%</div>
-                    <div class="text-[11px] font-bold text-white/90 leading-tight">Diagnostik Adaptif & Rekomendasi AI</div>
+                <div class="absolute bottom-4 sm:bottom-8 left-2 sm:-left-6 z-20 p-3 sm:p-4 rounded-2xl bg-[#FF5500] text-white space-y-1 sm:space-y-1.5 shadow-2xl shadow-orange-600/40 min-w-[150px] sm:min-w-[180px] text-left border-2 border-white/90">
+                    <span class="text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-black text-white px-2 py-0.5 rounded-md inline-block">AKM & PISA 2026</span>
+                    <div class="text-2xl sm:text-3xl font-black tracking-tight leading-none pt-0.5">100%</div>
+                    <div class="text-[10px] sm:text-[11px] font-bold text-white/90 leading-tight">Diagnostik Adaptif & Rekomendasi AI</div>
                 </div>
 
             </div>
@@ -95,33 +95,33 @@
     </div>
 
     <!-- METRICS STRIP (Exact Meekoo 4-Stat Strip with Black Dots) -->
-    <div class="meekoo-stat-strip p-8 sm:p-12 border border-neutral-200/80">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 items-center text-center">
+    <div class="meekoo-stat-strip p-6 sm:p-10 lg:p-12 border border-neutral-200/80">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 items-center text-center">
             
             <!-- Stat 1 -->
             <div class="space-y-1">
-                <div class="text-4xl sm:text-5xl font-black tracking-tight text-black">100%</div>
+                <div class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-black">100%</div>
                 <div class="text-xs sm:text-sm font-semibold text-neutral-500">Akurasi Deteksi Miskonsepsi</div>
             </div>
 
             <!-- Stat 2 -->
             <div class="space-y-1 relative">
                 <span class="hidden md:block absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-black"></span>
-                <div class="text-4xl sm:text-5xl font-black tracking-tight text-black">12+</div>
+                <div class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-black">12+</div>
                 <div class="text-xs sm:text-sm font-semibold text-neutral-500">Studi Kasus Berkelanjutan</div>
             </div>
 
             <!-- Stat 3 -->
             <div class="space-y-1 relative">
                 <span class="hidden md:block absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-black"></span>
-                <div class="text-4xl sm:text-5xl font-black tracking-tight text-black">20k+</div>
+                <div class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-black">20k+</div>
                 <div class="text-xs sm:text-sm font-semibold text-neutral-500">Latihan Adaptif Tergenerate</div>
             </div>
 
             <!-- Stat 4 -->
             <div class="space-y-1 relative">
                 <span class="hidden md:block absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-black"></span>
-                <div class="text-4xl sm:text-5xl font-black tracking-tight text-black">4 Domain</div>
+                <div class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-black">4 Domain</div>
                 <div class="text-xs sm:text-sm font-semibold text-neutral-500">Aljabar, Geometri, Data & Sosial</div>
             </div>
 
