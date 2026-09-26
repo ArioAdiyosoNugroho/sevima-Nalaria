@@ -294,9 +294,9 @@
                 
                 <!-- Brand Logo & Name -->
                 <a href="{{ route('diagnostic.landing') }}" class="brand-header">
-                    <x-logo class="w-8 h-8" fill="#FF5500" />
+                    <x-logo class="w-6 h-6" fill="#FF5500" />
                     <span class="brand-title">Nalaria</span>
-                </a>
+                </a>        
 
                 <!-- Title & Subtitle -->
                 <h1 class="auth-heading">Login to your account</h1>
