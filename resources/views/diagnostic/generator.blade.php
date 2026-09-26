@@ -297,17 +297,17 @@
                     <div class="space-y-2">
                         <label class="block text-xs font-bold text-black uppercase tracking-wider flex items-center justify-between">
                             <span>Mode Kecepatan <span class="text-[#FF5500]">*</span></span>
-                            <span class="text-[10px] text-emerald-600 font-extrabold uppercase">Rekomendasi: Mode Kilat</span>
+                            <span class="text-[10px] text-emerald-600 font-extrabold uppercase">Rekomendasi: Super Cepat</span>
                         </label>
                         <div class="grid grid-cols-2 gap-2.5" id="engineSelector">
                             <label class="engine-card flex flex-col p-3 rounded-2xl border-2 cursor-pointer transition-all duration-200 border-[#FF5500] bg-orange-50/60 shadow-xs">
                                 <input type="radio" name="engine" value="fast" class="sr-only" checked>
                                 <div class="flex items-center gap-1.5 mb-1">
                                     <span class="text-sm">⚡</span>
-                                    <span class="text-xs font-black text-black">Mode Kilat</span>
+                                    <span class="text-xs font-black text-black">Super Cepat (Dummy)</span>
                                     <span class="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase ml-auto">Instan</span>
                                 </div>
-                                <span class="text-[10px] text-neutral-600 font-medium leading-snug">~0.5 Detik • Bank Soal AKM & PISA Teruji (Bebas Kuota)</span>
+                                <span class="text-[10px] text-neutral-600 font-medium leading-snug">Soal contoh lokal • Instan • Tanpa API</span>
                             </label>
                             <label class="engine-card flex flex-col p-3 rounded-2xl border-2 cursor-pointer transition-all duration-200 border-neutral-200 bg-white hover:border-neutral-300">
                                 <input type="radio" name="engine" value="ai" class="sr-only">
@@ -316,7 +316,7 @@
                                     <span class="text-xs font-black text-black">AI Generatif</span>
                                     <span class="px-1.5 py-0.5 rounded-full bg-neutral-100 text-neutral-600 text-[9px] font-bold uppercase ml-auto">LLM</span>
                                 </div>
-                                <span class="text-[10px] text-neutral-500 font-medium leading-snug">~3–6 Detik • OpenRouter GPT-4o-mini</span>
+                                <span class="text-[10px] text-neutral-500 font-medium leading-snug">AI eksternal • Otomatis kembali ke soal lokal jika gagal</span>
                             </label>
                         </div>
                     </div>
@@ -427,7 +427,7 @@
                         <span id="btnIcon" class="flex items-center">
                             <x-lucide name="zap" class="w-4 h-4 text-white" />
                         </span>
-                        <span id="btnText">Generate Paket Soal Kilat (Instan)</span>
+                        <span id="btnText">Generate Dummy Super Cepat</span>
                     </button>
                 </form>
             </div>
@@ -1154,7 +1154,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (radio) {
                 radio.checked = true;
                 if (radio.value === 'fast') {
-                    btnText.textContent = 'Generate Paket Soal Kilat (Instan)';
+                    btnText.textContent = 'Generate Dummy Super Cepat';
                 } else {
                     btnText.textContent = 'Generate Paket Soal AI Generatif';
                 }
@@ -1242,13 +1242,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const diffLabel = diffCard ? diffCard.closest('.difficulty-card')?.querySelector('div.text-xs')?.textContent : 'Sedang';
 
             if (overlayTitle) overlayTitle.textContent = isFast
-                ? `Memuat ${count} Butir Soal Kilat (${domainLabel || 'AKM & PISA'})`
+                ? `Memuat ${count} Soal Dummy (${domainLabel || 'AKM & PISA'})`
                 : `Membuat ${count} Butir Soal AI Generatif (${domainLabel || 'AI'})`;
             if (overlaySubtitle) overlaySubtitle.textContent = isFast
-                ? `Mode Kilat Instan • Tingkat: ${diffLabel || 'Sedang'} • Standar Kurikulum PISA`
-                : `OpenRouter GPT-4o-mini • Tingkat: ${diffLabel || 'Sedang'} • Real-time AI`;
+                ? `Soal contoh lokal • Tingkat: ${diffLabel || 'Sedang'} • Tanpa API`
+                : `AI eksternal • Tingkat: ${diffLabel || 'Sedang'} • Fallback lokal aktif`;
             if (overlayCountText) overlayCountText.textContent = isFast
-                ? `${count} butir soal kurikulum adaptif sedang disiapkan...`
+                ? `${count} butir soal contoh lokal sedang disiapkan...`
                 : `${count} butir soal adaptif sedang dirancang AI...`;
         } catch (e) {
             console.warn('Error reading form labels:', e);
@@ -1424,7 +1424,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // 2. Set button loading state
             generateBtn.disabled = true;
-            btnText.textContent = isFast ? `Memuat ${selectedCount} Soal Kilat...` : `Merancang ${selectedCount} Soal AI...`;
+            btnText.textContent = isFast ? `Memuat ${selectedCount} Soal Dummy...` : `Merancang ${selectedCount} Soal AI...`;
             btnIcon.innerHTML = '<svg class="w-4 h-4 animate-spin text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
             const formData = new FormData(form);
@@ -1477,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const currentEngineInput = document.querySelector('input[name="engine"]:checked');
             btnText.textContent = (currentEngineInput && currentEngineInput.value === 'ai')
                 ? 'Generate Paket Soal AI Generatif'
-                : 'Generate Paket Soal Kilat (Instan)';
+                : 'Generate Dummy Super Cepat';
             btnIcon.innerHTML = '<svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>';
         }
     });

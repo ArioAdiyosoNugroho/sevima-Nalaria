@@ -40,7 +40,8 @@ return [
         'model' => env('OPENROUTER_MODEL', 'inclusionai/ling-3.0-flash-fin:free'),
         'site_url' => env('OPENROUTER_SITE_URL', 'http://127.0.0.1:8000'),
         'site_name' => env('OPENROUTER_SITE_NAME', 'Nalaria'),
-        'timeout' => (int) env('OPENROUTER_TIMEOUT', 30),
+        'connect_timeout' => (int) env('OPENROUTER_CONNECT_TIMEOUT', 3),
+        'timeout' => (int) env('OPENROUTER_TIMEOUT', 8),
     ],
 
 ];

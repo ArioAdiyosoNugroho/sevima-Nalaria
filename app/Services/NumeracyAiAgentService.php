@@ -617,6 +617,7 @@ class NumeracyAiAgentService
                 foreach ($requestSpecs as $spec) {
                     $requests[] = $pool
                         ->withOptions(['force_ip_resolve' => 'v4'])
+                        ->connectTimeout($this->openRouterConnectTimeoutSeconds())
                         ->timeout($this->openRouterTimeoutSeconds())
                         ->withHeaders($this->openRouterHeaders())
                         ->post($this->openRouterEndpoint(), $this->openRouterPayload($spec['system'], $spec['user']));
@@ -651,7 +652,12 @@ class NumeracyAiAgentService
      */
     protected function openRouterTimeoutSeconds(): int
     {
-        return (int) (config('services.openrouter.timeout') ?: env('OPENROUTER_TIMEOUT', 8));
+        return (int) config('services.openrouter.timeout', 8);
+    }
+
+    protected function openRouterConnectTimeoutSeconds(): int
+    {
+        return (int) config('services.openrouter.connect_timeout', 3);
     }
 
     /**
@@ -738,6 +744,7 @@ class NumeracyAiAgentService
 
         try {
             $response = Http::withOptions(['force_ip_resolve' => 'v4'])
+                ->connectTimeout($this->openRouterConnectTimeoutSeconds())
                 ->timeout($this->openRouterTimeoutSeconds())
                 ->withHeaders($this->openRouterHeaders())
                 ->post($this->openRouterEndpoint(), $this->openRouterPayload($systemPrompt, $userPrompt));
@@ -828,8 +835,6 @@ class NumeracyAiAgentService
         int $count = 3,
         ?string $topicContext = null
     ): array {
-        @set_time_limit(120);
-
         $count = max(1, min(8, $count));
 
         $normalizedDomain = match (strtolower(trim($domain))) {
@@ -873,7 +878,7 @@ class NumeracyAiAgentService
         $generatedQuestions = [];
         $apiKey = config('services.openrouter.key') ?: env('OPENROUTER_API_KEY');
         $modelName = config('services.openrouter.model') ?: env('OPENROUTER_MODEL', 'inclusionai/ling-3.0-flash-fin:free');
-        $fallbackEngineName = 'Nalaria AI Adaptive Generator Engine';
+        $fallbackEngineName = 'Bank Soal Lokal (Mode Super Cepat)';
 
         // Coba generate via OpenRouter jika API Key tersedia
         if (! empty($apiKey)) {
@@ -1057,7 +1062,7 @@ class NumeracyAiAgentService
             'domain_label' => $categoryLabel,
             'competency' => $competencyLabel,
             'total_questions' => count($questions),
-            'ai_model' => 'Nalaria AI Adaptive Generator Engine',
+            'ai_model' => 'Bank Soal Lokal (Mode Super Cepat)',
             'ai_generated_count' => 0,
             'questions' => $questions,
         ];
