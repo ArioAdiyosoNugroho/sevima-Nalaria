@@ -137,18 +137,45 @@
                 </a>
             </nav>
 
-            <!-- Right Action (Meekoo Pill + Arrow Circle) -->
-            <div class="flex items-center gap-2">
-                <a href="{{ route('diagnostic.quiz') }}" class="inline-flex items-center">
-                    <span class="px-6 py-3 rounded-full bg-black hover:bg-[#FF5500] text-white text-sm font-bold transition-all shadow-sm">
-                        Mulai Asesmen
-                    </span>
-                    <span class="w-11 h-11 -ml-2 rounded-full bg-black hover:bg-[#FF5500] text-white flex items-center justify-center transition-all border-2 border-white">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
-                        </svg>
-                    </span>
-                </a>
+            <!-- Right Actions (Auth & Meekoo Pill) -->
+            <div class="flex items-center gap-3">
+                @auth
+                    <div class="hidden sm:flex items-center gap-3 mr-1 text-xs">
+                        <span class="px-3 py-1.5 rounded-full bg-neutral-100 font-bold text-neutral-800">
+                            👤 {{ Auth::user()->name }}
+                        </span>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit" class="font-bold text-neutral-500 hover:text-black transition-colors cursor-pointer">
+                                Keluar
+                            </button>
+                        </form>
+                    </div>
+                    <a href="{{ route('diagnostic.quiz') }}" class="inline-flex items-center">
+                        <span class="px-5 py-2.5 rounded-full bg-black hover:bg-[#FF5500] text-white text-xs font-bold transition-all shadow-sm">
+                            Mulai Asesmen
+                        </span>
+                        <span class="w-10 h-10 -ml-2 rounded-full bg-black hover:bg-[#FF5500] text-white flex items-center justify-center transition-all border-2 border-white">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+                            </svg>
+                        </span>
+                    </a>
+                @else
+                    <a href="{{ route('login') }}" class="text-sm font-bold text-neutral-700 hover:text-[#FF5500] px-3 py-2 transition-colors">
+                        Masuk
+                    </a>
+                    <a href="{{ route('register') }}" class="inline-flex items-center">
+                        <span class="px-5 py-2.5 rounded-full bg-black hover:bg-[#FF5500] text-white text-xs font-bold transition-all shadow-sm">
+                            Daftar Siswa
+                        </span>
+                        <span class="w-10 h-10 -ml-2 rounded-full bg-black hover:bg-[#FF5500] text-white flex items-center justify-center transition-all border-2 border-white">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+                            </svg>
+                        </span>
+                    </a>
+                @endauth
             </div>
         </div>
     </header>

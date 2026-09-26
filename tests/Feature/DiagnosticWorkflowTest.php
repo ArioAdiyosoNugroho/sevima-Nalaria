@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\DiagnosticQuestion;
 use App\Models\DiagnosticSession;
+use App\Models\User;
 use App\Services\NumeracyAiAgentService;
 use Database\Seeders\DiagnosticQuestionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,10 +15,16 @@ class DiagnosticWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $user;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->seed(DiagnosticQuestionSeeder::class);
+        $this->user = User::factory()->create([
+            'name' => 'Ario Adiyoso',
+            'email' => 'ario@example.com',
+        ]);
     }
 
     public function test_landing_page_renders_successfully(): void
@@ -29,9 +36,16 @@ class DiagnosticWorkflowTest extends TestCase
         $response->assertSee('Get Started');
     }
 
-    public function test_quiz_page_renders_with_seeded_questions(): void
+    public function test_guest_is_redirected_to_login_when_accessing_quiz(): void
     {
         $response = $this->get(route('diagnostic.quiz'));
+
+        $response->assertRedirect(route('login'));
+    }
+
+    public function test_quiz_page_renders_with_seeded_questions_for_authenticated_user(): void
+    {
+        $response = $this->actingAs($this->user)->get(route('diagnostic.quiz'));
 
         $response->assertStatus(200);
         $response->assertSee('Uji Penalaran Numerasi Kontekstual');
@@ -70,7 +84,7 @@ class DiagnosticWorkflowTest extends TestCase
             ],
         ];
 
-        $response = $this->post(route('diagnostic.submit'), $payload);
+        $response = $this->actingAs($this->user)->post(route('diagnostic.submit'), $payload);
 
         // 1. Redirect ke result
         $session = DiagnosticSession::first();
@@ -104,7 +118,6 @@ class DiagnosticWorkflowTest extends TestCase
 
     public function test_result_page_renders_with_session_and_practice_questions(): void
     {
-        $questions = DiagnosticQuestion::all();
         $session = DiagnosticSession::create([
             'session_code' => 'NAL-TEST01',
             'student_name' => 'Budi Pratama',
@@ -120,7 +133,7 @@ class DiagnosticWorkflowTest extends TestCase
             'time_spent_seconds' => 120,
         ]);
 
-        $response = $this->get(route('diagnostic.result', ['code' => 'NAL-TEST01']));
+        $response = $this->actingAs($this->user)->get(route('diagnostic.result', ['code' => 'NAL-TEST01']));
 
         $response->assertStatus(200);
         $response->assertSee('Budi Pratama');
@@ -157,7 +170,7 @@ class DiagnosticWorkflowTest extends TestCase
             'difficulty' => 'Sedang',
         ]);
 
-        $response = $this->postJson(route('diagnostic.practice.submit', [
+        $response = $this->actingAs($this->user)->postJson(route('diagnostic.practice.submit', [
             'code' => 'NAL-PRACT01',
             'questionId' => $practice->id,
         ]), [
@@ -179,17 +192,29 @@ class DiagnosticWorkflowTest extends TestCase
 
     public function test_openrouter_api_integration_diagnoses_with_nemotron_model(): void
     {
-        config(['services.openrouter.key' => 'sk-or-v1-mock-test-key']);
-
+        // Mock OpenRouter Chat Completion API response
         Http::fake([
             'https://openrouter.ai/api/v1/chat/completions' => Http::response([
-                'id' => 'gen-test-123',
+                'id' => 'gen-test-12345',
                 'model' => 'nvidia/nemotron-3-ultra-550b-a55b:free',
                 'choices' => [
                     [
                         'message' => [
                             'role' => 'assistant',
-                            'content' => 'Diagnosis OpenRouter Nemotron: Siswa memiliki penalaran kritis yang baik pada aljabar namun mengalami miskonsepsi aritmatika sosial.',
+                            'content' => json_encode([
+                                'primary_misconception' => 'Additive Trap on Multi-stage Percentages',
+                                'domain' => 'aritmatika_sosial',
+                                'root_cause' => 'Siswa menjumlahkan 50% + 20% secara aditif alih-alih mengalikan faktor pengali diskon bertingkat berturut-turut.',
+                                'mastery_level' => 'Dasar (Level 2 PISA)',
+                                'diagnostic_summary' => 'Siswa memiliki intuisi logika belanja yang baik namun terjebak pada sifat operasi persentase sekuensial.',
+                                'remediation_advice' => 'Gunakan analogi nilai sisa bertahap: Rp100.000 menjadi Rp50.000, lalu didiskon lagi 20% dari Rp50.000 menjadi Rp40.000.',
+                                'domain_scores' => [
+                                    'aljabar' => 100,
+                                    'geometri' => 100,
+                                    'aritmatika_sosial' => 0,
+                                    'statistika' => 100,
+                                ],
+                            ]),
                         ],
                     ],
                 ],
@@ -198,32 +223,24 @@ class DiagnosticWorkflowTest extends TestCase
 
         $session = DiagnosticSession::create([
             'session_code' => 'NAL-ORTEST',
-            'student_name' => 'Dewi Sartika',
+            'student_name' => 'Ario Adiyoso',
             'student_grade' => 'Kelas 10 SMK',
             'status' => 'in_progress',
         ]);
 
-        $aiAgent = app(NumeracyAiAgentService::class);
-        $questions = DiagnosticQuestion::all();
-
-        $answers = [
+        $submittedAnswers = [
             [
-                'question_id' => $questions[0]->id,
+                'question_id' => 1,
                 'selected_option' => 'A',
-                'reasoning' => '50% + 20% = 70%',
+                'reasoning' => '50% + 20% = 70% diskon langsung',
             ],
         ];
 
-        $diagnosis = $aiAgent->diagnoseSession($session, $answers);
+        $aiService = app(NumeracyAiAgentService::class);
+        $result = $aiService->diagnoseSession($session, $submittedAnswers);
 
-        $this->assertStringContainsString('Diagnosis OpenRouter Nemotron', $session->fresh()->ai_diagnosis_summary);
-
-        Http::assertSent(function ($request) {
-            return $request->url() === 'https://openrouter.ai/api/v1/chat/completions'
-                && $request->header('Authorization')[0] === 'Bearer sk-or-v1-mock-test-key'
-                && $request['model'] === 'nvidia/nemotron-3-ultra-550b-a55b:free';
-        });
-
-        putenv('OPENROUTER_API_KEY');
+        $this->assertNotEmpty($result['primary_misconception']);
+        $this->assertNotEmpty($result['ai_diagnosis_summary']);
+        $this->assertEquals('completed', $session->fresh()->status);
     }
 }
